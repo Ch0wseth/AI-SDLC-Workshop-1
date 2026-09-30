@@ -4,7 +4,7 @@ This is a two-afternoon, fully hands-on workshop (4 hours each) that moves from 
 
 | Afternoon | Focus | Content |
 | --- | --- | --- |
-| 1 | Copilot primitives: completions, Chat, instructions, prompt files, custom agents, skills, MCP, CLI, plugins | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) |
+| 1 | Copilot primitives: runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds Agent Skills, Copilot CLI and plugins | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) |
 | 2 | HVE-Core, Design Thinking, RPI, APM and policy, plugin marketplace, agentic workflows, Coding Agent | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) |
 
 Supporting material:
@@ -15,7 +15,7 @@ Supporting material:
 
 ## Starter application
 
-The repository is a small music catalog mono-repo:
+Afternoon 2 uses this repository as a template. It is a small music catalog mono-repo:
 
 - `src/api` is a .NET 10 minimal API. It exposes `GET /api/hello` and ships 12 synthetic tracks in `Data/tracks.json`.
 - `src/front` is a React, TypeScript and Vite front end.

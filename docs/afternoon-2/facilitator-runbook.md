@@ -2,22 +2,28 @@
 
 This runbook covers both afternoons (4 hours each). Attendee content lives in [Afternoon 1](../afternoon-1/workshop.md) and [Afternoon 2](workshop.md). The attendee checklist is [prerequisites.md](prerequisites.md).
 
+Afternoon 1 runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on attendee forks of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds Levels 7 to 9 from this repository. Afternoon 2 switches to the Music Catalog template in this repository.
+
 ## Timing plan
 
 ### Afternoon 1 — Copilot primitives (240 min)
 
-| Block | Minutes | Checkpoint |
-| --- | --- | --- |
-| Setup | 15 | Starter builds and tests pass |
-| Level 1 Completions and NES | 20 | Health endpoint drafted |
-| Level 2 Chat | 35 | Footer component and tests |
-| Level 3 Instructions and prompt files | 30 | Prompt file committed |
-| Break | 10 | |
-| Level 4 Custom agents and skills | 35 | Agent and skill committed |
-| Level 5 MCP | 20 | MCP server listed |
-| Level 6 Copilot CLI | 35 | Refactor done from CLI |
-| Level 7 Plugins and Copilot App | 25 | Plugin listed |
-| Recap | 15 | |
+| Block | Minutes | Source | Checkpoint |
+| --- | --- | --- | --- |
+| Setup | 15 | Upstream introduction | Fork opened, front end running |
+| Upstream Level 1 Code Completion | 25 | GHCopilotHoL | Completions accepted |
+| Upstream Level 2 Copilot Chat | 30 | GHCopilotHoL | Chat fixes and tests |
+| Upstream Level 3 Agent Basics | 20 | GHCopilotHoL | Agent change reviewed |
+| Upstream Level 4 Plan & Implement | 25 | GHCopilotHoL | Plan implemented, Code Review run |
+| Break | 15 | | Work committed |
+| Upstream Level 5 Advanced Concepts | 25 | GHCopilotHoL | Instructions, prompt files, MCP |
+| Upstream Level 6 Agents on the platform | 20 | GHCopilotHoL | Coding Agent PR opened |
+| Level 7 Agent Skills | 15 | This repository | Skill committed |
+| Level 8 Copilot CLI | 25 | This repository | Endpoint added from CLI |
+| Level 9 Agent Plugins | 15 | This repository | Plugin installed then removed |
+| Recap | 10 | This repository | |
+
+Before the session, compare the upstream repositories with the commits recorded in the Afternoon 1 guide and adjust the timeboxes if levels changed. If late, skip the upstream side quests first, then shorten Level 9 to the CLI commands.
 
 ### Afternoon 2 — HVE-Core, RPI, APM and agentic workflows (240 min)
 
