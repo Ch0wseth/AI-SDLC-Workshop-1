@@ -1,0 +1,19 @@
+{
+  "name": "music-catalog-marketplace",
+  "owner": {
+    "name": "Music Catalog Team",
+    "email": "music-catalog-team@example.com"
+  },
+  "metadata": {
+    "description": "Curated plugins approved for the Music Catalog team",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "music-catalog-conventions",
+      "description": "Team conventions for the Music Catalog mono-repo: API endpoint skill and test-writer agent.",
+      "version": "1.0.0",
+      "source": "./plugins/music-catalog-conventions"
+    }
+  ]
+}

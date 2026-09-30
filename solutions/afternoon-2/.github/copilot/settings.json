@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "music-catalog-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "YOUR-ORG/YOUR-REPO"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "music-catalog-conventions@music-catalog-marketplace": true
+  }
+}
