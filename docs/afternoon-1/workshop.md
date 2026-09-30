@@ -13,18 +13,18 @@ banner_url: assets/banner.png
 navigation_levels: 3
 navigation_numbering: false
 sections_title:
-  - Agentic SDLC with GitHub Copilot — Afternoon 1: Copilot primitives
-  - Setup: Prepare your workshop environment
-  - Level 1: Code completions and Next Edit Suggestions
-  - Level 2: Copilot Chat
-  - Level 3: Custom instructions and prompt files
-  - Break
-  - Level 4: Custom agents and Agent Skills
-  - Level 5: Model Context Protocol servers
-  - Level 6: Copilot CLI
-  - Level 7: Plugins and the Copilot App
-  - Recap: Choose the right primitive
-  - Extra Credits 🪙
+  - 'Agentic SDLC with GitHub Copilot — Afternoon 1: Copilot primitives'
+  - 'Setup: Prepare your workshop environment'
+  - 'Level 1: Code completions and Next Edit Suggestions'
+  - 'Level 2: Copilot Chat'
+  - 'Level 3: Custom instructions and prompt files'
+  - 'Break'
+  - 'Level 4: Custom agents and Agent Skills'
+  - 'Level 5: Model Context Protocol servers'
+  - 'Level 6: Copilot CLI'
+  - 'Level 7: Plugins and the Copilot App'
+  - 'Recap: Choose the right primitive'
+  - 'Extra Credits 🪙'
 ---
 
 # Agentic SDLC with GitHub Copilot — Afternoon 1: Copilot primitives
