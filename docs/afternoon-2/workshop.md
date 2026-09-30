@@ -46,7 +46,7 @@ These are the minimal pre-requisites to run this workshop locally with the start
 
 |                                  |                                                                                                           |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Afternoon 1 baseline             | Complete the Afternoon 1 setup or start from a fresh repository created from the workshop template.        |
+| Workshop repository              | Create a fresh repository from the [workshop template](https://github.com/Justrebl/AI-SDLC-Workshop). Afternoon 1 used a different demo app. |
 | GitHub account with Copilot licence | Business or Enterprise recommended; Coding Agent, plugins, and gh-aw may need administrator enablement. |
 | VS Code latest + GitHub Copilot Chat | Required for local agent work. Install the HVE extension only if you use the VS Code alternative.       |
 | Git                              | Required for checkpoint commits and for APM dependency resolution.                                        |
