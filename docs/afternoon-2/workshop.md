@@ -13,17 +13,17 @@ banner_url: assets/banner.png
 navigation_levels: 3
 navigation_numbering: false
 sections_title:
-  - Agentic SDLC with GitHub Copilot — Afternoon 2: HVE-Core, RPI, APM and agentic workflows
-  - Level 0: Setup and starting point
-  - Level 1: HVE orientation and HVE-Core CLI plugin
-  - Level 2: Design Thinking with DT Coach
-  - Level 3: RPI implementation loop
-  - Break
-  - Level 4: APM, policy and plugin marketplace
-  - Level 5: Agentic workflows with gh-aw
-  - Level 6: Coding Agent delegation
-  - Recap: Governed agentic SDLC
-  - Extra Credits 🪙
+  - 'Agentic SDLC with GitHub Copilot — Afternoon 2: HVE-Core, RPI, APM and agentic workflows'
+  - 'Level 0: Setup and starting point'
+  - 'Level 1: HVE orientation and HVE-Core CLI plugin'
+  - 'Level 2: Design Thinking with DT Coach'
+  - 'Level 3: RPI implementation loop'
+  - 'Break'
+  - 'Level 4: APM, policy and plugin marketplace'
+  - 'Level 5: Agentic workflows with gh-aw'
+  - 'Level 6: Coding Agent delegation'
+  - 'Recap: Governed agentic SDLC'
+  - 'Extra Credits 🪙'
 ---
 
 # Agentic SDLC with GitHub Copilot — Afternoon 2: HVE-Core, RPI, APM and agentic workflows
