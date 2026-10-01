@@ -12,10 +12,11 @@ Supporting material:
 - [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md)
 - [Facilitator runbook](docs/afternoon-2/facilitator-runbook.md)
 - [Afternoon 2 solution files](solutions/afternoon-2)
+- [Workshop tester](tests/workshop/afternoon-2/README.md): an agentic workflow that replays the full Afternoon 2 lab in a throwaway Codespace on every change to `main` and files an issue when a step fails
 
 ## Starter application
 
-Afternoon 2 uses this repository as a template. It is a small music catalog mono-repo:
+In Afternoon 2, each attendee works in their own copy of this repository, created from the template or by copying it (Level 0 Step 1). It is a small music catalog mono-repo:
 
 - `src/api` is a .NET 10 minimal API. It exposes `GET /api/hello` and ships 12 synthetic tracks in `Data/tracks.json`.
 - `src/front` is a React, TypeScript and Vite front end.

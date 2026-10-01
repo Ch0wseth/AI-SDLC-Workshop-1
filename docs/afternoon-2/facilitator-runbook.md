@@ -45,6 +45,7 @@ Before the session, compare the upstream repositories with the commits recorded 
 3. Check that the HVE-Core commit pinned in `solutions/afternoon-2/apm.yml` still resolves. If you bump it, update the workshop text as well.
 4. Validate the plugin marketplace from a clean profile: `copilot plugin marketplace add <your-org>/<your-repo>`, `copilot plugin marketplace browse music-catalog-marketplace`, then `copilot plugin install music-catalog-conventions@music-catalog-marketplace`.
 5. Capture the screenshots listed in each `assets/README.md`.
+6. Check the latest [workshop tester](../../tests/workshop/afternoon-2/README.md) run. It replays the whole lab on every change to `main`, and an open `[Workshop tester]` issue lists the steps that currently fail.
 
 ## Known risks and fallbacks
 

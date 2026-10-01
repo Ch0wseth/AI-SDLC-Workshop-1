@@ -665,7 +665,7 @@ Today you used GitHub Copilot as a layered toolchain rather than one feature. Yo
 
 ## What is next
 
-Afternoon 2 moves from primitives to a governed agentic SDLC on a new application: a **Music Catalog** mono-repo with a React + TypeScript front end in `src/front` and a .NET 10 API in `src/api`. The application changes because Afternoon 2 needs a repository that you create from a template and fully own, with tests and a Coding Agent setup ready for HVE-Core, Design Thinking, RPI, APM policies, agentic workflows, and Coding Agent delegation.
+Afternoon 2 moves from primitives to a governed agentic SDLC on a new application: a **Music Catalog** mono-repo with a React + TypeScript front end in `src/front` and a .NET 10 API in `src/api`. The application changes because Afternoon 2 needs a repository that you copy and fully own, with tests and a Coding Agent setup ready for HVE-Core, Design Thinking, RPI, APM policies, agentic workflows, and Coding Agent delegation.
 
 Continue with [Afternoon 2](../afternoon-2/workshop.md).
 

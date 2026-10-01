@@ -22,7 +22,7 @@ Use this checklist **at least one week before** the session. Items marked **Admi
 | Item | Why it matters | Owner |
 | --- | --- | --- |
 | Copilot Business or Enterprise seat | Required for Coding Agent and org policy controls | Admin |
-| Each attendee owns a repository created from the workshop template | Workflows, issues and Coding Agent runs happen in the attendee's own repository | Attendee |
+| Each attendee owns a copy of the workshop repository (template or copy, Level 0 Step 1) | Workflows, issues and Coding Agent runs happen in the attendee's own repository | Attendee |
 | Actions enabled on attendee repositories | gh-aw workflows compile to GitHub Actions | Admin |
 | Copilot Coding Agent enabled for the repositories | Level 6 delegation | Admin |
 | Copilot CLI allowed by policy | Levels 1, 3 and 4 | Admin |
@@ -53,7 +53,7 @@ Use this checklist **at least one week before** the session. Items marked **Admi
 
 ## Day-before smoke test (facilitator)
 
-1. Create a fresh repository from the template and run Level 0 end to end.
+1. Create a fresh copy of the repository (Level 0 Step 1) and run Level 0 end to end.
 2. Run `copilot plugin marketplace add microsoft/hve-core` and `copilot plugin install hve-core@hve-core`.
 3. Run `apm install` with the pinned `apm.yml`, then `apm policy status --policy-source apm-policy.yml`.
 4. Run `gh aw compile` and `gh aw run daily-backlog`, and confirm the summary issue is created.
