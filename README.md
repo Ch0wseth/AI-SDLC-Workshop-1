@@ -122,7 +122,7 @@ The complete lists, with commands and owners, are in the per-option checklists a
 | --- | --- |
 | [docs/prerequisites.md](docs/prerequisites.md) | Shared prerequisites, network allowlist, organization settings and checklists |
 | [docs/before-d-day-codespace.md](docs/before-d-day-codespace.md), [docs/before-d-day-devcontainer.md](docs/before-d-day-devcontainer.md), [docs/before-d-day-local.md](docs/before-d-day-local.md) | Before D-Day checklist for each delivery option |
-| [docs/kick-off-call-checklist.md](docs/kick-off-call-checklist.md) | Live organization checklist (licences, policies, Actions, Codespaces, network) to walk through during the kick-off call |
+| [docs/kick-off-call-checklist.md](docs/kick-off-call-checklist.md) | D-Day readiness checklist (licences, Copilot features, Actions, Codespaces, network) to run live with the customer during the kick-off call |
 | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) | Afternoon 1 lab guide |
 | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) | Afternoon 2 lab guide |
 | [docs/tutor.md](docs/tutor.md) | Facilitator guide: timing, pre-flight, risks and messaging guardrails |
