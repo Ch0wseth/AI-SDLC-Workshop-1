@@ -106,7 +106,7 @@ Do not ask questions. Do not modify files. Your only possible outputs are one is
 A previous deterministic job already did this:
 
 1. Created a throwaway private sandbox repository from a snapshot of this commit.
-2. Opened a GitHub Codespace on it, using `.devcontainer.json`.
+2. Opened a GitHub Codespace on it, using `.devcontainer.json` pinned to the prebuilt image built from `.github/devcontainer-image/` at the tested commit.
 3. Ran `tests/workshop/afternoon-2/run-lab.sh` in that Codespace. The script replays every level of `docs/afternoon-2/workshop.md`: the commands, the copy-paste prompts (through Copilot CLI `-p`), the real `gh aw run` calls and the Coding Agent assignment.
 4. Deleted the Codespace and the sandbox repository.
 
@@ -136,7 +136,7 @@ If `lab/` is missing, the lab never ran. Report the infrastructure failure from 
    - Copilot output is non-deterministic. Judge the intent of the expected result, not exact wording.
 4. Classify every problem as exactly one of:
    - **Lab defect**: the document is wrong, incomplete or out of order, so a participant following it literally would fail or be confused. Examples: a missing push before a step that needs the remote, files the lab never commits, a missing title, a repository that is not a template.
-   - **Solution or code defect**: files under `solutions/afternoon-2/`, `src/`, `tests/` or `.devcontainer*` do not behave as the lab says.
+   - **Solution or code defect**: files under `solutions/afternoon-2/`, `src/`, `tests/`, `.devcontainer.json` or `.github/devcontainer-image/` do not behave as the lab says.
    - **Product or environment change**: a tool, CLI flag, plugin, model, policy or GitHub feature behaved differently than documented. Quote the exact error.
    - **Tester limitation**: the failure comes only from emulation, for example `/plugin` replayed as `copilot plugin list` or prompts sent through `copilot -p`, and a participant would not hit it.
    - **Infrastructure failure**: tokens, sandbox creation, Codespace, SSH or timeouts.

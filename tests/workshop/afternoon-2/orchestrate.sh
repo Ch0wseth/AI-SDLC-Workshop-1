@@ -21,7 +21,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 case $SANDBOX_NAME in workshop-tester-*) ;; *) echo "SANDBOX_NAME must start with workshop-tester-" >&2; exit 2;; esac
 SANDBOX_REPO="$SANDBOX_OWNER/$SANDBOX_NAME"
 CODESPACE_MACHINE=${CODESPACE_MACHINE:-standardLinux32gb}
-# Budget within the 360-minute lab_run job: setup (<= 72 min) + lab + collect (10) + cleanup (<= 17).
+# Budget within the 360-minute lab_run job: setup (<= 80 min, image wait included) + lab + collect (10) + cleanup (<= 17).
 LAB_TIMEOUT_S=${LAB_TIMEOUT_S:-14400}
 export COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN:-${GH_TOKEN-}}
 STATE="$OUT_DIR/state.env"
@@ -60,12 +60,36 @@ setup() {
     fi
   fi
 
+  # Pin the sandbox to the image built from this exact definition, so a stale :latest cannot mask a broken change.
+  IMAGE_REPO=$(sed -n 's/^[[:space:]]*"image":[[:space:]]*"\([^":]*\)\(:[^"]*\)\{0,1\}".*/\1/p' "$GITHUB_WORKSPACE/.devcontainer.json" | head -n1)
+  IMAGE_TAG="tree-$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD:.github/devcontainer-image 2>/dev/null | cut -c1-12)"
+  export IMAGE_REPO IMAGE_TAG
+  step infra-image infra "Prebuilt devcontainer image ${IMAGE_REPO}:${IMAGE_TAG} is published and public" translated 1260 '
+    case "$IMAGE_REPO" in ghcr.io/*) ;; *) echo "root .devcontainer.json does not reference a ghcr.io image"; exit 1;; esac
+    [ "$IMAGE_TAG" != tree- ] || { echo "cannot hash .github/devcontainer-image"; exit 1; }
+    name=${IMAGE_REPO#ghcr.io/}
+    accept="application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json"
+    for i in $(seq 1 40); do
+      tok=$(curl -fsS "https://ghcr.io/token?scope=repository:$name:pull" | jq -r ".token // empty")
+      code=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $tok" -H "Accept: $accept" \
+        "https://ghcr.io/v2/$name/manifests/$IMAGE_TAG")
+      echo "attempt $i: HTTP $code for $IMAGE_REPO:$IMAGE_TAG"
+      [ "$code" = 200 ] && exit 0
+      sleep 30
+    done
+    echo "prebuilt image not published (or not public) for this definition: run the Devcontainer image workflow and make the GHCR package public"
+    exit 1'
+  finish_step
+  [ "$STEP_CODE" -eq 0 ] || return 1
+
   # A snapshot of the tested commit with a single fresh commit, mirroring the Level 0 Step 1 copy fallback.
   step infra-sandbox infra "Create the private sandbox repository from a snapshot of the tested commit" translated 600 "
     set -e
     tmp=\$(mktemp -d)
     git -C '$GITHUB_WORKSPACE' archive HEAD | tar -x -C \"\$tmp\"
     cd \"\$tmp\"
+    sed -i 's#\"image\":[[:space:]]*\"[^\"]*\"#\"image\": \"$IMAGE_REPO:$IMAGE_TAG\"#' .devcontainer.json
+    grep '\"image\"' .devcontainer.json
     git init -q -b main
     git -c user.name='Workshop Tester' -c user.email='workshop-tester@users.noreply.github.com' add -A
     git -c user.name='Workshop Tester' -c user.email='workshop-tester@users.noreply.github.com' commit -q -m 'Workshop snapshot of ${SOURCE_REPO-}@${SOURCE_SHA-}'
@@ -87,12 +111,12 @@ setup() {
   finish_step
   [ -n "$CODESPACE" ] || return 1
 
-  step infra-ready infra "Codespace available and postCreateCommand finished" translated 2400 "
-    for i in \$(seq 1 60); do
+  step infra-ready infra "Codespace available and postCreateCommand finished" translated 1500 "
+    for i in \$(seq 1 30); do
       s=\$(gh codespace view -c '$CODESPACE' --json state --jq .state 2>/dev/null); echo \"state=\$s\"
       [ \"\$s\" = Available ] && break; sleep 20
     done
-    for i in \$(seq 1 80); do
+    for i in \$(seq 1 40); do
       gh codespace ssh -c '$CODESPACE' -- \"bash -lc 'command -v copilot && command -v apm && gh aw version && test -d /workspaces/$SANDBOX_NAME/src/front/node_modules'\" && exit 0
       sleep 15
     done
