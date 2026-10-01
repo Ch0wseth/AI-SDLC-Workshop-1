@@ -109,6 +109,45 @@ jobs:
   agent:
     needs: [lab_run]
 
+  report:
+    needs: [lab_run, agent, safe_outputs, sandbox_cleanup]
+    if: ${{ always() && vars.WORKSHOP_TESTER_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    env:
+      LAB_RESULT: ${{ needs.lab_run.result }}
+      AGENT_RESULT: ${{ needs.agent.result }}
+      SAFE_OUTPUTS_RESULT: ${{ needs.safe_outputs.result }}
+      CLEANUP_RESULT: ${{ needs.sandbox_cleanup.result }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Download lab results if available
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: workshop-tester-results
+          path: ${{ runner.temp }}/lab-run
+      - name: Publish workshop report
+        if: always()
+        run: |
+          if [ -f tests/workshop/afternoon-2/report.mjs ]; then
+            node tests/workshop/afternoon-2/report.mjs "${RUNNER_TEMP}/lab-run" >> "$GITHUB_STEP_SUMMARY" || {
+              echo "## Workshop report unavailable" >> "$GITHUB_STEP_SUMMARY"
+              echo "The report renderer failed. Inspect the run logs and uploaded artifact." >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            }
+          else
+            echo "## Workshop report unavailable" >> "$GITHUB_STEP_SUMMARY"
+            echo "The source checkout did not complete. Inspect the run logs and uploaded artifact." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
 steps:
   - name: Download lab results
     uses: actions/download-artifact@v4
@@ -117,8 +156,7 @@ steps:
       path: /tmp/gh-aw/agent/lab-run
 
 tools:
-  github:
-    toolsets: [repos, issues]
+  github: false
   bash: ["cat", "ls", "find", "grep", "head", "tail", "wc", "jq", "sed -n"]
 
 safe-outputs:
@@ -137,6 +175,7 @@ safe-outputs:
 
 You are running unattended in GitHub Actions for `${{ github.repository }}` after a change reached `main`. The tested commit is in `meta.json`.
 Do not ask questions. Do not modify files. Your only possible outputs are one issue or a `noop`.
+Follow `docs/afternoon-2/workshop.md` literally: use only its guided steps, expected results and links it explicitly provides, together with the supplied tester results and logs. Do not browse or search the internet, consult unrelated documentation, invent missing instructions, or infer how to accomplish an undocumented step. If the guide or captured evidence does not establish an outcome, report the evidence gap in the notes rather than guessing a defect category; never turn an assumption into a pass.
 
 A previous deterministic job already did this:
 
@@ -167,8 +206,8 @@ If `lab/` is missing, the lab never ran. Report the infrastructure failure from 
 2. Match each documented step to a result `id`, using its `level` and `title`.
    - List any documented step that has no result. That is coverage drift between the lab and `tests/workshop/afternoon-2/run-lab.sh`.
    - List any executed step that no longer exists in the lab.
-3. For each step, judge the outcome against the documented expected result, using the `checks`, `exit_code` and logs.
-   - Copilot output is non-deterministic. Judge the intent of the expected result, not exact wording.
+3. For each step, judge the outcome against the documented expected result, using the `checks`, `exit_code` and logs. Do not substitute an alternative command or result not supplied in the guide.
+   - Copilot output is non-deterministic. Judge only the documented acceptance behavior, not exact wording or outside product knowledge.
 4. Classify every problem as exactly one of:
    - **Lab defect**: the document is wrong, incomplete or out of order, so a participant following it literally would fail or be confused. Examples: a missing push before a step that needs the remote, files the lab never commits, a missing title, a repository that is not a template.
    - **Solution or code defect**: files under `solutions/afternoon-2/`, `src/`, `tests/`, `.devcontainer.json` or `.github/devcontainer-image/` do not behave as the lab says.
@@ -179,7 +218,7 @@ If `lab/` is missing, the lab never ran. Report the infrastructure failure from 
 
 ## Output
 
-- If every step passed and you found no lab defect, solution defect, product change or coverage drift, call `noop`. Include a one-line summary with the number of steps and the total duration.
+- If all executed checks passed, documented skips are accounted for, and you found no defect or coverage drift, call `noop`. Include a one-line summary with the number of steps and the total duration.
 - Otherwise create **one** issue with this structure:
   - Title: a short summary of the most important failure.
   - `## Summary`: the overall verdict, source commit, link to the run (from `meta.json`), and steps passed, failed, warned and skipped.
@@ -189,3 +228,4 @@ If `lab/` is missing, the lab never ran. Report the infrastructure failure from 
   - `## Copilot CLI usage`: a table by prompt step, in the reported units.
   - `## Notes`: tester limitations and assumptions.
 - Never include tokens, secrets or full environment dumps. Quote only short log excerpts.
+- The `report` job publishes the captured step counts and completion state on the Actions run summary even if you fail or stop early. Your issue/noop provides the guided analysis; do not assume the existence of an issue means the run succeeded.

@@ -104,7 +104,7 @@ finish_step
 skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \
   "extended track: multi-turn agent Q&A with human confirmation before /backlog-execute writes issues; Meeting Analyst needs Microsoft 365 and WorkIQ"
 
-step l2-curate-ignored "Level 2" "Curate: check that the tracking folder is ignored" literal 30 'git check-ignore -v .copilot-tracking'
+step l2-curate-ignored "Level 2" "Curate: check that the tracking folder is ignored" translated 30 'git check-ignore -v .copilot-tracking/probe'
 git check-ignore -q .copilot-tracking/probe && check ".copilot-tracking/ is ignored" true || check ".copilot-tracking/ is ignored" false
 finish_step
 
@@ -305,7 +305,7 @@ finish_step
 step l5-copy-workflows "Level 5" "Copy the solution workflows" translated 30 \
   'cp solutions/afternoon-2/.github/workflows/daily-backlog.md .github/workflows/daily-backlog.md && cp solutions/afternoon-2/.github/workflows/a11y-review.md .github/workflows/a11y-review.md'
 agent_imports=$(grep -Ec '^[[:space:]]*-[[:space:]]+\.github/agents/[^[:space:]]+\.agent\.md[[:space:]]*$' .github/workflows/a11y-review.md || true)
-if [ "$agent_imports" -eq 1 ] && grep -Fxq '  - .github/agents/accessibility-reviewer.agent.md' .github/workflows/a11y-review.md; then
+if [ "$agent_imports" -eq 1 ] && grep -Eq '^[[:space:]]*-[[:space:]]+\.github/agents/accessibility-reviewer\.agent\.md[[:space:]]*$' .github/workflows/a11y-review.md; then
   check "a11y-review imports only the Accessibility Reviewer" true
 else
   check "a11y-review imports only the Accessibility Reviewer" false "agent imports=$agent_imports"
@@ -472,6 +472,9 @@ else
       "gh pr edit $PR -R $SANDBOX_REPO --add-reviewer @copilot"
     note "PR-NUMBER replaced by the Copilot PR; -R targets the sandbox"
     REVIEW_CODE=$STEP_CODE waited=0 reviews=0
+    if [ "$REVIEW_CODE" -ne 0 ] && log_has "requires one of the following scopes: \['read:org'\]"; then
+      note "tester credential limitation: WORKSHOP_TESTER_TOKEN needs read:org to request a Copilot review; this step remains failed"
+    fi
     if [ "$REVIEW_CODE" -eq 0 ]; then
       while [ "$waited" -lt "$CODE_REVIEW_WAIT_S" ]; do
         reviews=$(gh pr view "$PR" -R "$SANDBOX_REPO" --json reviews \

@@ -12,6 +12,8 @@ flowchart LR
   B -->|collect, cleanup| D[(artifact<br/>workshop-tester-results)]
   D --> E[agent job<br/>read-only validator]
   E --> F[safe-outputs:<br/>create-issue or noop]
+  D --> G[report job<br/>Actions run summary]
+  E --> G
 ```
 
 | File | Runs on | Role |
@@ -30,6 +32,7 @@ Every step has a mode that the validator reports:
 - `skipped`: impossible headless (for example the VS Code fallback). It is reported, never counted as a pass.
 
 The validator agent compares the lab's steps against the result ids to detect coverage drift. It classifies each problem as a lab defect, a solution or code defect, a product or environment change, a tester limitation, or an infrastructure failure.
+It must use only the lab's guided steps, supplied links, and captured results. It does not browse for alternate instructions or infer undocumented procedures. The `report` job writes an Actions run summary with job status, per-level counts, and failed or warned steps, even when the validator cannot finish. Missing results or interrupted jobs are marked **Incomplete**, not passed; the downloadable artifact retains detailed logs.
 
 ## Setup
 
@@ -47,12 +50,13 @@ The workflow is opt-in. It does nothing until the variable below is set, so fork
 
 | Secret | Token type | Exact permissions | Why |
 | --- | --- | --- | --- |
-| `WORKSHOP_TESTER_TOKEN` | Classic PAT | `repo`, `workflow`, `delete_repo`, `codespace` | Create and push the private sandbox (including `.github/workflows`), create and delete the Codespace, delete the sandbox, run `gh aw run`, assign the issue to the Coding Agent. Fine-grained PATs cannot yet cover all of these for a user-owned sandbox created at run time. |
+| `WORKSHOP_TESTER_TOKEN` | Classic PAT | `repo`, `workflow`, `delete_repo`, `codespace`, `read:org` | Create and push the private sandbox (including `.github/workflows`), create and delete the Codespace, delete the sandbox, run `gh aw run`, assign the issue to the Coding Agent, and request Copilot review via `gh pr edit --add-reviewer @copilot`. Fine-grained PATs cannot yet cover all of these for a user-owned sandbox created at run time. |
 | `WORKSHOP_TESTER_COPILOT_TOKEN` | Fine-grained PAT | Account permission **Copilot Requests: Read** only, no repository access | Copilot CLI inference and the sandbox gh-aw engine. |
 
 Store **both** tokens as **Actions** repository secrets (Settings > Secrets and variables > Actions). A Codespaces secret is not visible to the workflow; the orchestrator injects the Copilot token into the sandbox Codespace itself.
 
 Hardening: issue both tokens from a dedicated bot account, not a personal account; use a short expiry and rotate; keep `WORKSHOP_TESTER_ENABLED` unset until both secrets exist.
+If the classic token was created without `read:org`, its owner must grant that scope and update the Actions secret before rerunning Level 6. The tester records a missing-scope review request as a failed step with a credential-limitation note; it does not bypass the review.
 
 The tester account also needs:
 
