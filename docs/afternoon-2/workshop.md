@@ -754,7 +754,7 @@ Apply these practices from the guides:
 
 ### One agent runs the phases
 
-The phase commands are not separate agents. **RPI Agent** is the HVE-Core agent that coordinates them. It runs `/rpi-research`, `/rpi-plan` and `/rpi-implement`, then `/rpi-review`, and saves each phase's output to files so the next phase and later sessions can pick up where it stopped.
+The phase commands are not separate agents, and each one also works on its own without RPI Agent. **RPI Agent** is the HVE-Core agent that coordinates them. It runs `/rpi-research`, `/rpi-plan` and `/rpi-implement`, then `/rpi-review`, and saves each phase's output to files so the next phase and later sessions can pick up where it stopped.
 
 You can drive it in two ways:
 
@@ -763,7 +763,7 @@ You can drive it in two ways:
 | Phase by phase (this level) | Select **RPI Agent**, then run one `/rpi-*` command at a time | Learning RPI, or when you want to check each phase before the next one |
 | Full loop | `/rpi task="..."` | A well-scoped task you trust the agent to carry through |
 
-With `/rpi`, RPI Agent first asks how much control you want. You can let it run end to end, have it check with you on unclear decisions, or stop it after planning. It still stops for safety confirmations and blockers. Use `/rpi continue=...` to resume a saved task, and `/rpi followUp=...` to start a new task from a review finding.
+With `/rpi`, RPI Agent asks how much control you want, unless your request already says (for example, "use automatic mode"). It offers four choices: run end to end, keep going but check with you on unclear decisions, research and plan with you then stop before implementation, or work through each phase with you. In VS Code, the agent's **Full Auto** button starts the end-to-end choice. It still stops for safety confirmations and blockers. Use `/rpi continue=...` to resume a saved task, and `/rpi followUp=...` to start a new task from a review finding.
 
 This level drives the phases one at a time so you see each output. Level 6 hands the full loop to RPI Agent on Copilot cloud agent.
 
