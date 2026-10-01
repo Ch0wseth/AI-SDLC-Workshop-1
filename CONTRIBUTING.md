@@ -18,6 +18,7 @@ The attendee guides (`docs/afternoon-*/workshop.md`) only contain what attendees
 | `src/`, `tests/api/` | Music Catalog starter application |
 | `tests/workshop/afternoon-2/` | Workshop tester scripts that replay the AI SDLC lab |
 | `.github/devcontainer-image/` | Prebuilt devcontainer image definition |
+| `.github/agents/workshop-creator.agent.md` | Workshop Creator agent: reproduces this repository's creation path for a new workshop, with handoffs to the HVE-Core DT Coach, RPI Agent and PowerPoint Builder |
 
 ## MOAW conventions
 
