@@ -12,6 +12,7 @@ Supporting material:
 - [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md)
 - [Facilitator runbook](docs/afternoon-2/facilitator-runbook.md)
 - [Afternoon 2 solution files](solutions/afternoon-2)
+- [Workshop tester](tests/workshop/afternoon-2/README.md): an agentic workflow that replays the full Afternoon 2 lab in a throwaway Codespace on every change to `main` and files an issue when a step fails
 
 ## Starter application
 
