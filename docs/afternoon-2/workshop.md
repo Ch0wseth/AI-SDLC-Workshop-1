@@ -1035,8 +1035,8 @@ Keep it short and ask at most two clarifying questions.
 ```
 
 Expected result:
-- ADR Creator drafts a decision record with context, decision, and consequences, and tells you where it saved the draft.
-- You decide whether to keep it. To keep it, copy it to `docs\decisions` and commit it.
+- ADR Creator drafts a decision record with context, decision, and consequences, then asks you to confirm it.
+- When you confirm, it saves the final ADR as a numbered file in `docs\planning\adrs`, for example `0001-in-memory-playlist-state.md`. Keep it there; Step 3 commits it.
 
 ### Step 2: Review the change with the Code Review agent
 
@@ -1082,6 +1082,17 @@ Expected result:
 
 </div>
 
+### Step 4: Draft the pull request with `/pull-request`
+
+Type:
+
+```text
+/pull-request action=prepare
+```
+
+Expected result:
+- The agent reads the committed diff of your branch, runs quick checks on the changed areas, and shows you a pull request title and description.
+- With `action=prepare`, nothing is written to GitHub. You do not push until Level 4, so keep the draft as the description for a pull request you open later.
 ---
 
 # Break
