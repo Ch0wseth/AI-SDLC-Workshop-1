@@ -29,6 +29,7 @@ permissions:
   copilot-requests: write   # Copilot inference for the validation agent, no PAT required
 
 engine: copilot
+model: gpt-5.5
 timeout-minutes: 20
 
 jobs:
@@ -96,6 +97,10 @@ safe-outputs:
     labels: [workshop-tester, automation]
     max: 1
     close-older-issues: true
+  threat-detection:
+    engine:
+      id: copilot
+      model: gpt-5.5
 ---
 
 # Workshop tester: Afternoon 2 validation report
