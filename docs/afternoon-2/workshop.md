@@ -1581,7 +1581,7 @@ Copy-Item solutions\afternoon-2\.github\workflows\a11y-review.md .github\workflo
 
 Expected result:
 - `.github\workflows\daily-backlog.md` uses HVE Backlog Manager as a workshop pattern.
-- `.github\workflows\a11y-review.md` uses Accessibility Reviewer and Accessibility Planner as a workshop pattern.
+- `.github\workflows\a11y-review.md` imports Accessibility Reviewer for assessment and specifies the bounded remediation plan in its own prompt.
 
 ### Step 2: Inspect `daily-backlog.md`
 
@@ -1600,7 +1600,7 @@ Expected result:
 
 Check these mechanisms:
 
-- It imports Accessibility Reviewer and Accessibility Planner.
+- It imports only Accessibility Reviewer: gh-aw allows one agent file per workflow. The workflow prompt supplies the remediation-planning instructions without importing Accessibility Planner.
 - It scopes review to `src\front\src\**`.
 - It creates at most one issue and closes older matching issues.
 - It says the result is not a conformance claim.
@@ -1610,7 +1610,7 @@ Expected result:
 
 <div class="warning" data-title="Architectural pattern">
 
-> The `imports:` use of HVE agent files is a workshop pattern. gh-aw compilation verifies the syntax, while gh-aw `tools:` and `safe-outputs:` govern actual workflow capabilities. HVE agent files may contain tool names intended for other Copilot surfaces.
+> The single `imports:` agent file is a workshop pattern. gh-aw compilation verifies the syntax, while gh-aw `tools:` and `safe-outputs:` govern actual workflow capabilities. HVE agent files may contain tool names intended for other Copilot surfaces.
 
 </div>
 
@@ -1626,7 +1626,7 @@ gh aw compile
 
 Expected result:
 - gh-aw generates `.github\workflows\daily-backlog.lock.yml` and `.github\workflows\a11y-review.lock.yml`.
-- Compile succeeds with the HVE imports.
+- Compile succeeds with the single HVE Reviewer import; the remediation plan is defined in the workflow prompt.
 
 ### Step 2: Review generated files without editing
 

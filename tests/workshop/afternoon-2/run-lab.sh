@@ -304,6 +304,12 @@ finish_step
 
 step l5-copy-workflows "Level 5" "Copy the solution workflows" translated 30 \
   'cp solutions/afternoon-2/.github/workflows/daily-backlog.md .github/workflows/daily-backlog.md && cp solutions/afternoon-2/.github/workflows/a11y-review.md .github/workflows/a11y-review.md'
+agent_imports=$(grep -Ec '^[[:space:]]*-[[:space:]]+\.github/agents/[^[:space:]]+\.agent\.md[[:space:]]*$' .github/workflows/a11y-review.md || true)
+if [ "$agent_imports" -eq 1 ] && grep -Fxq '  - .github/agents/accessibility-reviewer.agent.md' .github/workflows/a11y-review.md; then
+  check "a11y-review imports only the Accessibility Reviewer" true
+else
+  check "a11y-review imports only the Accessibility Reviewer" false "agent imports=$agent_imports"
+fi
 finish_step
 
 step l5-compile "Level 5" "Compile workflows (gh aw compile)" literal 600 'gh aw compile'
