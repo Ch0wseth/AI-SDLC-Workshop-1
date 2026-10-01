@@ -131,20 +131,33 @@ setup() {
 
 run() {
   [ -n "${CODESPACE-}" ] || { echo "no Codespace, skipping the lab run"; return 1; }
-  step infra-lab-start infra "Start run-lab.sh in the Codespace" translated 120 \
-    "gh codespace ssh -c '$CODESPACE' -- \"bash -lc 'set -a; . ~/.workshop-tester.env; set +a; cd /workspaces/$SANDBOX_NAME && setsid nohup bash tests/workshop/afternoon-2/run-lab.sh > /tmp/workshop-tester-runner.log 2>&1 < /dev/null & echo started'\""
-  finish_step
-  [ "$STEP_CODE" -eq 0 ] || return 1
+  # gh codespace ssh can stay open after the detached runner starts, so the SSH exit code is not the gate:
+  # the step passes when the remote shell printed "started" and the runner process is verified alive (or already done).
+  step infra-lab-start infra "Start run-lab.sh in the Codespace" translated 90 \
+    "gh codespace ssh -c '$CODESPACE' -- \"bash -lc 'set -a; . ~/.workshop-tester.env; set +a; cd /workspaces/$SANDBOX_NAME && setsid -f bash tests/workshop/afternoon-2/run-lab.sh > /tmp/workshop-tester-runner.log 2>&1 < /dev/null; echo started'\""
+  local alive="" i
+  for i in 1 2 3 4 5 6; do
+    alive=$(cs_ssh 'if test -f /tmp/workshop-tester/done; then echo RUNNER_DONE; elif pgrep -f "afternoon-2/[r]un-lab.sh" >/dev/null; then echo RUNNER_ALIVE; fi' 2>/dev/null | grep -Eo 'RUNNER_(ALIVE|DONE)' | head -n1)
+    [ -n "$alive" ] && break
+    sleep 10
+  done
+  [ "$STEP_CODE" -eq 0 ] || note "ssh exited with $STEP_CODE after the launch; gate is the runner process check"
+  if log_has '^started'; then check "Launch command printed started" true; else check "Launch command printed started" false; fi
+  if [ -n "$alive" ]; then check "Runner process verified in the Codespace" true "$alive"; else check "Runner process verified in the Codespace" false; fi
+  finish_step any
+  [ -n "$alive" ] || return 1
 
-  local start waited=0 failures=0 out
+  local start waited=0 failures=0 gone=0 out
   start=$(date +%s)
   while [ "$waited" -lt "$LAB_TIMEOUT_S" ]; do
     sleep 60
     waited=$(( $(date +%s) - start ))
-    if out=$(cs_ssh 'test -f /tmp/workshop-tester/done && echo LAB_DONE; tail -n 2 /tmp/workshop-tester-runner.log' 2>&1); then
+    if out=$(cs_ssh 'if test -f /tmp/workshop-tester/done; then echo LAB_DONE; elif ! pgrep -f "afternoon-2/[r]un-lab.sh" >/dev/null; then echo RUNNER_GONE; fi; tail -n 2 /tmp/workshop-tester-runner.log' 2>&1); then
       failures=0
       echo "[$((waited / 60)) min] $(echo "$out" | tail -n 1)"
       echo "$out" | grep -q LAB_DONE && break
+      if echo "$out" | grep -q RUNNER_GONE; then gone=$((gone + 1)); else gone=0; fi
+      [ "$gone" -ge 2 ] && break
     else
       failures=$((failures + 1))
       echo "ssh poll failed ($failures): $out"
@@ -154,7 +167,9 @@ run() {
   STEP_ID=infra-lab-wait STEP_LEVEL=infra STEP_TITLE="Lab run finished inside the Codespace" STEP_MODE=translated STEP_CMD="poll /tmp/workshop-tester/done" STEP_DUR=$waited
   if echo "${out-}" | grep -q LAB_DONE; then STEP_CODE=0; else
     STEP_CODE=1
-    [ "$failures" -ge 10 ] && note "lost SSH access to the Codespace" || note "lab did not finish within ${LAB_TIMEOUT_S}s"
+    if [ "$failures" -ge 10 ]; then note "lost SSH access to the Codespace"
+    elif [ "$gone" -ge 2 ]; then note "run-lab.sh exited without writing /tmp/workshop-tester/done"
+    else note "lab did not finish within ${LAB_TIMEOUT_S}s"; fi
   fi
   finish_step
 }
