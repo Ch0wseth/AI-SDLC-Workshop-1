@@ -24,7 +24,7 @@ In Afternoon 2, each attendee works in their own copy of this repository, create
 
 In Afternoon 2, attendees use HVE-Core's RPI workflow to build one capability: **browse tracks and add them to a single in-memory playlist**.
 
-For a preconfigured environment, open the repository in GitHub Codespaces or use VS Code's **Dev Containers: Reopen in Container** command. The root `.devcontainer.json` provides Git, Node.js 22, .NET 10, GitHub CLI, GitHub Copilot CLI, APM CLI, the `gh-aw` extension, Copilot extensions, restored .NET dependencies and installed front-end dependencies. Authentication, Copilot licensing and organization policies must still be configured as described in the [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md).
+For a preconfigured environment, open the repository in GitHub Codespaces or use VS Code's **Dev Containers: Reopen in Container** command. The root `.devcontainer.json` pulls a prebuilt image (`ghcr.io/justrebl/ai-sdlc-workshop/devcontainer`) that already contains Git, Node.js 22, .NET 10, GitHub CLI, GitHub Copilot CLI and APM CLI, then adds the `gh-aw` extension, Copilot extensions, restored .NET dependencies and installed front-end dependencies. Authentication, Copilot licensing and organization policies must still be configured as described in the [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md).
 
 ```bash
 dotnet test
@@ -32,6 +32,12 @@ cd src/front
 npm ci
 npm test
 ```
+
+## Prebuilt devcontainer image
+
+The image is defined in [`.github/devcontainer-image/`](.github/devcontainer-image/) and published to GitHub Container Registry by the [Devcontainer image workflow](.github/workflows/devcontainer-image.yml) on every change to that folder on `main`, weekly and on demand. Each build is tagged `latest` and `tree-<hash>`, where `<hash>` is the first 12 characters of the folder's Git tree hash; the workshop tester pins the sandbox Codespace to the `tree-<hash>` tag of the tested commit.
+
+If you create your own copy of this template, run the workflow once (`gh workflow run devcontainer-image.yml`), set the `devcontainer` package visibility to **Public** in its package settings, and replace `justrebl/ai-sdlc-workshop` in the root `.devcontainer.json` with your lowercase `owner/repo`.
 
 ## Publishing on MOAW
 
