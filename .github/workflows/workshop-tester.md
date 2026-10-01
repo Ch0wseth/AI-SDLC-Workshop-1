@@ -63,10 +63,14 @@ jobs:
       - name: Run the Afternoon 2 lab in the Codespace
         run: bash tests/workshop/afternoon-2/orchestrate.sh run
       - name: Collect lab results
-        if: always()
+        # Skipped on cancel: the 5-minute cancellation grace period is reserved for cleanup.
+        if: ${{ !cancelled() }}
         run: bash tests/workshop/afternoon-2/orchestrate.sh collect
       - name: Delete Codespace and sandbox repository
         if: always()
+        timeout-minutes: 15
+        env:
+          JOB_STATUS: ${{ job.status }}
         run: bash tests/workshop/afternoon-2/orchestrate.sh cleanup
       - name: Upload lab results
         if: always()
@@ -76,6 +80,31 @@ jobs:
           path: ${{ runner.temp }}/lab-run
           retention-days: 14
           if-no-files-found: warn
+
+  # Backstop: runs even when the run is cancelled or lab_run is force-terminated after the cancellation grace period,
+  # and deletes this run's Codespace and sandbox repository if they still exist. Runner loss is covered by the
+  # orphan sweep of the next run.
+  sandbox_cleanup:
+    needs: [lab_run]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions: {}
+    env:
+      GH_TOKEN: ${{ secrets.WORKSHOP_TESTER_TOKEN }}
+      GH_PROMPT_DISABLED: "1"
+      SANDBOX_REPO: ${{ vars.WORKSHOP_TESTER_OWNER || github.repository_owner }}/workshop-tester-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Delete leftover Codespace and sandbox repository of this run
+        run: |
+          [ -n "$GH_TOKEN" ] || { echo "WORKSHOP_TESTER_TOKEN secret is missing"; exit 0; }
+          gh codespace list --json name,repository --jq ".[] | select(.repository == \"$SANDBOX_REPO\") | .name" |
+            while read -r cs; do echo "delete codespace $cs"; gh codespace delete -c "$cs" --force || true; done
+          if gh repo view "$SANDBOX_REPO" --json description --jq .description 2>/dev/null | grep -qF "Ephemeral workshop tester sandbox"; then
+            echo "delete repo $SANDBOX_REPO"; gh repo delete "$SANDBOX_REPO" --yes || true
+          else
+            echo "no leftover sandbox repository"
+          fi
 
   agent:
     needs: [lab_run]
