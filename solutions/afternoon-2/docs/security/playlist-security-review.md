@@ -44,7 +44,7 @@ Verification summary: two findings were confirmed in the starter configuration. 
 | ID | Title | Status | Severity | Location | Finding | Recommendation | Verdict | Justification |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | SBD-01 | No rate limiting | FAIL | Medium | `src/api/Program.cs` | The API registers no rate limiter, so a client can grow the in-memory state or load the process. | Add the ASP.NET Core rate limiting middleware with a fixed window before any shared deployment. | Verified | No rate limiter is registered in the starter `Program.cs`. |
-| SBD-02 | Shared mutable state without synchronisation | PARTIAL | Low | Playlist store in `src/api` | A plain `List<T>` singleton is not thread-safe under concurrent adds. | Use a lock or a concurrent collection, and keep the duplicate check and the add in one atomic step. | Unverified | Depends on the participant's store. See [ADR 0001](../decisions/0001-in-memory-playlist-state.md). |
+| SBD-02 | Shared mutable state without synchronisation | PARTIAL | Low | Playlist store in `src/api` | A plain `List<T>` singleton is not thread-safe under concurrent adds. | Use a lock or a concurrent collection, and keep the duplicate check and the add in one atomic step. | Unverified | Depends on the participant's store. See [ADR 0001](../planning/adrs/0001-in-memory-playlist-state.md). |
 
 ## Detailed Remediation
 

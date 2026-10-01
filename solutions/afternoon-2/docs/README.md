@@ -13,7 +13,7 @@ These files show what good output from the HVE-Core role agents looks like for t
 | [project-planning/music-catalog-playlist-slice-brd.md](project-planning/music-catalog-playlist-slice-brd.md) | Level 2, Product Manager | BRD Builder | `docs\project-planning` |
 | [project-planning/music-catalog-playlist-slice.md](project-planning/music-catalog-playlist-slice.md) | Level 2, Product Manager | PRD Builder | `docs\project-planning` |
 | [project-planning/playlist-slice-backlog-handoff.md](project-planning/playlist-slice-backlog-handoff.md) | Level 2, Product Manager | Functional Planner (`handoff.md`) and Backlog Manager `/backlog-plan` | Not committed. Functional Planner writes its handoff to a local tracking folder. |
-| [decisions/0001-in-memory-playlist-state.md](decisions/0001-in-memory-playlist-state.md) | Level 3, Tech Lead extension | ADR Creator | `docs\decisions` |
+| [planning/adrs/0001-in-memory-playlist-state.md](planning/adrs/0001-in-memory-playlist-state.md) | Level 3, Tech Lead extension | ADR Creator | `docs\planning\adrs` |
 | [security/playlist-security-review.md](security/playlist-security-review.md) | Level 5, Security Architect track | Security Reviewer, run by Copilot cloud agent | `docs\security`, through the agent's pull request |
 
 How to use them:

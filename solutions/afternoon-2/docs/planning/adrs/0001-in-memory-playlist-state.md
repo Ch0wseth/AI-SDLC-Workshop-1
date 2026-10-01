@@ -13,7 +13,7 @@ informed: Workshop participants
 
 ## Context and Problem Statement
 
-The playlist slice ([PRD-001](../project-planning/music-catalog-playlist-slice.md)) needs to remember which tracks a listener added. The repository conventions say state is kept in memory only, with no database, file writes, or external services. Where should the API keep the playlist?
+The playlist slice ([PRD-001](../../project-planning/music-catalog-playlist-slice.md)) needs to remember which tracks a listener added. The repository conventions say state is kept in memory only, with no database, file writes, or external services. Where should the API keep the playlist?
 
 ## Decision Drivers
 
@@ -68,4 +68,4 @@ Chosen option: "In-memory collection registered as a singleton", because it is t
 
 ## More Information
 
-Revisit this decision if the workshop adds users or persistence. Related: [security review](../security/playlist-security-review.md) finding on thread safety.
+Revisit this decision if the workshop adds users or persistence. Related: [security review](../../security/playlist-security-review.md) finding on thread safety.

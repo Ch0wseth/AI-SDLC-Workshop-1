@@ -1059,7 +1059,7 @@ Expected result:
 - ADR Creator drafts a decision record with context, decision, and consequences, then asks you to confirm it.
 - When you confirm, it saves the final ADR as a numbered file in `docs\planning\adrs`, for example `0001-in-memory-playlist-state.md`. Keep it there; Step 3 commits it.
 
-A sample ADR is in `solutions\afternoon-2\docs\decisions\0001-in-memory-playlist-state.md`.
+A sample ADR is in `solutions\afternoon-2\docs\planning\adrs\0001-in-memory-playlist-state.md`.
 
 ### Step 2: Review the change with the Code Review agent
 

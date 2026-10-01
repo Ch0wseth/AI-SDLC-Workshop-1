@@ -46,7 +46,7 @@ Release horizon: one workshop level. Primary success metric: the API and UI test
 
 ## Design Decisions
 
-- **DD-001**: Keep the single playlist in memory in the API process. See [ADR 0001](../decisions/0001-in-memory-playlist-state.md).
+- **DD-001**: Keep the single playlist in memory in the API process. See [ADR 0001](../planning/adrs/0001-in-memory-playlist-state.md).
 - **DD-002**: Use the existing `/api` minimal API conventions and camelCase JSON.
 
 ## Product Goals
