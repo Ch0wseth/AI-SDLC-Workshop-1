@@ -88,14 +88,15 @@ Principles to keep in mind:
 ### What comes next
 
 **AI SDLC with GitHub and GitHub Copilot** reuses these primitives at team and organization scale: HVE-Core for Design Thinking and the Research, Plan, Implement, Review (RPI) workflow, APM to version and govern agent packages, GitHub agentic workflows for backlog automation, and controlled delegation to Copilot cloud agent.
+
 ## How to use this guide
 
 You will work in two browser tabs:
 
-1. **This guide**: agenda, timeboxes, and the extra levels 7 to 9.
+1. **This guide**: the order of the blocks, links to the upstream lab, and the extra Levels 7 to 9.
 2. **The upstream lab**: the step-by-step content for Levels 1 to 6.
 
-When a section below says **Open upstream Level N**, switch to the lab tab, complete that level, then come back here for the next timebox.
+When a section below says **Open upstream Level N**, switch to the lab tab, complete that level, then come back here for the next section.
 
 | Upstream level | Link |
 | -------------- | ---- |
@@ -106,36 +107,6 @@ When a section below says **Open upstream Level N**, switch to the lab tab, comp
 | Level 4: Copilot Plan & Implement | [step 4](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=4) |
 | Level 5: Advanced Copilot Concepts | [step 5](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=5) |
 | Level 6: Leveraging agents on the platform | [step 6](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=6) |
-
-<div class="info" data-title="Pinning the upstream content">
-
-> This guide was checked against GHCopilotHoL commit `c7f7f94` and gh-copilot-demo commit `f935d88`. If the upstream lab changes before your session, facilitators can review the diff since those commits and adjust the timeboxes below.
-
-</div>
-
-## Agenda
-
-| Time | Block | Source |
-| ---- | ----- | ------ |
-| 0:00 | Setup: fork gh-copilot-demo, open Codespaces or local | This guide + upstream introduction |
-| 0:15 | Level 1: Code Completion | Upstream |
-| 0:40 | Level 2: Copilot Chat | Upstream |
-| 1:10 | Level 3: Copilot Agent Basics | Upstream |
-| 1:30 | Level 4: Copilot Plan & Implement | Upstream |
-| 1:55 | Break | - |
-| 2:10 | Level 5: Advanced Copilot Concepts (instructions, prompts, MCP) | Upstream |
-| 2:35 | Level 6: Copilot cloud agent (coding agent) and custom agents on github.com | Upstream |
-| 2:55 | Level 7: Agent Skills | This guide |
-| 3:10 | Level 8: Copilot CLI | This guide |
-| 3:35 | Level 9: Agent Plugins and marketplaces | This guide |
-| 3:50 | Recap | This guide |
-| 4:00 | End | - |
-
-<div class="tip" data-title="Running late?">
-
-> Upstream Levels 1 to 6 are the core. If you fall behind, skip the upstream side quests first, then shorten Level 9 to the CLI plugin commands only.
-
-</div>
 
 ## 🚀 Dev Environment Setup
 
@@ -202,8 +173,6 @@ Install the tools yourself, then clone your fork:
 
 # Setup: Prepare your workshop environment
 
-You have **15 minutes** for this setup.
-
 ## Topic
 
 You will fork the upstream demo application, open it in Codespaces or locally, and check that Copilot is signed in.
@@ -247,15 +216,13 @@ Expected result:
 
 # Part 1: GitHub Copilot hands-on lab, Levels 1 to 4
 
-You have **100 minutes** for this part.
-
 ## Topic
 
 You will learn completions, Chat, agent mode, and the plan-then-implement loop using the upstream lab.
 
 ## Open upstream Level 1: Code Completion
 
-You have **25 minutes**. Open [Level 1](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=1).
+Open [Level 1](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=1).
 
 Focus on:
 - Ghost text and accepting suggestions.
@@ -266,7 +233,7 @@ The side quests on commit messages and documentation are optional.
 
 ## Open upstream Level 2: Copilot Chat
 
-You have **30 minutes**. Open [Level 2](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=2).
+Open [Level 2](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=2).
 
 Focus on:
 - Chat participants, context variables, and slash commands.
@@ -274,7 +241,7 @@ Focus on:
 
 ## Open upstream Level 3: Copilot Agent Basics
 
-You have **20 minutes**. Open [Level 3](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=3).
+Open [Level 3](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=3).
 
 Focus on:
 - When agent mode edits files and runs commands.
@@ -282,7 +249,7 @@ Focus on:
 
 ## Open upstream Level 4: Copilot Plan & Implement
 
-You have **25 minutes**. Open [Level 4](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=4).
+Open [Level 4](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=4).
 
 Focus on:
 - Planning before implementing.
@@ -307,15 +274,11 @@ git add -A; git commit -m "Complete upstream Levels 1 to 4"
 
 # Break
 
-You have **15 minutes** for this break.
-
 Before the break, make sure your working tree is committed. After the break, you will move to repository-level customization, MCP, and agents on github.com.
 
 ---
 
 # Part 2: GitHub Copilot hands-on lab, Levels 5 and 6
-
-You have **45 minutes** for this part.
 
 ## Topic
 
@@ -323,7 +286,7 @@ You will customize Copilot for the repository and delegate work to agents on git
 
 ## Open upstream Level 5: Advanced Copilot Concepts
 
-You have **25 minutes**. Open [Level 5](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=5).
+Open [Level 5](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=5).
 
 Focus on:
 - **Custom Instructions**: `.github/copilot-instructions.md` and path-specific instructions.
@@ -334,7 +297,7 @@ Prompt engineering techniques are a short read; skim them if time is tight.
 
 ## Open upstream Level 6: Leveraging agents on the platform
 
-You have **20 minutes**. Open [Level 6](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=6).
+Open [Level 6](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=6).
 
 Focus on:
 - Assigning an issue to Copilot cloud agent and reviewing its pull request.
@@ -358,8 +321,6 @@ git add -A; git commit -m "Complete upstream Levels 5 and 6"
 ---
 
 # Level 7: Agent Skills
-
-You have **15 minutes** for this level.
 
 ## Topic
 
@@ -440,8 +401,6 @@ git add -A; git commit -m "Add albums-api endpoint skill"
 ---
 
 # Level 8: Copilot CLI
-
-You have **25 minutes** for this level.
 
 ## Topic
 
@@ -626,8 +585,6 @@ git add -A; git commit -m "Add artist filter endpoint from Copilot CLI"
 
 # Level 9: Agent Plugins and marketplaces
 
-You have **15 minutes** for this level.
-
 ## Topic
 
 You will learn what Agent Plugins bundle, browse a plugin marketplace from the CLI and from VS Code, install and inspect one plugin, then uninstall it. Official docs:
@@ -727,8 +684,6 @@ Expected result:
 
 # Recap: Choose the right primitive
 
-You have **10 minutes** for this recap.
-
 ## What you practiced
 
 Today you used GitHub Copilot as a layered toolchain rather than one feature. You started with completions and Chat, moved to agent mode and plan-then-implement, stored durable guidance in instructions and prompt files, connected tools through MCP, delegated to Copilot cloud agent, packaged know-how as an Agent Skill, reused it from the CLI, and inspected how plugins bundle everything for sharing.
@@ -763,4 +718,4 @@ Continue with [AI SDLC with GitHub and GitHub Copilot](../afternoon-2/workshop.m
 
 ## Help us improve this Workshop
 
-If you have feedback on this guide, open an issue in [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop/issues). For feedback on the upstream lab, use [Philess/GHCopilotHoL](https://github.com/Philess/GHCopilotHoL/issues).
+If you have feedback on this guide, open an issue in [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop/issues). For feedback on the upstream lab, use [Philess/GHCopilotHoL](https://github.com/Philess/GHCopilotHoL/issues). To propose a fix, see [CONTRIBUTING.md](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/CONTRIBUTING.md).

@@ -221,8 +221,6 @@ If a command is missing:
 
 # Level 0: Setup and starting point
 
-You have **10 minutes** for this level.
-
 ## Topic
 
 You will verify the starter repository, run both test suites, confirm that the playlist capability is not implemented yet, and create a clean checkpoint.
@@ -326,8 +324,6 @@ Expected result:
 
 # Level 1: HVE orientation and HVE-Core CLI plugin
 
-You have **15 minutes** for this level.
-
 ## Topic
 
 You will install HVE-Core as a personal Copilot CLI plugin and identify the HVE agents used later: DT Coach, RPI Agent, Backlog Manager, Accessibility Reviewer, and Accessibility Planner.
@@ -423,8 +419,6 @@ Expected result:
 
 # Level 2: Design Thinking with DT Coach
 
-You have **35 minutes** for this level.
-
 ## Topic
 
 You will use HVE-Core DT Coach to frame the feature. To keep the room aligned, the inputs and decisions are fixed. The output should identify one capability: browse tracks and add a track to a single in-memory playlist. Duplicate adds are rejected. An empty-state is shown.
@@ -514,7 +508,7 @@ Expected result:
 
 # Level 3: RPI implementation loop
 
-You have **80 minutes** for this level, including the break that follows. RPI means **Research, Plan, Implement, Review**. HVE-Core also documents a follow-up stage in the RPI Agent description, but this workshop walks the four core phases.
+RPI means **Research, Plan, Implement, Review**. HVE-Core also documents a follow-up stage in the RPI Agent description, but this workshop walks the four core phases.
 
 ## Topic
 
@@ -795,7 +789,7 @@ git add -A; git commit -m "Review playlist slice"
 
 # Break
 
-You have **10 minutes** for this break. Before leaving your machine, make sure the implementation is committed and tests pass.
+Before leaving your machine, make sure the implementation is committed and tests pass.
 
 Run:
 
@@ -816,8 +810,6 @@ Expected result:
 ---
 
 # Level 4: APM, policy and plugin marketplace
-
-You have **40 minutes** for this level.
 
 ## Topic
 
@@ -858,12 +850,6 @@ Expected result:
 - `apm.lock.yaml` is created.
 - The lockfile records the resolved commit.
 - The install may take a few minutes.
-
-<div class="tip" data-title="Timing fallback">
-
-> If the room is short on time, start `apm install` first, then explain the lockfile and policy while it runs. If a participant is blocked, use the committed solution manifest as the reference and let the facilitator continue the explanation.
-
-</div>
 
 ### Step 3: Inspect the lockfile
 
@@ -1097,8 +1083,6 @@ Expected result:
 
 # Level 5: Agentic workflows with gh-aw
 
-You have **40 minutes** for this level.
-
 ## Topic
 
 You will install gh-aw, initialize the repository, copy two workflow source files, compile them to `.lock.yml`, and run the daily backlog workflow. You will then inspect the accessibility workflow pattern.
@@ -1317,8 +1301,6 @@ Expected result:
 
 # Level 6: Coding Agent delegation
 
-You have **15 minutes** for this level.
-
 ## Topic
 
 You will create one follow-up issue from the feature form and assign it to GitHub Copilot Coding Agent using the RPI Agent custom agent if it is available on the default branch.
@@ -1442,8 +1424,6 @@ Expected result:
 ---
 
 # Recap: Governed agentic SDLC
-
-You have **5 minutes** for this recap.
 
 ## Topic
 
@@ -1611,4 +1591,4 @@ Expected result:
 
 ## Help us improve this Workshop
 
-If you faced any challenge or bug running this workshop, please let us know. Your help will be invaluable in making this workshop better, especially as we try to keep it up to date with fast-moving Copilot capabilities. [Report any problem here.](https://github.com/Justrebl/AI-SDLC-Workshop/issues)
+If you faced any challenge or bug running this workshop, please let us know. Your help will be invaluable in making this workshop better, especially as we try to keep it up to date with fast-moving Copilot capabilities. [Report any problem here.](https://github.com/Justrebl/AI-SDLC-Workshop/issues) To propose a fix, see [CONTRIBUTING.md](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/CONTRIBUTING.md).

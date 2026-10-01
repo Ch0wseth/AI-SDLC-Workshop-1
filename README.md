@@ -10,7 +10,8 @@ This is a two-afternoon, fully hands-on workshop (4 hours each) that moves from 
 Supporting material:
 
 - [AI SDLC with GitHub and GitHub Copilot prerequisites](docs/afternoon-2/prerequisites.md)
-- [Facilitator runbook](docs/afternoon-2/facilitator-runbook.md)
+- [Tutor guide](docs/tutor.md): timing, pre-flight, risks and messaging guardrails
+- [Contributing](CONTRIBUTING.md): writing rules, upstream pins and validation
 - [AI SDLC with GitHub and GitHub Copilot solution files](solutions/afternoon-2)
 - [Workshop tester](tests/workshop/afternoon-2/README.md): an agentic workflow that replays the full AI SDLC with GitHub and GitHub Copilot lab in a throwaway Codespace on every change to `main` and files an issue when a step fails
 
@@ -41,7 +42,7 @@ If you create your own copy of this template, replace `justrebl/ai-sdlc-workshop
 
 ## Publishing on MOAW
 
-The workshop files follow the [MOAW contributing conventions](https://github.com/microsoft/moaw/blob/main/CONTRIBUTING.md). Preview them at `https://moaw.dev/workshop/gh:Justrebl/AI-SDLC-Workshop/main/docs/afternoon-2/`.
+The guides follow the MOAW conventions. See [CONTRIBUTING.md](CONTRIBUTING.md) for preview URLs, writing rules and validation.
 
 ## Feedback
 
