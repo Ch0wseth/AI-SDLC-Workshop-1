@@ -64,6 +64,7 @@ Rules for the tracks:
 - Only `/backlog-execute` writes to GitHub. Make attendees read the Functional Planner handoff before they confirm.
 - Present the HVE-Core security agents as assistive only. They never replace SAST, DAST, SCA, or qualified human review.
 - The gh-aw label-gated delegation (`security-review-delegation.md`) needs a fine-grained PAT stored as `GH_AW_AGENT_TOKEN`. Use your own sandbox and delete the PAT afterwards. Do not ask attendees to create one.
+- Hand-written reference outputs for all three tracks (BRD, PRD, backlog handoff, ADR, security report) are in [solutions/afternoon-2/docs](../solutions/afternoon-2/docs/README.md). Use them for demos, or as a fallback when an agent run fails.
 
 ## Pre-flight (day before)
 

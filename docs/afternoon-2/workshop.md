@@ -635,6 +635,12 @@ Expected result:
 
 Open `handoff.md`. Check that it lists one parent issue, four sub-issues, and acceptance criteria that match the PRD.
 
+<div class="tip" data-title="Reference outputs">
+
+> To compare your BRD, PRD, and handoff with a hand-written sample, open `solutions\afternoon-2\docs\project-planning`. The samples show the expected shape and scope, not the exact text an agent produces.
+
+</div>
+
 ### Step 6: Create the issues
 
 Use the Functional Planner **Execute Hierarchy** handoff, or select **Backlog Manager**. Copy paste the following prompt, replacing `<owner>/<repo>`:
@@ -1052,6 +1058,8 @@ Keep it short and ask at most two clarifying questions.
 Expected result:
 - ADR Creator drafts a decision record with context, decision, and consequences, then asks you to confirm it.
 - When you confirm, it saves the final ADR as a numbered file in `docs\planning\adrs`, for example `0001-in-memory-playlist-state.md`. Keep it there; Step 3 commits it.
+
+A sample ADR is in `solutions\afternoon-2\docs\decisions\0001-in-memory-playlist-state.md`.
 
 ### Step 2: Review the change with the Code Review agent
 
@@ -1745,6 +1753,8 @@ When the pull request is ready, check:
 - Each finding points to a file and a line that you can open.
 - The report lists the skills it applied.
 - You verify at least one finding yourself and mark false positives.
+
+A sample report with illustrative findings is in `solutions\afternoon-2\docs\security\playlist-security-review.md`. Use it to compare the shape, not the findings.
 
 Expected result:
 - Nothing merges without a human decision.
