@@ -12,6 +12,7 @@ The attendee guides (`docs/afternoon-*/workshop.md`) only contain what attendees
 | `docs/afternoon-2/workshop.md` | AI SDLC with GitHub and GitHub Copilot |
 | `docs/prerequisites.md` | Shared prerequisites, network allowlist, organization settings and pre-D-Day checklists for both afternoons |
 | `docs/before-d-day-*.md` | Self-contained pre-D-Day checklists for each delivery option (Codespaces, dev container, local tools). Keep them consistent with `docs/prerequisites.md` |
+| `docs/kick-off-call-checklist.md` | Step-by-step organization checklist for the kick-off call; keep consistent with `docs/prerequisites.md` section 7 |
 | `docs/tutor.md` | Timing, pre-flight, risks and messaging guardrails for tutors |
 | `docs/afternoon-*/assets/` | Screenshots and their placeholder lists |
 | `solutions/afternoon-2/` | Reference files for blocked attendees (`apm.yml`, policy, workflows) |
