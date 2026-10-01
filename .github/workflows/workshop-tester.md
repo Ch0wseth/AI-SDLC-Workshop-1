@@ -46,11 +46,13 @@ jobs:
       SANDBOX_OWNER: ${{ vars.WORKSHOP_TESTER_OWNER || github.repository_owner }}
       SANDBOX_NAME: workshop-tester-${{ github.run_id }}-${{ github.run_attempt }}
       CODESPACE_MACHINE: ${{ vars.WORKSHOP_TESTER_MACHINE || 'standardLinux32gb' }}
-      OUT_DIR: ${{ runner.temp }}/lab-run
       SOURCE_REPO: ${{ github.repository }}
       SOURCE_SHA: ${{ github.sha }}
       RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
+      # The runner context is not available in job-level env, so OUT_DIR is set here.
+      - name: Set results directory
+        run: echo "OUT_DIR=${RUNNER_TEMP}/lab-run" >> "$GITHUB_ENV"
       - uses: actions/checkout@v5
         with:
           persist-credentials: false
