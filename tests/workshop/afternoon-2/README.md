@@ -85,6 +85,11 @@ See the official GitHub billing documentation for current rates; this repository
 - Level 0 Step 1 offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
 - Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Coding Agent PR JSON, the Copilot code review JSON).
 - The Level 6 push protection demo is always recorded as skipped. It needs GitHub Secret Protection on the private sandbox, plus settings-UI steps (custom pattern and dry run) that the tester does not automate.
+- The extended tracks are always recorded as skipped:
+  - **Level 2 Product Manager track:** multi-turn agent Q&A, and a human confirms before `/backlog-execute` writes issues.
+  - **Level 3 Tech Lead extension:** human-gated agents.
+  - **Level 5 security delegation:** a second Copilot pull request would collide with the Level 6 PR detection, and the gh-aw variant needs a `GH_AW_AGENT_TOKEN` PAT.
+  - The new text prompts in these tracks deliberately avoid the first lines and leads that `extract-prompts.mjs` matches, so they do not replace the core prompts.
 
 ## Run the lab script by hand
 
