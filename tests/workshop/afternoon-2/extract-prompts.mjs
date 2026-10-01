@@ -31,6 +31,7 @@ const wanted = {
   'rpi-plan': byFirstLine('/rpi-plan'),
   'rpi-implement': byFirstLine('/rpi-implement'),
   'rpi-review': byFirstLine('/rpi-review'),
+  'issue-title': byLead('Title:'),
   'issue-problem': byLead('Problem statement:'),
   'issue-outcome': byLead('Expected outcome:'),
   'issue-acceptance': byLead('Acceptance criteria:'),

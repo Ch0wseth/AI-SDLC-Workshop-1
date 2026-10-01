@@ -16,7 +16,7 @@ Supporting material:
 
 ## Starter application
 
-Afternoon 2 uses this repository as a template. It is a small music catalog mono-repo:
+In Afternoon 2, each attendee works in their own copy of this repository, created from the template or by copying it (Level 0 Step 1). It is a small music catalog mono-repo:
 
 - `src/api` is a .NET 10 minimal API. It exposes `GET /api/hello` and ships 12 synthetic tracks in `Data/tracks.json`.
 - `src/front` is a React, TypeScript and Vite front end.

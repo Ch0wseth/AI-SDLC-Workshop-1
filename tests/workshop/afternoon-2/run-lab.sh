@@ -242,22 +242,32 @@ step l4-settings-repo "Level 4" "Replace YOUR-ORG/YOUR-REPO in settings.json" tr
 grep -q "$SANDBOX_REPO" .github/copilot/settings.json && check "settings.json points to the sandbox repository" true || check "settings.json points to the sandbox repository" false
 finish_step
 
-# The lab says "after you push to your own repository" but the first push happens in Level 5.
-step l4-marketplace-add "Level 4" "Register the team marketplace (before any push, as the lab orders it)" literal 300 \
-  "copilot plugin marketplace add $SANDBOX_REPO"
-L4_MARKETPLACE_OK=$STEP_CODE
-finish_step any
-step l4-marketplace-browse "Level 4" "Browse the team marketplace" literal 300 'copilot plugin marketplace browse music-catalog-marketplace'
-finish_step any
-step l4-plugin-install "Level 4" "Install music-catalog-conventions" literal 300 'copilot plugin install music-catalog-conventions@music-catalog-marketplace'
-finish_step any
+# push_fallback <step-id>: retry a rejected push with the tester token so later levels can still run.
+push_fallback() {
+  if [ "$STEP_CODE" -ne 0 ]; then
+    note "git push with the Codespace credential failed; retrying with the tester token to continue the run"
+    git -c credential.helper= -c credential.helper='!gh auth git-credential' push >> "$RESULTS_DIR/steps/$1.log" 2>&1 \
+      && check "push succeeded with the tester token (fallback)" true || check "push succeeded with the tester token (fallback)" false
+  fi
+}
 
-step l4-commit "Level 4" "Commit governed HVE and marketplace setup" translated 60 \
-  'git status; git add apm.yml apm.lock.yaml apm-policy.yml .github/plugin/marketplace.json .github/copilot/settings.json plugins/music-catalog-conventions && git commit -m "Add governed HVE and plugin marketplace setup"'
+step l4-commit "Level 4" "Commit and push governed HVE and marketplace setup" translated 300 \
+  'git status; git add apm.yml apm.lock.yaml apm-policy.yml .github plugins/music-catalog-conventions && git commit -m "Add governed HVE and plugin marketplace setup" && git push'
+push_fallback l4-commit
 git ls-files --error-unmatch .github/workflows/daily-backlog.lock.yml >/dev/null 2>&1 \
   && check "no workflow lock files committed in Level 4" false || check "no workflow lock files committed in Level 4" true
+gh api "repos/$SANDBOX_REPO/contents/.github/plugin/marketplace.json" --jq .path >/dev/null 2>&1 \
+  && check "marketplace.json is on the default branch" true || check "marketplace.json is on the default branch" false
 untracked=$(git status --porcelain | head -n 30)
-[ -n "$untracked" ] && note "left uncommitted after Level 4 (APM-deployed files are not in the lab's git add list): $(echo "$untracked" | tr '\n' ' ')"
+[ -n "$untracked" ] && note "left uncommitted after Level 4: $(echo "$untracked" | tr '\n' ' ')"
+finish_step
+
+step l4-marketplace-add "Level 4" "Register the team marketplace" literal 300 \
+  "copilot plugin marketplace add $SANDBOX_REPO"
+finish_step
+step l4-marketplace-browse "Level 4" "Browse the team marketplace" literal 300 'copilot plugin marketplace browse music-catalog-marketplace'
+finish_step
+step l4-plugin-install "Level 4" "Install music-catalog-conventions" literal 300 'copilot plugin install music-catalog-conventions@music-catalog-marketplace'
 finish_step
 
 # ---------------------------------------------------------------- Level 5
@@ -284,23 +294,23 @@ step l5-review-diff "Level 5" "Review generated files without editing" translate
 finish_step
 
 step l5-commit "Level 5" "Commit workflow sources and locks" translated 60 \
-  'git status; git add .github/workflows/daily-backlog.md .github/workflows/daily-backlog.lock.yml .github/workflows/a11y-review.md .github/workflows/a11y-review.lock.yml && git commit -m "Add agentic backlog and accessibility workflows"'
+  'git status; git add -A && git commit -m "Add agentic backlog and accessibility workflows"'
+for w in daily-backlog a11y-review; do
+  git ls-files --error-unmatch ".github/workflows/$w.lock.yml" >/dev/null 2>&1 \
+    && check "$w.lock.yml committed" true || check "$w.lock.yml committed" false
+done
 finish_step
 
 step l5-push "Level 5" "Push your branch (Codespace credentials)" literal 300 'git push'
-if [ "$STEP_CODE" -ne 0 ]; then
-  note "git push with the Codespace credential failed; retrying with the tester token to continue the run"
-  git -c credential.helper= -c credential.helper='!gh auth git-credential' push >> "$RESULTS_DIR/steps/l5-push.log" 2>&1 \
-    && check "push succeeded with the tester token (fallback)" true || check "push succeeded with the tester token (fallback)" false
-fi
+push_fallback l5-push
 finish_step
 
-if [ "$L4_MARKETPLACE_OK" -ne 0 ]; then
-  step l5-retry-marketplace "Level 4 (retry)" "Register, browse and install the team marketplace after the first push" literal 600 \
-    "copilot plugin marketplace add $SANDBOX_REPO && copilot plugin marketplace browse music-catalog-marketplace && copilot plugin install music-catalog-conventions@music-catalog-marketplace"
-  note "Level 4 marketplace registration failed before the push; this retry shows whether ordering is the cause"
-  finish_step
-fi
+step l5-seed-issues "Level 5" "Seed the backlog" translated 120 \
+  "gh issue create -R $SANDBOX_REPO --title 'Show track count in the playlist panel' --body 'Display the number of tracks currently in the in-memory playlist.' && gh issue create -R $SANDBOX_REPO --title 'Add an API test for an unknown track id' --body 'Cover adding an unknown track id to the playlist with an xUnit test.'"
+note "-R added so gh targets the sandbox repository explicitly"
+seeded=$(gh issue list -R "$SANDBOX_REPO" --state open --json number --jq 'length' 2>/dev/null)
+[ "${seeded:-0}" -ge 2 ] && check "at least two open issues" true "open=$seeded" || check "at least two open issues" false "open=${seeded:-unknown}"
+finish_step
 
 # wait_aw_run <step-id> <workflow> <title>
 wait_aw_run() {
@@ -364,8 +374,8 @@ finish_step
 # ---------------------------------------------------------------- Level 6
 P=$RESULTS_DIR/prompts
 step l6-create-issue "Level 6" "Create the follow-up issue from the feature form" emulated 120 \
-  "printf '### Problem statement\n\n%s\n\n### Expected outcome\n\n%s\n\n### Acceptance criteria\n\n%s\n\n### Area\n\n%s\n\n### Out of scope\n\n%s\n' \"\$(cat $P/issue-problem.txt)\" \"\$(cat $P/issue-outcome.txt)\" \"\$(cat $P/issue-acceptance.txt)\" \"\$(cat $P/issue-area.txt)\" \"\$(cat $P/issue-out-of-scope.txt)\" > $RESULTS_DIR/issue-body.md && gh issue create -R $SANDBOX_REPO --title '[Feature]: Remove a track from the playlist' --label enhancement --body-file $RESULTS_DIR/issue-body.md"
-note "web issue form replaced by gh issue create with the same field labels; the lab does not specify an issue title, so the tester used '[Feature]: Remove a track from the playlist'"
+  "printf '### Problem statement\n\n%s\n\n### Expected outcome\n\n%s\n\n### Acceptance criteria\n\n%s\n\n### Area\n\n%s\n\n### Out of scope\n\n%s\n' \"\$(cat $P/issue-problem.txt)\" \"\$(cat $P/issue-outcome.txt)\" \"\$(cat $P/issue-acceptance.txt)\" \"\$(cat $P/issue-area.txt)\" \"\$(cat $P/issue-out-of-scope.txt)\" > $RESULTS_DIR/issue-body.md && gh issue create -R $SANDBOX_REPO --title \"\$(cat $P/issue-title.txt)\" --label enhancement --body-file $RESULTS_DIR/issue-body.md"
+note "web issue form replaced by gh issue create with the lab's title and the same field labels"
 ISSUE_URL=$(grep -Eo 'https://github.com/[^ ]+/issues/[0-9]+' "$RESULTS_DIR/steps/l6-create-issue.log" | tail -n1)
 ISSUE_NUMBER=${ISSUE_URL##*/}
 [ -n "$ISSUE_NUMBER" ] && check "issue created" true "$ISSUE_URL" || check "issue created" false

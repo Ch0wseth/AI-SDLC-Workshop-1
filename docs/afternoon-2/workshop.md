@@ -46,7 +46,7 @@ These are the minimal pre-requisites to run this workshop locally with the start
 
 |                                  |                                                                                                           |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Workshop repository              | Create a fresh repository from the [workshop template](https://github.com/Justrebl/AI-SDLC-Workshop). Afternoon 1 used a different demo app. |
+| Workshop repository              | Your own copy of the [workshop repository](https://github.com/Justrebl/AI-SDLC-Workshop), created in Level 0 Step 1. Afternoon 1 used a different demo app. |
 | GitHub account with Copilot licence | Business or Enterprise recommended; Coding Agent, plugins, and gh-aw may need administrator enablement. |
 | VS Code latest + GitHub Copilot Chat | Required for local agent work. Install the HVE extension only if you use the VS Code alternative.       |
 | Git                              | Required for checkpoint commits and for APM dependency resolution.                                        |
@@ -85,9 +85,36 @@ You will verify the starter repository, run both test suites, confirm that the p
 
 ## Validate the starter
 
-### Step 1: Open the repository root
+### Step 1: Create your workshop repository
 
-Open the repository that you created from the workshop template. The expected layout is:
+You need a repository that you own: Level 4 pushes a marketplace, Level 5 runs workflows, and Level 6 assigns issues to Coding Agent. Replace `my-music-catalog` with any name.
+
+If your facilitator marked the workshop repository as a template, run:
+
+```powershell
+gh repo create my-music-catalog --private --template Justrebl/AI-SDLC-Workshop --clone
+cd my-music-catalog
+```
+
+Otherwise, copy it with a fresh history:
+
+```powershell
+git clone https://github.com/Justrebl/AI-SDLC-Workshop my-music-catalog
+cd my-music-catalog
+Remove-Item -Recurse -Force .git
+git init -b main; git add -A; git commit -m "Workshop starter"
+gh repo create my-music-catalog --private --source . --remote origin --push
+```
+
+Expected result:
+- `gh repo view` shows your own repository with a `main` branch.
+- You can open it locally or in a Codespace.
+
+> The copy contains files under `.github\workflows`. If the push is rejected for missing the `workflow` scope, follow the tip in Level 5 "Push your branch", then run `git push -u origin main`.
+
+### Step 2: Open the repository root
+
+Open the repository root. The expected layout is:
 
 ```text
 src\front
@@ -105,7 +132,7 @@ Expected result:
 - `src\front\src\App.tsx` fetches `/api/hello` only.
 - `src\api\Data\tracks.json` contains 12 synthetic tracks and is not wired to an endpoint yet.
 
-### Step 2: Run API tests
+### Step 3: Run API tests
 
 Run from the repository root:
 
@@ -117,7 +144,7 @@ Expected result:
 - xUnit tests pass.
 - The existing hello endpoint still works.
 
-### Step 3: Run front-end tests
+### Step 4: Run front-end tests
 
 Run:
 
@@ -130,7 +157,7 @@ Expected result:
 - Vitest passes.
 - The existing test verifies the hello message.
 
-### Step 4: Create a baseline checkpoint
+### Step 5: Create a baseline checkpoint
 
 Run from the repository root:
 
@@ -859,26 +886,12 @@ Expected result:
 - The skill says API state stays in memory.
 - The test-writer agent writes tests only.
 
-### Step 3: Register and browse the marketplace in Copilot CLI
+### Step 3: Prepare the marketplace settings
 
-Replace `YOUR-ORG/YOUR-REPO` in `.github\copilot\settings.json` after you push to your own repository. Then run:
-
-```powershell
-copilot plugin marketplace add <owner>/<repo>
-copilot plugin marketplace browse music-catalog-marketplace
-copilot plugin install music-catalog-conventions@music-catalog-marketplace
-```
+Replace `YOUR-ORG/YOUR-REPO` in `.github\copilot\settings.json` with your repository, for example `octo-user/my-music-catalog`. Copilot CLI registers a GitHub marketplace from the remote repository, so you register it after the commit checkpoint pushes these files.
 
 Expected result:
-- The marketplace can be registered from the repository.
-- The plugin appears as `music-catalog-conventions`.
-- The install command uses the exact marketplace name from `marketplace.json`.
-
-<div class="warning" data-title="Configuration versus install">
-
-> `.github\copilot\settings.json` is repository configuration for known and enabled plugins. The CLI marketplace commands install into a user's Copilot environment. Managed organization policy may override local enable or disable commands.
-
-</div>
+- `extraKnownMarketplaces.music-catalog-marketplace.source.repo` points to your repository.
 
 ### Step 4: VS Code Agent Plugins view
 
@@ -894,19 +907,45 @@ Expected result:
 
 ![VS Code Agent Plugins recommended view](assets/l4-vscode-agentplugins.png)
 
-## Commit checkpoint
+## Commit and push checkpoint
 
 Run from the repository root:
 
 ```powershell
 git status
-git add apm.yml apm.lock.yaml apm-policy.yml .github\plugin\marketplace.json .github\copilot\settings.json plugins\music-catalog-conventions
+git add apm.yml apm.lock.yaml apm-policy.yml .github plugins\music-catalog-conventions
 git commit -m "Add governed HVE and plugin marketplace setup"
+git push
 ```
 
 Expected result:
 - The APM manifest, lockfile, policy, marketplace, settings, and local plugin are committed.
+- The HVE-Core agents, prompts, and skills that APM deployed under `.github` are committed too. Level 5 imports `.github\agents\backlog-manager.agent.md` and Level 6 selects the RPI Agent from the default branch.
 - No generated workflow lock files are committed in this level.
+- `git status` is clean and your default branch on GitHub contains the marketplace.
+
+## Register the team marketplace
+
+### Step 1: Register, browse, and install in Copilot CLI
+
+Run, replacing `<owner>/<repo>` with your repository:
+
+```powershell
+copilot plugin marketplace add <owner>/<repo>
+copilot plugin marketplace browse music-catalog-marketplace
+copilot plugin install music-catalog-conventions@music-catalog-marketplace
+```
+
+Expected result:
+- The marketplace is registered from the pushed repository.
+- The plugin appears as `music-catalog-conventions`.
+- The install command uses the exact marketplace name from `marketplace.json`.
+
+<div class="warning" data-title="Configuration versus install">
+
+> `.github\copilot\settings.json` is repository configuration for known and enabled plugins. The CLI marketplace commands install into a user's Copilot environment. Managed organization policy may override local enable or disable commands.
+
+</div>
 
 ---
 
@@ -1032,12 +1071,14 @@ Run:
 
 ```powershell
 git status
-git add .github\workflows\daily-backlog.md .github\workflows\daily-backlog.lock.yml .github\workflows\a11y-review.md .github\workflows\a11y-review.lock.yml
+git add -A
 git commit -m "Add agentic backlog and accessibility workflows"
 ```
 
+Review `git status` before `git add -A`: it should list only the files created by `gh aw init` and the workflow sources and locks.
+
 Expected result:
-- The source `.md` files and generated `.lock.yml` files are committed together.
+- The `gh aw init` outputs, the source `.md` files, and the generated `.lock.yml` files are committed together.
 
 ### Step 2: Push your branch
 
@@ -1050,7 +1091,25 @@ git push
 Expected result:
 - GitHub can see the workflow files.
 
-### Step 3: Run daily backlog
+<div class="tip" data-title="Push rejected for workflow files">
+
+> GitHub rejects pushes that change `.github\workflows` when your credential lacks the `workflow` scope. This can happen with some Codespaces or OAuth tokens. If it does, refresh your credential with `gh auth refresh --scopes workflow` and `gh auth setup-git`, then push again. In a Codespace, run `Remove-Item Env:GITHUB_TOKEN` (or `unset GITHUB_TOKEN` in bash) first so `gh` uses your own login.
+
+</div>
+
+### Step 3: Seed the backlog
+
+The daily backlog workflow noops when your repository has no open issues. Create two small issues so it has something to rank:
+
+```powershell
+gh issue create --title "Show track count in the playlist panel" --body "Display the number of tracks currently in the in-memory playlist."
+gh issue create --title "Add an API test for an unknown track id" --body "Cover adding an unknown track id to the playlist with an xUnit test."
+```
+
+Expected result:
+- `gh issue list` shows at least two open issues.
+
+### Step 4: Run daily backlog
 
 Run:
 
@@ -1065,7 +1124,7 @@ Expected result:
 
 ![Daily backlog summary issue](assets/l5-daily-backlog-issue.png)
 
-### Step 4: Read the summary issue
+### Step 5: Read the summary issue
 
 Open the created issue. Look for:
 
@@ -1129,6 +1188,12 @@ On GitHub, open **Issues > New issue > Feature request**. Use the repository iss
 ### Step 2: Fill the form
 
 Copy paste the following fixed content into the form fields.
+
+Title:
+
+```text
+[Feature]: Remove a track from the playlist
+```
 
 Problem statement:
 

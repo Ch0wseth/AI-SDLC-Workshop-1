@@ -43,6 +43,17 @@ The workflow is opt-in. It does nothing until the variable below is set, so fork
 | Secret | `WORKSHOP_TESTER_TOKEN` | User token for a dedicated tester account with scopes `repo`, `workflow`, `delete_repo`, `codespace`. It creates and deletes the sandbox, pushes workflow files, runs `gh aw run` and assigns the issue to the Coding Agent (the assignment API requires a user token, not a GitHub App or `GITHUB_TOKEN`). |
 | Secret | `WORKSHOP_TESTER_COPILOT_TOKEN` | Fine-grained PAT for the same account with the **Copilot Requests** permission, used by Copilot CLI and by the sandbox's gh-aw workflows. Falls back to `WORKSHOP_TESTER_TOKEN` if unset. |
 
+### Token permissions
+
+| Secret | Token type | Exact permissions | Why |
+| --- | --- | --- | --- |
+| `WORKSHOP_TESTER_TOKEN` | Classic PAT | `repo`, `workflow`, `delete_repo`, `codespace` | Create and push the private sandbox (including `.github/workflows`), create and delete the Codespace, delete the sandbox, run `gh aw run`, assign the issue to the Coding Agent. Fine-grained PATs cannot yet cover all of these for a user-owned sandbox created at run time. |
+| `WORKSHOP_TESTER_COPILOT_TOKEN` | Fine-grained PAT | Account permission **Copilot Requests: Read** only, no repository access | Copilot CLI inference and the sandbox gh-aw engine. |
+
+Store **both** tokens as **Actions** repository secrets (Settings > Secrets and variables > Actions). A Codespaces secret is not visible to the workflow; the orchestrator injects the Copilot token into the sandbox Codespace itself.
+
+Hardening: issue both tokens from a dedicated bot account, not a personal account; use a short expiry and rotate; keep `WORKSHOP_TESTER_ENABLED` unset until both secrets exist.
+
 The tester account also needs:
 
 - A Copilot license with Copilot CLI, the Copilot Coding Agent and agentic workflows allowed by its organization policy.
@@ -70,7 +81,7 @@ See the official GitHub billing documentation for current rates; this repository
 
 - Copilot CLI prompts are model output. The checks verify the lab's acceptance criteria (endpoints, status codes, tests, files), not identical code.
 - Whether `copilot -p` expands plugin prompts such as `/rpi-research`, and how `--continue` behaves with `-p`, depend on the Copilot CLI version. A failure there is reported as a tester limitation, not a lab defect.
-- The sandbox is a single-commit snapshot of the tested commit, not a repo created from a template, because this repository is not marked as a template. The validator reports this as a lab finding while Level 0 says "created from the workshop template".
+- Level 0 Step 1 offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
 - Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Coding Agent PR JSON).
 
 ## Run the lab script by hand
