@@ -89,7 +89,16 @@ The complete endpoint table is in [prerequisites, section 6](prerequisites.md#6-
 
 ## D-1 — Every attendee
 
-- [ ] **Afternoon 1:** fork [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then **Code → Codespaces → Create codespace on main**.
+- [ ] **Afternoon 1:** fork [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then **Code → Codespaces → Create codespace on main**. Wait until the `postCreateCommand` terminal reports that setup is complete.
+- [ ] **Afternoon 1:** run the sample app once, as the upstream lab requires at least the front end:
+
+  ```bash
+  cd albums-api && dotnet run          # API on port 3000, Swagger at /swagger
+  cd album-viewer && npm install && npm run dev   # second terminal; viewer on port 3001
+  ```
+
+  Open the forwarded port 3001 from the **Ports** view and check that albums are listed. If `copilot` is missing in this codespace, run `npm install -g @github/copilot`.
+- [ ] **Afternoon 1:** in the fork, **Settings → Copilot → Cloud agent** is available (used in Level 6). If it is not, ask the organization owner (see D-7).
 - [ ] **Afternoon 2:** **Use this template → Create a new repository** (private) from [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop), then create a codespace on it. The first start pulls the prebuilt image.
 - [ ] In each codespace terminal, sign in and check the tools:
 
@@ -115,4 +124,5 @@ The complete endpoint table is in [prerequisites, section 6](prerequisites.md#6-
 | The codespace starts but VS Code never connects | Tunnel or WebSockets blocked, or TLS inspection | Run the tunnel test; open the codespace in the browser; see the [connection troubleshooting guide](https://docs.github.com/en/codespaces/troubleshooting/troubleshooting-your-connection-to-github-codespaces). |
 | Copilot Chat says you have no access | Wrong account, or no seat | Check the **Accounts** menu and [github.com/settings/copilot](https://github.com/settings/copilot). |
 | `git push` of `.github/workflows/*` is rejected | The codespace token lacks the `workflow` scope | `unset GITHUB_TOKEN`, then `gh auth refresh --scopes workflow` and `gh auth setup-git`. |
+| Afternoon 1 viewer shows no albums | API not running on port 3000 | Start `albums-api` first, and check both ports in the **Ports** view. |
 | Spending limit reached | Codespaces budget is 0 or exhausted | Ask the billing owner to raise the Codespaces budget. |

@@ -108,7 +108,16 @@ Codespaces endpoints are **not** needed for this setup. The complete endpoint ta
 
 ## D-1 — Every attendee
 
-- [ ] **Afternoon 1:** fork [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), clone the fork, open it in VS Code, and run **Dev Containers: Reopen in Container**.
+- [ ] **Afternoon 1:** fork [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), clone the fork, open it in VS Code, and run **Dev Containers: Reopen in Container**. This container builds from a base image with no prebuilt layer, so the first build is the slow one: do it now, not on the day.
+- [ ] **Afternoon 1:** run the sample app once, as the upstream lab requires at least the front end:
+
+  ```bash
+  cd albums-api && dotnet run          # API on port 3000, Swagger at /swagger
+  cd album-viewer && npm install && npm run dev   # second terminal; viewer on port 3001
+  ```
+
+  Open `http://localhost:3001` and check that albums are listed. If `copilot` is missing in this container, run `npm install -g @github/copilot`.
+- [ ] **Afternoon 1:** in the fork, **Settings → Copilot → Cloud agent** is available (used in Level 6). If it is not, ask the organization owner (see D-7).
 - [ ] **Afternoon 2:** **Use this template → Create a new repository** (private) from [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop), clone it, and **Reopen in Container**.
 - [ ] In each container terminal, sign in and check the tools:
 
@@ -134,4 +143,5 @@ Codespaces endpoints are **not** needed for this setup. The complete endpoint ta
 | Image pull fails with a certificate error | TLS inspection | Ask for a `ghcr.io` exclusion, or trust the proxy root certificate in the engine. |
 | `npm ci` or `dotnet restore` fails inside the container | Proxy or certificate missing inside the container | Pass `HTTPS_PROXY`, and add the root certificate in the container (`NODE_EXTRA_CA_CERTS` for Node.js). |
 | Build is very slow or runs out of space | Disk space or VM resources | Free at least 15 GB; give the Docker or Podman VM at least 4 GB of memory. |
+| Afternoon 1 viewer shows no albums | API not running on port 3000 | Start `albums-api` first; check that ports 3000 and 3001 are forwarded. |
 | Copilot Chat says you have no access | Wrong account, or no seat | Check the **Accounts** menu and [github.com/settings/copilot](https://github.com/settings/copilot). |

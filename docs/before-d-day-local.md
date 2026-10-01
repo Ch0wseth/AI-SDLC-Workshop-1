@@ -67,7 +67,7 @@ Codespaces and container registry endpoints are **not** needed for this setup. T
    | --- | --- | --- | --- | --- |
    | Git | 2.40 or later | A1, A2 | [git-scm.com](https://git-scm.com/downloads) | `git --version` |
    | Node.js | 22 LTS | A1, A2 | [nodejs.org](https://nodejs.org/) | `node --version` |
-   | .NET SDK | 10.x for Afternoon 2; for Afternoon 1, the version in the upstream README | A1, A2 | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) | `dotnet --version` |
+   | .NET SDK | 8.x for Afternoon 1 (`albums-api`) and 10.x for Afternoon 2; both can be installed side by side | A1, A2 | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) | `dotnet --version` |
    | GitHub CLI | Latest | A1, A2 | [cli.github.com](https://cli.github.com/) | `gh --version` |
    | GitHub Copilot CLI | Latest | A1, A2 | `npm install -g @github/copilot` ([docs](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli)) | `copilot --version` |
    | APM CLI | Latest | A2 | [APM installation](https://microsoft.github.io/apm/getting-started/installation/) | `apm --version` |
@@ -92,7 +92,15 @@ Codespaces and container registry endpoints are **not** needed for this setup. T
 
 ## D-1 — Every attendee
 
-- [ ] **Afternoon 1:** fork [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), clone the fork, open it in VS Code, and follow the upstream README to restore its dependencies.
+- [ ] **Afternoon 1:** fork [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), clone the fork, open it in VS Code, and run the sample app once (the upstream lab requires at least the front end):
+
+  ```bash
+  cd albums-api && dotnet run          # API on port 3000, Swagger at /swagger
+  cd album-viewer && npm install && npm run dev   # second terminal; viewer on port 3001
+  ```
+
+  Open `http://localhost:3001` and check that albums are listed.
+- [ ] **Afternoon 1:** in the fork, **Settings → Copilot → Cloud agent** is available (used in Level 6). If it is not, ask the organization owner (see D-7).
 - [ ] **Afternoon 2:** **Use this template → Create a new repository** (private) from [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop), clone it, and run:
 
   ```bash
@@ -111,6 +119,8 @@ Codespaces and container registry endpoints are **not** needed for this setup. T
 | --- | --- | --- |
 | `copilot: command not found` | npm global folder not on `PATH` | Add the folder from `npm prefix -g` (Windows) or `$(npm prefix -g)/bin` to `PATH`, then open a new terminal. |
 | `dotnet test` fails to restore | Wrong SDK or NuGet blocked | `dotnet --list-sdks` must show 10.x; test `api.nuget.org`. |
+| `albums-api` fails with "framework not found" | .NET 8 SDK or runtime missing | Install the .NET 8 SDK next to .NET 10; `dotnet --list-sdks` must show both. |
+| Afternoon 1 viewer shows no albums, or a port is busy | API not running on 3000, or 3000/3001 already in use | Start `albums-api` first; stop whatever uses ports 3000 or 3001. |
 | `npm ci` fails with `UNABLE_TO_GET_ISSUER_CERT` | TLS inspection | Set `NODE_EXTRA_CA_CERTS` to the proxy root certificate, or ask for an exclusion. |
 | `gh extension install github/gh-aw` fails | GitHub CLI not signed in, or `github.com` downloads blocked | `gh auth status`; check access to GitHub release assets. |
 | `git push` of `.github/workflows/*` is rejected | Missing `workflow` scope | `gh auth refresh --scopes workflow`, then `gh auth setup-git`. |

@@ -141,7 +141,7 @@ Install the tools yourself. Afternoon 2 needs every row. Afternoon 1 needs only 
 | Git | 2.40 or later | A1, A2 | [git-scm.com](https://git-scm.com/downloads) | `git --version` |
 | VS Code + Copilot Chat | Latest stable | A1, A2 | [Section 3](#3-visual-studio-code-all-options) | Chat replies |
 | Node.js | 22 LTS | A1, A2 | [nodejs.org](https://nodejs.org/) | `node --version` |
-| .NET SDK | 10.x for Afternoon 2; for Afternoon 1, the version listed in the upstream README | A1, A2 | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) | `dotnet --version` |
+| .NET SDK | 8.x for Afternoon 1 (`albums-api`) and 10.x for Afternoon 2; both can be installed side by side | A1, A2 | [dotnet.microsoft.com](https://dotnet.microsoft.com/download) | `dotnet --version` |
 | GitHub CLI | Latest | A1, A2 | [cli.github.com](https://cli.github.com/) | `gh --version` |
 | GitHub Copilot CLI | Latest | A1, A2 | `npm install -g @github/copilot` ([docs](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli)) | `copilot --version` |
 | APM CLI | Latest | A2 | [APM installation](https://microsoft.github.io/apm/getting-started/installation/) | `apm --version` |

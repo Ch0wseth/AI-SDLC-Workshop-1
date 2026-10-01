@@ -101,7 +101,8 @@ The complete lists, with commands and owners, are in the per-option checklists a
 - [ ] A delivery option chosen and tested:
   - Codespaces: a test Codespace opens in the browser and in VS Code
   - Dev container: **Docker** or **Podman** works (`docker run --rm hello-world`, or Podman with `dev.containers.dockerPath` set to `podman` and an optional `docker` alias)
-  - Local tools: Git, Node.js 22, .NET 10, GitHub CLI, Copilot CLI, APM CLI and gh-aw all print a version
+  - Local tools: Git, Node.js 22, .NET 8 (Afternoon 1) and .NET 10 (Afternoon 2), GitHub CLI, Copilot CLI, APM CLI and gh-aw all print a version
+- [ ] Afternoon 1 fork of `Philess/gh-copilot-demo` runs: API on port 3000 and viewer on port 3001
 - [ ] Network checks pass from the network you will use on the day: `github.com`, `api.github.com`, `*.githubcopilot.com`, `*.github.dev`, the Codespaces tunnel at `global.rel.tunnels.api.visualstudio.com`, and `ghcr.io`
 
 **Organization or enterprise owners**
