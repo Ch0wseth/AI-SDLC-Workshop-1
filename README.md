@@ -1,30 +1,139 @@
 # Agentic SDLC with GitHub Copilot — Workshop
 
-This is a two-afternoon, fully hands-on workshop (4 hours each) that moves from individual GitHub Copilot primitives to a governed, agentic software development lifecycle.
+A two-afternoon, fully hands-on workshop (about 4 hours each). It starts with individual GitHub Copilot primitives and ends with a governed, agentic software development lifecycle: repository-owned packages, policy, structured Research → Plan → Implement → Review execution, automated backlog management, and controlled delegation to the Copilot cloud agent.
 
-| Afternoon | Focus | Content |
+> **Before D-Day:** every attendee and administrator must complete the [prerequisites and pre-D-Day checks](docs/prerequisites.md). Most setup problems on the day come from licences, organization policies, and corporate networks, and none of them can be fixed in the room.
+
+## At a glance
+
+| | Afternoon 1 — **GitHub Copilot Zero to Hero** | Afternoon 2 — **AI SDLC with GitHub and GitHub Copilot** |
 | --- | --- | --- |
-| 1 | Copilot primitives: runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds Agent Skills, Copilot CLI and plugins | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) |
-| 2 | HVE-Core, Design Thinking, RPI, APM and policy, plugin marketplace, agentic workflows, Coding Agent | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) |
+| Goal | Become fluent with Copilot primitives in VS Code, Copilot CLI and on github.com | Run a governed, agentic SDLC on a real repository |
+| Repository | Your fork of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo) | Your private copy of this template |
+| Lab guide | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) |
+| Audience | Developers new to Copilot or using only completions and chat | Developers, tech leads and platform engineers who completed Afternoon 1 or have equivalent experience |
 
-Supporting material:
+## Key concepts
 
-- [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md)
-- [Facilitator runbook](docs/afternoon-2/facilitator-runbook.md)
-- [Afternoon 2 solution files](solutions/afternoon-2)
-- [Workshop tester](tests/workshop/afternoon-2/README.md): an agentic workflow that replays the full Afternoon 2 lab in a throwaway Codespace on every change to `main` and files an issue when a step fails
+| Concept | In one sentence | Practised in |
+| --- | --- | --- |
+| **Copilot primitives** | Custom instructions, prompt files, custom agents, Agent Skills, MCP servers and hooks: the building blocks that shape what Copilot knows and can do | Afternoon 1, Levels 5–7 |
+| **Copilot CLI** | Copilot as a terminal agent that plans, edits and runs commands, with the same primitives as VS Code | Afternoon 1, Level 8; Afternoon 2 throughout |
+| **Plugins and marketplaces** | A plugin bundles primitives into one installable unit; a marketplace is a Git repository that lists plugins for discovery | Afternoon 1, Level 9; Afternoon 2, Levels 1 and 4 |
+| **HVE-Core** | Microsoft's open-source library of Copilot agents, prompts, instructions and skills for hypervelocity engineering, including the Design Thinking coach and the RPI workflow | Afternoon 2, Levels 1–3 |
+| **Design Thinking coach** | An HVE-Core agent that guides a team from a vague request to a scoped, user-centred problem statement before any code is written | Afternoon 2, Level 2 |
+| **RPI (Research → Plan → Implement → Review)** | A structured agentic workflow that separates investigation, planning, implementation and review into explicit phases with durable artifacts | Afternoon 2, Level 3 |
+| **APM (Agent Package Manager)** | A package manager for agent primitives: declare dependencies in `apm.yml`, pin them in a lockfile, and enforce policy and audits in CI | Afternoon 2, Level 4 |
+| **GitHub Agentic Workflows (gh-aw)** | Markdown-defined workflows compiled to GitHub Actions, where a coding agent runs on a schedule or on events, with safe outputs such as issues and comments | Afternoon 2, Level 5 |
+| **Copilot cloud agent** (formerly coding agent) | Assign an issue to Copilot; it works in a GitHub Actions environment and opens a pull request for human review | Afternoon 1, Level 6; Afternoon 2, Level 6 |
+| **Model selection and usage** | Explicit model choice versus Auto model selection, and how usage is measured differently in each Copilot experience | Afternoon 2, throughout and Extra Credits |
 
-## Starter application
+Each lab opens with a short refresher on these concepts. HydraFusion multi-model orchestration is a **Research Preview** and appears only as optional Extra Credit.
 
-In Afternoon 2, each attendee works in their own copy of this repository, created from the template or by copying it (Level 0 Step 1). It is a small music catalog mono-repo:
+## Afternoon 1 — GitHub Copilot Zero to Hero
 
-- `src/api` is a .NET 10 minimal API. It exposes `GET /api/hello` and ships 12 synthetic tracks in `Data/tracks.json`.
-- `src/front` is a React, TypeScript and Vite front end.
-- `tests/api` holds the xUnit integration tests.
+Runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on a fork of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds three levels.
 
-In Afternoon 2, attendees use HVE-Core's RPI workflow to build one capability: **browse tracks and add them to a single in-memory playlist**.
+| Level | Topic | You will |
+| --- | --- | --- |
+| Setup | Environment | Fork the demo, open it in your chosen environment, install Copilot CLI |
+| 1 | Code completion | Use inline suggestions and next edit suggestions |
+| 2 | Copilot Chat | Ask, explain, fix and generate tests in chat |
+| 3 | Agent basics | Let agent mode edit several files and run commands |
+| 4 | Plan and implement | Plan a change, then implement it with the agent |
+| 5 | Advanced concepts | Custom instructions, prompt files, custom agents and MCP |
+| 6 | Agents on the platform | Assign an issue to the Copilot cloud agent and use your custom agents on github.com |
+| 7 | Agent Skills | Create and use an Agent Skill |
+| 8 | Copilot CLI | Drive the same repository from the terminal |
+| 9 | Plugins and marketplaces | Browse and install plugins from a marketplace in Copilot CLI and VS Code |
+| Recap | | What to take back to your team |
 
-For a preconfigured environment, open the repository in GitHub Codespaces or use VS Code's **Dev Containers: Reopen in Container** command. The root `.devcontainer.json` pulls a prebuilt image (`ghcr.io/justrebl/ai-sdlc-workshop/devcontainer`) that already contains Git, Node.js 22, .NET 10, GitHub CLI, GitHub Copilot CLI and APM CLI, then adds the `gh-aw` extension, Copilot extensions, restored .NET dependencies and installed front-end dependencies. Authentication, Copilot licensing and organization policies must still be configured as described in the [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md).
+## Afternoon 2 — AI SDLC with GitHub and GitHub Copilot
+
+Attendees build one capability in a small music catalog app (**browse tracks and add them to an in-memory playlist**) while progressively adding governance and automation.
+
+| Level | Topic | You will |
+| --- | --- | --- |
+| 0 | Setup | Create your repository from the template and verify the environment |
+| 1 | HVE-Core CLI plugin | Install HVE-Core into Copilot CLI and explore its agents |
+| 2 | Design Thinking coach | Turn the playlist request into a scoped problem statement |
+| 3 | RPI loop | Research, plan, implement and review the playlist feature |
+| 4 | APM, policy and marketplace | Make HVE-Core a versioned, locked, policy-checked repository dependency |
+| 5 | Agentic workflows | Create a daily backlog workflow that recommends an implementation order and parallel work |
+| 6 | Cloud agent delegation | Delegate a selected issue to the Copilot cloud agent and review its pull request |
+| Recap | | Governance, cost awareness and next steps |
+| Extra Credits | | Model and harness comparison, HydraFusion (Research Preview), accessibility workflow |
+
+### The crescendo
+
+```mermaid
+flowchart LR
+  A[Copilot primitives] --> B[Plugins and marketplaces]
+  B --> C[Versioned APM packages]
+  C --> D[Policy-controlled supply chain]
+  D --> E[Structured RPI execution]
+  E --> F[Automated backlog with gh-aw]
+  F --> G[Controlled delegation to the cloud agent]
+```
+
+Each step reuses what the previous one introduced, and adds one layer of sharing, governance or automation.
+
+## Delivery options
+
+Both labs support three ways to work. Pick one per attendee before D-Day.
+
+| Option | Summary | Best when |
+| --- | --- | --- |
+| 🥇 **GitHub Codespaces** | Nothing to install; a preconfigured cloud environment | Your network and organization allow Codespaces (recommended) |
+| 🥈 **Local dev container** | The same environment in Docker or Podman on your machine | Codespaces is blocked, but containers are allowed |
+| 🥉 **Local tools** | Install Git, Node.js, .NET, GitHub CLI, Copilot CLI, APM and gh-aw yourself | Containers are not allowed |
+
+Full steps for each option, including Podman and the `docker` alias, are in the [prerequisites](docs/prerequisites.md#4-per-option-setup).
+
+## Pre-D-Day checklist (summary)
+
+The complete list, with commands and owners, is in [docs/prerequisites.md](docs/prerequisites.md).
+
+**Every attendee**
+
+- [ ] GitHub account with an active **Copilot Business or Enterprise** seat, visible at [github.com/settings/copilot](https://github.com/settings/copilot)
+- [ ] **VS Code** with GitHub Copilot Chat, signed in to the same account, and Chat answers a prompt
+- [ ] A delivery option chosen and tested:
+  - Codespaces: a test Codespace opens in the browser and in VS Code
+  - Dev container: **Docker** or **Podman** works (`docker run --rm hello-world`, or Podman with `dev.containers.dockerPath` set to `podman` and an optional `docker` alias)
+  - Local tools: Git, Node.js 22, .NET 10, GitHub CLI, Copilot CLI, APM CLI and gh-aw all print a version
+- [ ] Network checks pass from the network you will use on the day: `github.com`, `api.github.com`, `*.githubcopilot.com`, `*.github.dev`, the Codespaces tunnel at `global.rel.tunnels.api.visualstudio.com`, and `ghcr.io`
+
+**Organization or enterprise owners**
+
+- [ ] Copilot seats assigned to all attendees
+- [ ] Copilot policies: Copilot CLI, Copilot cloud agent, MCP servers, allowed models, preview features, and plugins or marketplaces
+- [ ] Codespaces enabled for attendees on private repositories, with a billing owner and spending limit
+- [ ] No organization IP allow list on the organization hosting the attendee repositories (it disables Codespaces)
+- [ ] GitHub Actions enabled, and `actions/*` and `github/gh-aw-actions/*` allowed
+- [ ] Members can create private repositories from a template and fork public repositories
+- [ ] Network team has the allowlist (`gh api meta --jq '.domains.codespaces'` for Codespaces, plus the Copilot allowlist), including TLS-inspection exclusions
+- [ ] Budgets reviewed for Copilot usage, Actions minutes and Codespaces
+
+## Repository contents
+
+| Path | Purpose |
+| --- | --- |
+| [docs/prerequisites.md](docs/prerequisites.md) | Shared prerequisites, network allowlist, organization settings and checklists |
+| [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) | Afternoon 1 lab guide |
+| [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) | Afternoon 2 lab guide |
+| [docs/tutor.md](docs/tutor.md) | Facilitator guide: timing, pre-flight, risks and messaging guardrails |
+| [solutions/afternoon-2](solutions/afternoon-2) | Reference solution files for Afternoon 2 |
+| [tests/workshop/afternoon-2](tests/workshop/afternoon-2/README.md) | An agentic workflow that replays the Afternoon 2 lab in a throwaway Codespace on every change to `main` and files an issue when a step fails |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Writing rules, upstream pins, MOAW preview and validation |
+
+## Starter application (Afternoon 2)
+
+A small music catalog mono-repo:
+
+- `src/api`: a .NET 10 minimal API exposing `GET /api/hello`, with 12 synthetic tracks in `Data/tracks.json`
+- `src/front`: a React, TypeScript and Vite front end
+- `tests/api`: xUnit integration tests
 
 ```bash
 dotnet test
@@ -33,15 +142,17 @@ npm ci
 npm test
 ```
 
-## Prebuilt devcontainer image
+## Prebuilt dev container image
 
-The image is defined in [`.github/devcontainer-image/`](.github/devcontainer-image/) and published to GitHub Container Registry by the [Devcontainer image workflow](.github/workflows/devcontainer-image.yml) only when a file under `.github/devcontainer-image/.devcontainer/` changes on `main` (pull requests that touch it build the image without publishing). Each build is tagged `latest` and `tree-<hash>`, where `<hash>` is the first 12 characters of the folder's Git tree hash; the workshop tester pins the sandbox Codespace to the `tree-<hash>` tag of the tested commit.
+The root `.devcontainer.json` pulls `ghcr.io/justrebl/ai-sdlc-workshop/devcontainer`, which already contains Git, Node.js 22, .NET 10, GitHub CLI, GitHub Copilot CLI and APM CLI. `postCreateCommand` then adds the `gh-aw` extension and restores the .NET and front-end dependencies. Authentication, the Copilot licence and organization policies still have to be configured as described in the [prerequisites](docs/prerequisites.md).
+
+The image is defined in [`.github/devcontainer-image/`](.github/devcontainer-image/) and published to GitHub Container Registry by the [Devcontainer image workflow](.github/workflows/devcontainer-image.yml) only when a file under `.github/devcontainer-image/.devcontainer/` changes on `main`. Pull requests that touch it build the image without publishing. Each build is tagged `latest` and `tree-<hash>`, where `<hash>` is the first 12 characters of the folder's Git tree hash; the workshop tester pins its sandbox Codespace to the `tree-<hash>` tag of the tested commit.
 
 If you create your own copy of this template, replace `justrebl/ai-sdlc-workshop` in the root `.devcontainer.json` with your lowercase `owner/repo`, push any change under `.github/devcontainer-image/.devcontainer/` to `main` to publish the first image, then set the `devcontainer` package visibility to **Public** in its package settings.
 
 ## Publishing on MOAW
 
-The workshop files follow the [MOAW contributing conventions](https://github.com/microsoft/moaw/blob/main/CONTRIBUTING.md). Preview them at `https://moaw.dev/workshop/gh:Justrebl/AI-SDLC-Workshop/main/docs/afternoon-2/`.
+The guides follow the [MOAW](https://moaw.dev) conventions. See [CONTRIBUTING.md](CONTRIBUTING.md) for preview URLs, writing rules and validation.
 
 ## Feedback
 

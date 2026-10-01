@@ -1,8 +1,8 @@
 ---
 published: false
 type: workshop
-title: 'Agentic SDLC with GitHub Copilot — Afternoon 2: HVE-Core, RPI, APM and agentic workflows'
-short_title: HVE-Core, RPI and agentic workflows
+title: 'AI SDLC with GitHub and GitHub Copilot'
+short_title: AI SDLC with GitHub Copilot
 description: Build a governed Music Catalog feature with HVE-Core, Design Thinking, RPI, APM, GitHub Copilot plugins, gh-aw workflows, and Coding Agent.
 level: intermediate
 authors: [Julien Strebler]
@@ -13,7 +13,7 @@ banner_url: assets/banner.png
 navigation_levels: 3
 navigation_numbering: false
 sections_title:
-  - 'Agentic SDLC with GitHub Copilot — Afternoon 2: HVE-Core, RPI, APM and agentic workflows'
+  - 'AI SDLC with GitHub and GitHub Copilot'
   - 'Level 0: Setup and starting point'
   - 'Level 1: HVE orientation and HVE-Core CLI plugin'
   - 'Level 2: Design Thinking with DT Coach'
@@ -26,36 +26,182 @@ sections_title:
   - 'Extra Credits 🪙'
 ---
 
-# Agentic SDLC with GitHub Copilot — Afternoon 2: HVE-Core, RPI, APM and agentic workflows
+# AI SDLC with GitHub and GitHub Copilot
 
 *Version 1.0 - September 2026*
 
-The goal of this workshop is to move from Copilot primitives to a governed agentic SDLC. You will use HVE-Core as a methodology source, Design Thinking to frame a deliberately small capability, RPI to implement it, APM and Copilot plugin marketplaces to package the rules, gh-aw to automate backlog and accessibility reviews, and GitHub Copilot Coding Agent to pick up one follow-up issue.
+Welcome to this workshop. It follows **GitHub Copilot Zero to Hero**: there you used Copilot primitives one at a time. Here you combine them into a governed, AI-assisted software development lifecycle (SDLC) for a real repository.
 
-The shared application is the Music Catalog starter. It begins with a React + TypeScript + Vite front end in `src\front`, a .NET 10 minimal API in `src\api`, xUnit API tests in `tests\api`, and synthetic seed data in `src\api\Data\tracks.json`. The capability for today is fixed: **browse tracks and add tracks to a single in-memory playlist**. Duplicate adds are rejected. The empty playlist state is visible.
+You will go from an idea to a merged change and then automate the work around it:
 
-<div class="warning" data-title="Product evolution">
+- frame a deliberately small capability with the HVE-Core **Design Thinking Coach**
+- implement it with the **RPI** workflow (Research, Plan, Implement, Review)
+- package and govern the rules with **APM** and a Copilot **plugin marketplace**
+- compare models, Auto, and harnesses using measured usage
+- automate backlog triage and accessibility reviews with **GitHub Agentic Workflows (gh-aw)**
+- delegate a follow-up issue to **Copilot cloud agent** (formerly Copilot coding agent)
 
-> GitHub Copilot, Copilot CLI, HVE-Core, APM, Agent Plugins, gh-aw, and Coding Agent evolve quickly. Screens, labels, commands, and availability may change after this workshop is written. When a feature looks different, check the current documentation linked in the relevant section and adapt without changing the learning objective.
+The shared application is the Music Catalog starter. It has a React + TypeScript + Vite front end in `src\front`, a .NET 10 minimal API in `src\api`, xUnit API tests in `tests\api`, and synthetic seed data in `src\api\Data\tracks.json`. The capability for today is fixed: **browse tracks and add tracks to a single in-memory playlist**. Duplicate adds are rejected. The empty playlist state is visible.
+
+<div class="task" data-title="How to read this lab">
+
+> Each level starts with a short **Topic**, followed by numbered steps and an **Expected result**. Copy-paste prompts are in code blocks. Reference solutions are in `solutions\afternoon-2`. Commit a checkpoint at the end of each level so that you can always come back to a working state.
 
 </div>
 
-## Minimal Pre-requisites
+<div class="warning" data-title="Product evolution">
 
-These are the minimal pre-requisites to run this workshop locally with the starter mono-repo. See the [full Afternoon 2 checklist](prerequisites.md) for policy, licence, and administrator checks.
+> GitHub Copilot, Copilot CLI, HVE-Core, APM, Agent Plugins, gh-aw, and Copilot cloud agent evolve quickly. Screens, labels, commands, and availability may change after this workshop is written. When a feature looks different, check the current documentation linked in the relevant section and adapt without changing the learning objective.
 
-|                                  |                                                                                                           |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Workshop repository              | Your own copy of the [workshop repository](https://github.com/Justrebl/AI-SDLC-Workshop), created in Level 0 Step 1. Afternoon 1 used a different demo app. |
-| GitHub account with Copilot licence | Business or Enterprise recommended; Coding Agent, plugins, and gh-aw may need administrator enablement. |
-| VS Code latest + GitHub Copilot Chat | Required for local agent work. Install the HVE extension only if you use the VS Code alternative.       |
-| Git                              | Required for checkpoint commits and for APM dependency resolution.                                        |
-| Node.js 22 LTS                  | Required for the Vite + React front end and Copilot CLI.                                                  |
-| .NET 10 SDK                     | Required for the minimal API and xUnit integration tests.                                                 |
-| GitHub CLI                      | Required for gh-aw installation and GitHub repository operations.                                         |
-| Copilot CLI                     | Required for HVE-Core plugin installation and plugin marketplace exercises.                               |
-| APM CLI                         | Required for the repository-owned HVE-Core dependency and policy audit.                                   |
-| gh-aw extension                 | Required for agentic workflow compilation and runs.                                                       |
+</div>
+
+## 🎓 Key concepts
+
+This is a quick reminder of what you will practise, not a lecture. Each concept links to its reference documentation.
+
+### Copilot primitives (recap from GitHub Copilot Zero to Hero)
+
+Primitives are the building blocks that you combine in this lab:
+
+| Primitive | What it carries | Where it lives |
+| --- | --- | --- |
+| [Custom instructions](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions) | Always-on conventions | `.github\copilot-instructions.md`, `*.instructions.md` |
+| [Prompt files](https://code.visualstudio.com/docs/copilot/customization/prompt-files) | Reusable tasks you invoke by name | `*.prompt.md` |
+| [Custom agents](https://code.visualstudio.com/docs/copilot/customization/custom-agents) | A persona with its own tools and rules | `*.agent.md` |
+| [Agent skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) | Task knowledge loaded on demand | `skills\<name>\SKILL.md` |
+| [MCP servers](https://code.visualstudio.com/docs/copilot/customization/mcp-servers) | External tools and data | `mcp.json` |
+| [Plugins](https://code.visualstudio.com/docs/copilot/customization/agent-plugins) and [marketplaces](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/plugins-finding-installing) | A bundle of primitives and a catalogue to share it | `plugin.json`, `marketplace.json` |
+
+Principle: **context is the product**. The quality of an agent's output depends on the context that you give it. Primitives make that context explicit, reviewable, and versioned.
+
+### HVE and HVE-Core
+
+[HVE-Core](https://microsoft.github.io/hve-core/) (Hypervelocity Engineering Core) is an open-source, opinionated agentic SDLC framework from Microsoft. It ships agents, prompts, instructions, and skills as a Copilot plugin. Its central principle is **"AI carries the rules, humans keep the judgment."**
+
+- **Design Thinking Coach**: guides a team through the problem space before any code is written: scope, research, synthesis, then ideas.
+- **RPI (Research → Plan → Implement → Review)**: separates finding facts, deciding, changing code, and verifying. Each phase writes an artifact that a human can review, and each phase starts from a clean context.
+- HVE-Core describes itself as *rapidly evolving*. Treat it as a source of patterns, and pin the version that you use.
+
+### APM (Agent Package Manager)
+
+[APM](https://microsoft.github.io/apm/) is a dependency manager for agent context. It applies the `package.json` model to agent context.
+
+- `apm.yml` declares the skills, prompts, instructions, plugins, and MCP servers that a repository needs.
+- The **lockfile** pins exact versions, so every developer and CI run gets the same context.
+- **Policy** and `apm audit` restrict allowed sources, executable components, and MCP servers at enterprise, organization, or repository level.
+- Principle: agent context is part of your **software supply chain**. Review, version, and govern it like code.
+
+### GitHub Agentic Workflows (gh-aw)
+
+[gh-aw](https://github.github.com/gh-aw/) lets you write repository automation in Markdown and run it as GitHub Actions. It is part of the GitHub Next [Continuous AI](https://githubnext.com/projects/continuous-ai) research.
+
+- You write `*.md` and compile it to a `*.lock.yml` that Actions runs. Commit both files.
+- The agent runs with **read-only permissions**. Writes such as issues, comments, and pull requests go through declared **safe outputs**.
+- Principle: put automation on a schedule or an event, but keep strong guardrails and keep humans in the loop.
+
+### Copilot cloud agent (formerly coding agent)
+
+[Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent) works on an issue in its own GitHub Actions environment and opens a pull request for review.
+
+- `copilot-setup-steps.yml` prepares its environment. Repository instructions and custom agents shape its behaviour.
+- Branch protection, required reviews, and CI remain the gates. The agent proposes the change and humans approve it.
+
+### Further reading
+
+- [Customize Copilot in VS Code (overview)](https://code.visualstudio.com/docs/copilot/customization/overview)
+- [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli)
+- [HVE-Core repository](https://github.com/microsoft/hve-core)
+- [Customize the Copilot cloud agent environment](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
+- [Copilot billing and usage](https://docs.github.com/en/copilot/concepts/billing-and-usage)
+
+## 🚀 Dev Environment Setup
+
+To complete this lab, you need:
+
+- A GitHub account with a GitHub Copilot licence. Business or Enterprise is recommended. Copilot cloud agent, plugins, and gh-aw may need administrator enablement. See the [full prerequisites checklist](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/prerequisites.md) for the policy, licence, and administrator checks.
+- **Your own repository** created from the workshop template. Level 4 pushes a marketplace, Level 5 runs workflows, and Level 6 assigns issues to Copilot cloud agent, so the repository must belong to you.
+
+Create your repository from the template: open [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop), select **Use this template** → **Create a new repository**, and choose a **private** repository under your account. [Learn more about template repositories](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template). Level 0 Step 1 gives the equivalent `gh` command and a fallback.
+
+The repository ships a [dev container](https://code.visualstudio.com/docs/devcontainers/containers) based on a **prebuilt image**. The image already contains Git, Node.js 22, .NET 10, GitHub CLI, Copilot CLI, and APM CLI. On first start, the dev container installs the gh-aw extension and restores the API and front-end dependencies.
+
+Choose one of the following three options.
+
+### 🥇 Option 1: Pre-configured GitHub Codespace
+
+Use this option if you want everything ready in a browser or in VS Code, with nothing to install.
+
+1. In your new repository, select **<> Code** → **Codespaces** → **+** (Create codespace on main). See [Creating a codespace](https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository).
+2. Wait for the `postCreateCommand` to finish in the terminal.
+
+<div class="info" data-title="Codespaces usage">
+
+> Codespaces usage is billed or counted against your included quota, depending on your account. Check [GitHub Codespaces billing](https://docs.github.com/en/billing/concepts/product-billing/github-codespaces), and stop or delete your codespace after the workshop.
+
+</div>
+
+### 🥈 Option 2: Local dev container
+
+Use this option if you prefer to work locally with the same tooling as the codespace.
+
+1. Install [Git](https://git-scm.com/downloads), [Docker Desktop](https://www.docker.com/products/docker-desktop/), and [VS Code](https://code.visualstudio.com/download) with the **Dev Containers** extension.
+2. Clone your repository and open it in VS Code.
+3. Run **Dev Containers: Reopen in Container** from the Command Palette.
+
+### 🥉 Option 3: Local environment
+
+Use this option if you cannot run containers. Install:
+
+| Tool | Why |
+| --- | --- |
+| [Git](https://git-scm.com/downloads) | Checkpoint commits and APM dependency resolution |
+| [VS Code](https://code.visualstudio.com/download) + GitHub Copilot Chat | Local agent work |
+| [Node.js 22 LTS](https://nodejs.org/en/download) | Vite + React front end, and Copilot CLI |
+| [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) | Minimal API and xUnit tests |
+| [GitHub CLI](https://cli.github.com/) | Repository operations and gh-aw |
+| [Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli) | HVE-Core plugin and marketplace exercises |
+| [APM CLI](https://microsoft.github.io/apm/getting-started/installation/) | Repository-owned HVE-Core dependency and policy audit |
+
+Then clone your repository, run `gh extension install github/gh-aw`, `dotnet restore`, and `npm --prefix src\front ci`.
+
+<div class="tip" data-title="Recommendation">
+
+> Use Option 1 when you can. It saves setup time and gives the same environment to every participant and to the workshop tester.
+
+</div>
+
+## 🔐 Sign in and check your tools
+
+Sign in to GitHub CLI, and then to Copilot CLI. Copilot CLI asks you to run `/login` on first start.
+
+```bash
+gh auth login
+copilot
+```
+
+Check that every tool answers:
+
+```bash
+git --version
+node --version
+dotnet --version
+gh --version
+copilot --version
+apm --version
+gh aw version
+```
+
+<details>
+<summary>📚 Toggle solution</summary>
+
+If a command is missing:
+
+- In a codespace or dev container, run **Codespaces: Rebuild Container** or **Dev Containers: Rebuild Container**.
+- Locally, reinstall the tool from the table in Option 3. Then open a new terminal so that `PATH` is refreshed.
+- If `gh aw version` fails, run `gh extension install github/gh-aw`.
+
+</details>
 
 <div class="info" data-title="Documented capability labels">
 
@@ -69,13 +215,11 @@ These are the minimal pre-requisites to run this workshop locally with the start
 
 </div>
 
-![Afternoon 2 route map](assets/a2-route-map.png)
+![AI SDLC with GitHub and GitHub Copilot route map](assets/a2-route-map.png)
 
 ---
 
 # Level 0: Setup and starting point
-
-You have **10 minutes** for this level.
 
 ## Topic
 
@@ -87,16 +231,16 @@ You will verify the starter repository, run both test suites, confirm that the p
 
 ### Step 1: Create your workshop repository
 
-You need a repository that you own: Level 4 pushes a marketplace, Level 5 runs workflows, and Level 6 assigns issues to Coding Agent. Replace `my-music-catalog` with any name.
+You need a repository that you own: Level 4 pushes a marketplace, Level 5 runs workflows, and Level 6 assigns issues to Coding Agent. Skip this step if you already created your repository from the template in **🚀 Dev Environment Setup** (introduction page) and opened it.
 
-If your facilitator marked the workshop repository as a template, run:
+Otherwise, create it from the template with GitHub CLI. Replace `my-music-catalog` with any name:
 
 ```powershell
 gh repo create my-music-catalog --private --template Justrebl/AI-SDLC-Workshop --clone
 cd my-music-catalog
 ```
 
-Otherwise, copy it with a fresh history:
+If template creation is blocked in your organization, copy the repository with a fresh history:
 
 ```powershell
 git clone https://github.com/Justrebl/AI-SDLC-Workshop my-music-catalog
@@ -179,8 +323,6 @@ Expected result:
 ---
 
 # Level 1: HVE orientation and HVE-Core CLI plugin
-
-You have **15 minutes** for this level.
 
 ## Topic
 
@@ -277,8 +419,6 @@ Expected result:
 
 # Level 2: Design Thinking with DT Coach
 
-You have **35 minutes** for this level.
-
 ## Topic
 
 You will use HVE-Core DT Coach to frame the feature. To keep the room aligned, the inputs and decisions are fixed. The output should identify one capability: browse tracks and add a track to a single in-memory playlist. Duplicate adds are rejected. An empty-state is shown.
@@ -368,7 +508,7 @@ Expected result:
 
 # Level 3: RPI implementation loop
 
-You have **80 minutes** for this level, including the break that follows. RPI means **Research, Plan, Implement, Review**. HVE-Core also documents a follow-up stage in the RPI Agent description, but this workshop walks the four core phases.
+RPI means **Research, Plan, Implement, Review**. HVE-Core also documents a follow-up stage in the RPI Agent description, but this workshop walks the four core phases.
 
 ## Topic
 
@@ -649,7 +789,7 @@ git add -A; git commit -m "Review playlist slice"
 
 # Break
 
-You have **10 minutes** for this break. Before leaving your machine, make sure the implementation is committed and tests pass.
+Before leaving your machine, make sure the implementation is committed and tests pass.
 
 Run:
 
@@ -670,8 +810,6 @@ Expected result:
 ---
 
 # Level 4: APM, policy and plugin marketplace
-
-You have **40 minutes** for this level.
 
 ## Topic
 
@@ -712,12 +850,6 @@ Expected result:
 - `apm.lock.yaml` is created.
 - The lockfile records the resolved commit.
 - The install may take a few minutes.
-
-<div class="tip" data-title="Timing fallback">
-
-> If the room is short on time, start `apm install` first, then explain the lockfile and policy while it runs. If a participant is blocked, use the committed solution manifest as the reference and let the facilitator continue the explanation.
-
-</div>
 
 ### Step 3: Inspect the lockfile
 
@@ -951,8 +1083,6 @@ Expected result:
 
 # Level 5: Agentic workflows with gh-aw
 
-You have **40 minutes** for this level.
-
 ## Topic
 
 You will install gh-aw, initialize the repository, copy two workflow source files, compile them to `.lock.yml`, and run the daily backlog workflow. You will then inspect the accessibility workflow pattern.
@@ -1171,8 +1301,6 @@ Expected result:
 
 # Level 6: Coding Agent delegation
 
-You have **15 minutes** for this level.
-
 ## Topic
 
 You will create one follow-up issue from the feature form and assign it to GitHub Copilot Coding Agent using the RPI Agent custom agent if it is available on the default branch.
@@ -1296,8 +1424,6 @@ Expected result:
 ---
 
 # Recap: Governed agentic SDLC
-
-You have **5 minutes** for this recap.
 
 ## Topic
 
@@ -1465,4 +1591,4 @@ Expected result:
 
 ## Help us improve this Workshop
 
-If you faced any challenge or bug running this workshop, please let us know. Your help will be invaluable in making this workshop better, especially as we try to keep it up to date with fast-moving Copilot capabilities. [Report any problem here.](https://github.com/Justrebl/AI-SDLC-Workshop/issues)
+If you faced any challenge or bug running this workshop, please let us know. Your help will be invaluable in making this workshop better, especially as we try to keep it up to date with fast-moving Copilot capabilities. [Report any problem here.](https://github.com/Justrebl/AI-SDLC-Workshop/issues) To propose a fix, see [CONTRIBUTING.md](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/CONTRIBUTING.md).

@@ -1,8 +1,8 @@
 ---
 published: false
 type: workshop
-title: 'Agentic SDLC with GitHub Copilot — Afternoon 1: Copilot primitives'
-short_title: Copilot primitives
+title: 'GitHub Copilot Zero to Hero'
+short_title: Copilot Zero to Hero
 description: Run the official GitHub Copilot hands-on lab, then extend it with Agent Skills, Copilot CLI, and Agent Plugins before moving to agentic SDLC workflows.
 level: beginner
 authors: [Julien Strebler]
@@ -13,7 +13,7 @@ banner_url: assets/banner.png
 navigation_levels: 3
 navigation_numbering: false
 sections_title:
-  - 'Agentic SDLC with GitHub Copilot — Afternoon 1: Copilot primitives'
+  - 'GitHub Copilot Zero to Hero'
   - 'Setup: Prepare your workshop environment'
   - 'Part 1: GitHub Copilot hands-on lab, Levels 1 to 4'
   - 'Break'
@@ -24,30 +24,79 @@ sections_title:
   - 'Recap: Choose the right primitive'
 ---
 
-# Agentic SDLC with GitHub Copilot — Afternoon 1: Copilot primitives
+# GitHub Copilot Zero to Hero
 
-*Version 1.1 - September 2026*
+*Version 1.2 - September 2026*
 
-The goal of this afternoon is to learn the GitHub Copilot primitives that a development team uses before moving to agentic SDLC practices. It is **Afternoon 1** of a two-afternoon series for technical staff in an insurance and reinsurance context.
+Welcome to **GitHub Copilot Zero to Hero**. In this lab you go from your first code suggestion to plugins that bundle a whole team setup. It is the first lab of a two-part series for technical staff in an insurance and reinsurance context. The second lab, **AI SDLC with GitHub and GitHub Copilot**, builds on everything you practise here.
 
-Rather than duplicating existing material, this afternoon runs the official hands-on lab **[GitHub Copilot, your new AI pair programmer](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/)** (GHCopilotHoL) on its companion application [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo). This guide gives you the timed route through that lab and adds three short levels for primitives the lab does not cover yet: **Agent Skills**, **Copilot CLI**, and **Agent Plugins**.
+Rather than duplicating existing material, this lab runs the official hands-on lab **[GitHub Copilot, your new AI pair programmer](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/)** (GHCopilotHoL) on its companion application [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo). This guide gives you the timed route through that lab and adds three short levels for primitives the lab does not cover yet: **Agent Skills**, **Copilot CLI**, and **Agent Plugins**.
 
-Afternoon 2 then switches to a dedicated Music Catalog mono-repo to practice HVE-Core, Design Thinking, RPI, APM, agentic workflows, and Coding Agent delegation.
+During this lab you will:
+
+- Accept and steer code completions.
+- Use Copilot Chat to explain, fix, and test code.
+- Let agent mode plan and implement a change, then review the diff.
+- Shape Copilot with custom instructions, prompt files, MCP servers, and custom agents.
+- Delegate a task to Copilot cloud agent on github.com.
+- Package task knowledge as an Agent Skill.
+- Drive the same primitives from the terminal with Copilot CLI.
+- Install, inspect, and remove a plugin from a marketplace.
 
 <div class="warning" data-title="Product evolution">
 
-> GitHub Copilot, VS Code, Copilot CLI, MCP, and Agent Plugins evolve quickly. The upstream lab is also maintained independently of this guide. When a screen, label, or step looks different, check the linked documentation and adapt without changing the learning objective.
+> GitHub Copilot, VS Code, Copilot CLI, MCP, and Agent Plugins evolve quickly. Copilot coding agent is now documented as **Copilot cloud agent**; the upstream lab may still use the old name. The upstream lab is also maintained independently of this guide. When a screen, label, or step looks different, check the linked documentation and adapt without changing the learning objective.
 
 </div>
+
+## 🎓 Key concepts
+
+This is a quick reminder of what you will practise, not a lecture. Each concept links to its reference documentation.
+
+### Interaction modes
+
+| Mode | What it does | You stay in control by |
+| --- | --- | --- |
+| [Code completions](https://docs.github.com/en/copilot/concepts/completions/code-suggestions) | Suggests the next lines as you type | Accepting, rejecting, or rewording the comment |
+| [Chat](https://code.visualstudio.com/docs/copilot/chat/copilot-chat) | Answers questions with your code as context | Choosing the context you attach |
+| [Agent mode](https://code.visualstudio.com/docs/copilot/agents/overview) | Edits files and runs commands to reach a goal | Approving tools and reviewing the diff |
+| [Plan](https://code.visualstudio.com/docs/copilot/agents/planning) | Writes a plan before any change | Reviewing the plan before implementation |
+| [Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/about-copilot-cli) | Runs the agent in your terminal | Approving tools and paths per session |
+| [Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-cloud-agent) | Works on an issue in GitHub Actions and opens a pull request | Reviewing and merging the pull request |
+
+The further you go down this table, the more autonomy you hand over, and the more the review step matters.
+
+### Copilot primitives
+
+Primitives are the files that carry your team's context to Copilot:
+
+| Primitive | What it carries | Where it lives |
+| --- | --- | --- |
+| [Custom instructions](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions) | Always-on conventions | `.github\copilot-instructions.md`, `*.instructions.md` |
+| [Prompt files](https://code.visualstudio.com/docs/copilot/customization/prompt-files) | Reusable tasks you invoke by name | `*.prompt.md` |
+| [Custom agents](https://code.visualstudio.com/docs/copilot/customization/custom-agents) | A persona with its own tools and rules | `*.agent.md` |
+| [Agent skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) | Task knowledge loaded on demand | `skills\<name>\SKILL.md` |
+| [MCP servers](https://code.visualstudio.com/docs/copilot/customization/mcp-servers) | External tools and data | `mcp.json` |
+| [Plugins](https://code.visualstudio.com/docs/copilot/customization/agent-plugins) and [marketplaces](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/plugins-finding-installing) | A bundle of primitives and a catalogue to share it | `plugin.json`, `marketplace.json` |
+
+Principles to keep in mind:
+
+- **Context is the product.** The quality of the output depends on the context that you give. Primitives make that context explicit, reviewable, and versioned.
+- **Small, well-scoped tasks win.** Split big asks into steps that you can verify.
+- **You own the result.** Copilot proposes; you review, test, and commit.
+
+### What comes next
+
+**AI SDLC with GitHub and GitHub Copilot** reuses these primitives at team and organization scale: HVE-Core for Design Thinking and the Research, Plan, Implement, Review (RPI) workflow, APM to version and govern agent packages, GitHub agentic workflows for backlog automation, and controlled delegation to Copilot cloud agent.
 
 ## How to use this guide
 
 You will work in two browser tabs:
 
-1. **This guide**: agenda, timeboxes, and the extra levels 7 to 9.
+1. **This guide**: the order of the blocks, links to the upstream lab, and the extra Levels 7 to 9.
 2. **The upstream lab**: the step-by-step content for Levels 1 to 6.
 
-When a section below says **Open upstream Level N**, switch to the lab tab, complete that level, then come back here for the next timebox.
+When a section below says **Open upstream Level N**, switch to the lab tab, complete that level, then come back here for the next section.
 
 | Upstream level | Link |
 | -------------- | ---- |
@@ -59,58 +108,72 @@ When a section below says **Open upstream Level N**, switch to the lab tab, comp
 | Level 5: Advanced Copilot Concepts | [step 5](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=5) |
 | Level 6: Leveraging agents on the platform | [step 6](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=6) |
 
-<div class="info" data-title="Pinning the upstream content">
+## 🚀 Dev Environment Setup
 
-> This guide was checked against GHCopilotHoL commit `c7f7f94` and gh-copilot-demo commit `f935d88`. If the upstream lab changes before your session, facilitators can review the diff since those commits and adjust the timeboxes below.
+### Requirements
+
+| | |
+| --- | --- |
+| GitHub account with a Copilot licence | Copilot Business or Enterprise recommended. Copilot cloud agent and plugins may need administrator enablement. |
+| A fork of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo) | Every option below starts from your fork. |
+| A browser | For this guide, the upstream lab, and github.com. |
+
+Complete the [prerequisites and pre-D-Day checks](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/prerequisites.md) before the session. They cover the licence, VS Code, Docker or Podman, network allowlist, and organization settings.
+
+Fork the demo repository first: open [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), select **Fork**, and keep your own account as the owner.
+
+Then choose **one** of the three options below. They are ordered from the fastest to the most hands-on.
+
+### 🥇 Option 1: GitHub Codespaces
+
+Nothing to install. The fork ships a [dev container](https://code.visualstudio.com/docs/devcontainers/containers) with .NET, Node.js, the Copilot extensions, and the project dependencies.
+
+1. In your fork, select **Code** → **Codespaces** → **Create codespace on main**.
+2. Wait until `postCreateCommand` prints `Setup complete`.
+3. Install Copilot CLI in the Codespace terminal for Levels 8 and 9: `npm install -g @github/copilot`.
+
+<div class="info" data-title="Codespaces usage">
+
+> Codespaces usage is billed by compute and storage, separately from Copilot. Check what applies to your account in [About billing for GitHub Codespaces](https://docs.github.com/en/billing/managing-billing-for-your-products/about-billing-for-github-codespaces). Stop or delete the Codespace at the end of the lab.
 
 </div>
 
-## Agenda
+### 🥈 Option 2: Dev container on your machine
 
-| Time | Block | Source |
-| ---- | ----- | ------ |
-| 0:00 | Setup: fork gh-copilot-demo, open Codespaces or local | This guide + upstream introduction |
-| 0:15 | Level 1: Code Completion | Upstream |
-| 0:40 | Level 2: Copilot Chat | Upstream |
-| 1:10 | Level 3: Copilot Agent Basics | Upstream |
-| 1:30 | Level 4: Copilot Plan & Implement | Upstream |
-| 1:55 | Break | - |
-| 2:10 | Level 5: Advanced Copilot Concepts (instructions, prompts, MCP) | Upstream |
-| 2:35 | Level 6: Coding Agent and custom agents on github.com | Upstream |
-| 2:55 | Level 7: Agent Skills | This guide |
-| 3:10 | Level 8: Copilot CLI | This guide |
-| 3:35 | Level 9: Agent Plugins and marketplaces | This guide |
-| 3:50 | Recap | This guide |
-| 4:00 | End | - |
+Same environment as Option 1, running in Docker on your machine.
 
-<div class="tip" data-title="Running late?">
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) or a compatible engine, VS Code, and the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+2. Clone your fork and open it in VS Code.
+3. Run **Dev Containers: Reopen in Container** from the Command Palette.
+4. Install Copilot CLI in the container terminal: `npm install -g @github/copilot`.
 
-> Upstream Levels 1 to 6 are the core. If you fall behind, skip the upstream side quests first, then shorten Level 9 to the CLI plugin commands only.
+### 🥉 Option 3: Local tools
+
+Install the tools yourself, then clone your fork:
+
+| Tool | Why |
+| --- | --- |
+| [VS Code](https://code.visualstudio.com/) with GitHub Copilot and GitHub Copilot Chat | Levels 1 to 7 and 9 |
+| [Git](https://git-scm.com/downloads) | Commit checkpoints |
+| [Node.js 22 LTS](https://nodejs.org/) | Upstream front end and Copilot CLI install |
+| [.NET SDK](https://dotnet.microsoft.com/download) | Upstream `albums-api`. Use the version listed in the upstream README. |
+| [GitHub CLI](https://cli.github.com/) | Sign-in and repository commands |
+| [Copilot CLI](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli) | Levels 8 and 9 |
+
+<div class="tip" data-title="Recommendation">
+
+> Use **Option 1** unless your organization blocks Codespaces. It removes local setup issues and gives every participant the same environment.
 
 </div>
-
-## Minimal Pre-requisites
-
-|                                     |                                                                                              |
-| ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| GitHub account with Copilot licence | Business or Enterprise recommended; Coding Agent and plugins may need administrator enablement. |
-| VS Code latest + GitHub Copilot Chat | Or GitHub Codespaces, as proposed by the upstream lab.                                       |
-| Git                                 | Required to commit checkpoints.                                                              |
-| Node.js 22 LTS                      | Required for the upstream front end and for installing Copilot CLI.                          |
-| .NET SDK                            | Required for the upstream `albums-api`. Use the version listed in the upstream README.        |
-| Copilot CLI                         | Required for Levels 8 and 9. Codespaces users can install it in the terminal.                |
-
 <div class="important" data-title="Synthetic data only">
 
-> Do not paste customer data, confidential code, credentials, or production telemetry into prompts, issues, or Coding Agent tasks. The demo application uses sample album data only.
+> Do not paste customer data, confidential code, credentials, or production telemetry into prompts, issues, or Copilot cloud agent tasks. The demo application uses sample album data only.
 
 </div>
 
 ---
 
 # Setup: Prepare your workshop environment
-
-You have **15 minutes** for this setup.
 
 ## Topic
 
@@ -155,15 +218,13 @@ Expected result:
 
 # Part 1: GitHub Copilot hands-on lab, Levels 1 to 4
 
-You have **100 minutes** for this part.
-
 ## Topic
 
 You will learn completions, Chat, agent mode, and the plan-then-implement loop using the upstream lab.
 
 ## Open upstream Level 1: Code Completion
 
-You have **25 minutes**. Open [Level 1](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=1).
+Open [Level 1](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=1).
 
 Focus on:
 - Ghost text and accepting suggestions.
@@ -174,7 +235,7 @@ The side quests on commit messages and documentation are optional.
 
 ## Open upstream Level 2: Copilot Chat
 
-You have **30 minutes**. Open [Level 2](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=2).
+Open [Level 2](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=2).
 
 Focus on:
 - Chat participants, context variables, and slash commands.
@@ -182,7 +243,7 @@ Focus on:
 
 ## Open upstream Level 3: Copilot Agent Basics
 
-You have **20 minutes**. Open [Level 3](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=3).
+Open [Level 3](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=3).
 
 Focus on:
 - When agent mode edits files and runs commands.
@@ -190,15 +251,15 @@ Focus on:
 
 ## Open upstream Level 4: Copilot Plan & Implement
 
-You have **25 minutes**. Open [Level 4](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=4).
+Open [Level 4](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=4).
 
 Focus on:
 - Planning before implementing.
 - The Code Review agent.
 
-<div class="info" data-title="Link to Afternoon 2">
+<div class="info" data-title="Link to AI SDLC with GitHub and GitHub Copilot">
 
-> The plan-then-implement loop you practice here becomes the full **Research, Plan, Implement, Review** (RPI) workflow in Afternoon 2.
+> The plan-then-implement loop you practice here becomes the full **Research, Plan, Implement, Review** (RPI) workflow in **AI SDLC with GitHub and GitHub Copilot**.
 
 </div>
 
@@ -215,15 +276,11 @@ git add -A; git commit -m "Complete upstream Levels 1 to 4"
 
 # Break
 
-You have **15 minutes** for this break.
-
 Before the break, make sure your working tree is committed. After the break, you will move to repository-level customization, MCP, and agents on github.com.
 
 ---
 
 # Part 2: GitHub Copilot hands-on lab, Levels 5 and 6
-
-You have **45 minutes** for this part.
 
 ## Topic
 
@@ -231,7 +288,7 @@ You will customize Copilot for the repository and delegate work to agents on git
 
 ## Open upstream Level 5: Advanced Copilot Concepts
 
-You have **25 minutes**. Open [Level 5](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=5).
+Open [Level 5](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=5).
 
 Focus on:
 - **Custom Instructions**: `.github/copilot-instructions.md` and path-specific instructions.
@@ -242,21 +299,21 @@ Prompt engineering techniques are a short read; skim them if time is tight.
 
 ## Open upstream Level 6: Leveraging agents on the platform
 
-You have **20 minutes**. Open [Level 6](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=6).
+Open [Level 6](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/?step=6).
 
 Focus on:
-- Assigning an issue to Copilot Coding Agent and reviewing its pull request.
+- Assigning an issue to Copilot cloud agent and reviewing its pull request.
 - Using your custom agents on github.com.
 
-<div class="warning" data-title="Coding Agent availability">
+<div class="warning" data-title="Copilot cloud agent availability">
 
-> Coding Agent needs a supported plan and may need to be enabled by an administrator. If it is not available in your account, follow along with the facilitator's demo and continue.
+> Copilot cloud agent needs a supported plan and may need to be enabled by an administrator. If it is not available in your account, follow along with the facilitator's demo and continue.
 
 </div>
 
 ## Commit checkpoint
 
-Pull any merged Coding Agent changes, then run:
+Pull any merged Copilot cloud agent changes, then run:
 
 ```powershell
 git status
@@ -266,8 +323,6 @@ git add -A; git commit -m "Complete upstream Levels 5 and 6"
 ---
 
 # Level 7: Agent Skills
-
-You have **15 minutes** for this level.
 
 ## Topic
 
@@ -349,8 +404,6 @@ git add -A; git commit -m "Add albums-api endpoint skill"
 
 # Level 8: Copilot CLI
 
-You have **25 minutes** for this level.
-
 ## Topic
 
 You will use GitHub Copilot CLI from the repository root. You will trust the folder, sign in, explain the repository, inspect model selection, make a change, use shell escape, reuse your custom agent and skill, and try programmatic mode carefully. Official docs:
@@ -429,7 +482,7 @@ Expected result:
 
 <div class="info" data-title="Usage units">
 
-> Copilot usage is measured in units that depend on the experience and on your plan. Afternoon 2 covers how to read them. Do not compare CLI and VS Code usage without checking which unit each one reports.
+> Copilot usage is measured in units that depend on the experience and on your plan. **AI SDLC with GitHub and GitHub Copilot** covers how to read them. Do not compare CLI and VS Code usage without checking which unit each one reports.
 
 </div>
 
@@ -458,7 +511,7 @@ In the CLI, run:
 Expected result:
 - The CLI shows the models available to your account. Availability depends on your plan and organization policy.
 
-Keep the default or choose the model your facilitator recommends. Model comparison and Auto selection are covered in Afternoon 2.
+Keep the default or choose the model your facilitator recommends. Model comparison and Auto selection are covered in **AI SDLC with GitHub and GitHub Copilot**.
 
 ## Make a change from the CLI
 
@@ -534,8 +587,6 @@ git add -A; git commit -m "Add artist filter endpoint from Copilot CLI"
 
 # Level 9: Agent Plugins and marketplaces
 
-You have **15 minutes** for this level.
-
 ## Topic
 
 You will learn what Agent Plugins bundle, browse a plugin marketplace from the CLI and from VS Code, install and inspect one plugin, then uninstall it. Official docs:
@@ -554,7 +605,7 @@ You created customizations one file at a time today. A plugin **bundles** them s
 - Hooks.
 - MCP server configuration.
 
-A **marketplace** is a GitHub repository that lists plugins. Afternoon 2 uses the HVE-Core marketplace and a repository-owned APM package to share an entire methodology.
+A **marketplace** is a GitHub repository that lists plugins. **AI SDLC with GitHub and GitHub Copilot** uses the HVE-Core marketplace and a repository-owned APM package to share an entire methodology.
 
 <div class="warning" data-title="Hooks and MCP can run code">
 
@@ -627,7 +678,7 @@ Expected result:
 
 <div class="tip" data-title="Why uninstall?">
 
-> Uninstalling keeps all participants aligned for Afternoon 2. In real projects, keep only approved plugins and record why the team uses them. Afternoon 2 shows how APM and policies make that decision versioned and auditable.
+> Uninstalling keeps all participants aligned for **AI SDLC with GitHub and GitHub Copilot**. In real projects, keep only approved plugins and record why the team uses them. The second lab shows how APM and policies make that decision versioned and auditable.
 
 </div>
 
@@ -635,11 +686,9 @@ Expected result:
 
 # Recap: Choose the right primitive
 
-You have **10 minutes** for this recap.
-
 ## What you practiced
 
-Today you used GitHub Copilot as a layered toolchain rather than one feature. You started with completions and Chat, moved to agent mode and plan-then-implement, stored durable guidance in instructions and prompt files, connected tools through MCP, delegated to Coding Agent, packaged know-how as an Agent Skill, reused it from the CLI, and inspected how plugins bundle everything for sharing.
+Today you used GitHub Copilot as a layered toolchain rather than one feature. You started with completions and Chat, moved to agent mode and plan-then-implement, stored durable guidance in instructions and prompt files, connected tools through MCP, delegated to Copilot cloud agent, packaged know-how as an Agent Skill, reused it from the CLI, and inspected how plugins bundle everything for sharing.
 
 ## Primitive selection table
 
@@ -652,7 +701,7 @@ Today you used GitHub Copilot as a layered toolchain rather than one feature. Yo
 | Custom instructions | `.github` folder | Stable team conventions | Upstream Level 5 |
 | Prompt files | `.github\prompts` | Repeatable requests | Upstream Level 5 |
 | MCP servers | MCP configuration | External tools and context | Upstream Level 5 |
-| Coding Agent and custom agents | github.com | Asynchronous delegated work | Upstream Level 6 |
+| Copilot cloud agent and custom agents | github.com | Asynchronous delegated work | Upstream Level 6 |
 | Agent Skills | `.github\skills` | Procedures loaded on demand | Level 7 |
 | Copilot CLI | Terminal | Repository work without leaving the shell | Level 8 |
 | Agent Plugins | CLI or VS Code | Sharing bundles of customizations | Level 9 |
@@ -665,10 +714,10 @@ Today you used GitHub Copilot as a layered toolchain rather than one feature. Yo
 
 ## What is next
 
-Afternoon 2 moves from primitives to a governed agentic SDLC on a new application: a **Music Catalog** mono-repo with a React + TypeScript front end in `src/front` and a .NET 10 API in `src/api`. The application changes because Afternoon 2 needs a repository that you copy and fully own, with tests and a Coding Agent setup ready for HVE-Core, Design Thinking, RPI, APM policies, agentic workflows, and Coding Agent delegation.
+**AI SDLC with GitHub and GitHub Copilot** moves from primitives to a governed agentic SDLC on a new application: a **Music Catalog** mono-repo with a React + TypeScript front end in `src/front` and a .NET 10 API in `src/api`. The application changes because the second lab needs a repository that you copy and fully own, with tests and a Copilot cloud agent setup ready for HVE-Core, Design Thinking, RPI, APM policies, agentic workflows, and Copilot cloud agent delegation.
 
-Continue with [Afternoon 2](../afternoon-2/workshop.md).
+Continue with [AI SDLC with GitHub and GitHub Copilot](../afternoon-2/workshop.md).
 
 ## Help us improve this Workshop
 
-If you have feedback on this guide, open an issue in [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop/issues). For feedback on the upstream lab, use [Philess/GHCopilotHoL](https://github.com/Philess/GHCopilotHoL/issues).
+If you have feedback on this guide, open an issue in [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop/issues). For feedback on the upstream lab, use [Philess/GHCopilotHoL](https://github.com/Philess/GHCopilotHoL/issues). To propose a fix, see [CONTRIBUTING.md](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/CONTRIBUTING.md).
