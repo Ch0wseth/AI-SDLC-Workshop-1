@@ -4,7 +4,7 @@
 #
 # Required environment:
 #   SANDBOX_REPO          owner/name of the sandbox repository (the Codespace's own repository)
-#   GH_TOKEN              token for gh (sandbox issues, workflow runs, Coding Agent assignment)
+#   GH_TOKEN              sandbox-scoped token for gh (sandbox issues, workflow runs, Copilot cloud agent assignment)
 #   COPILOT_GITHUB_TOKEN  token for Copilot CLI (fine-grained PAT with the Copilot Requests permission)
 # Optional:
 #   RESULTS_DIR           default /tmp/workshop-tester
@@ -242,7 +242,7 @@ step l4-settings-repo "Level 4" "Replace YOUR-ORG/YOUR-REPO in settings.json" tr
 grep -q "$SANDBOX_REPO" .github/copilot/settings.json && check "settings.json points to the sandbox repository" true || check "settings.json points to the sandbox repository" false
 finish_step
 
-# push_fallback <step-id>: retry a rejected push with the tester token so later levels can still run.
+# push_fallback <step-id>: retry a rejected push with the sandbox-scoped tester token so later levels can still run.
 push_fallback() {
   if [ "$STEP_CODE" -ne 0 ]; then
     note "git push with the Codespace credential failed; retrying with the tester token to continue the run"
