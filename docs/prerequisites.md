@@ -258,6 +258,7 @@ Enterprise policies take precedence: if an enterprise owner has set a policy, th
 | Copilot | Seats assigned to every attendee | A1, A2 | Required for all Copilot features |
 | Copilot | Copilot in the CLI enabled | A1 (Levels 8–9), A2 | Copilot CLI is used in both afternoons |
 | Copilot | **Copilot cloud agent** (formerly coding agent) enabled, and allowed on the attendees' repositories | A1 (Level 6), A2 (Level 6) | Delegating an issue to Copilot |
+| Copilot | **Copilot code review** enabled in the Copilot policies | A2 (Level 6) | Reviewing the Copilot cloud agent pull request |
 | Copilot | Models policy reviewed: the models you plan to demonstrate are enabled | A1, A2 | Auto model selection only picks from models your policies allow |
 | Copilot | Preview features allowed, if you plan to demonstrate preview features | A2 | Some Afternoon 2 features are previews |
 | Copilot | MCP servers policy allows MCP in Copilot | A1, A2 | MCP tools in VS Code, Copilot CLI and the cloud agent |
@@ -270,13 +271,14 @@ Enterprise policies take precedence: if an enterprise owner has set a policy, th
 | Actions | Workflow permissions allow the workflows to create issues and comments, or the workflow files declare them | A2 | gh-aw safe outputs |
 | Repositories | Members can create private repositories and can use template repositories; forking of public repositories allowed (A1) | A1, A2 | Fork for Afternoon 1, template copy for Afternoon 2 |
 | Packages | Members can pull public images from `ghcr.io` | A2 | The prebuilt dev container image |
+| Code security | Optional: **GitHub Secret Protection** available for the attendees' private repositories, and repository administrators allowed to enable it and add custom patterns | A2 (Level 6) | Push protection demo; without it, the facilitator demos it |
 | Billing | Budgets reviewed for Copilot usage, Actions minutes and Codespaces | A1, A2 | A session with ~20 attendees for 4 hours must fit within your budgets |
 
 **Copilot authentication in agentic workflows.** The Afternoon 2 workflows declare `permissions: copilot-requests: write`, so Copilot requests are authorized through the workflow's GitHub Actions token and billed to the organization. No personal access token is needed. If that path is not available in your tenant, gh-aw also supports a `COPILOT_GITHUB_TOKEN` repository secret holding a fine-grained personal access token whose resource owner is your **user account**, with the **Copilot Requests** account permission. See the [gh-aw authentication reference](https://github.github.com/gh-aw/reference/auth/).
 
 ## 8. Usage and billing readiness
 
-- Each experience uses a different usage unit. Check which one applies to your tenant for VS Code, Copilot CLI, the Copilot cloud agent, agentic workflows (Copilot requests and Actions minutes), and Codespaces (compute and storage). See [GitHub Copilot billing](https://docs.github.com/en/copilot/concepts/billing) and your enterprise billing settings. **Do not rely on prices written in workshop material.**
+- Each experience uses a different usage unit. Check which one applies to your tenant for VS Code, Copilot CLI, the Copilot cloud agent, Copilot code review (AI credits, plus Actions minutes on private repositories), agentic workflows (Copilot requests and Actions minutes), and Codespaces (compute and storage). GitHub Secret Protection is a separate licence. See [GitHub Copilot billing](https://docs.github.com/en/copilot/concepts/billing) and your enterprise billing settings. **Do not rely on prices written in workshop material.**
 - Decide whether attendees may use Auto model selection, and which explicit models are allowed.
 - **HydraFusion** is a **Research Preview**. Include it only if your tenant has access, and present it as optional.
 

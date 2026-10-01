@@ -105,6 +105,13 @@ Principle: **context is the product**. The quality of an agent's output depends 
 
 - `copilot-setup-steps.yml` prepares its environment. Repository instructions and custom agents shape its behaviour.
 - Branch protection, required reviews, and CI remain the gates. The agent proposes the change and humans approve it.
+- By default, the agent checks its own changes with CodeQL, the GitHub Advisory Database, secret scanning and Copilot code review before it completes the pull request ([risks and mitigations](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations)).
+
+### Copilot code review and secret scanning
+
+- [Copilot code review](https://docs.github.com/en/copilot/concepts/agents/code-review) reviews a pull request like a human reviewer. It reads the repository custom instructions, such as `.github/copilot-instructions.md`, from the pull request's head branch.
+- [Secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning) detects credentials in the Git history. [Push protection](https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection) blocks a push that contains a secret before it reaches the repository.
+- Both act on pull requests and pushes. They review agent output in the same way as human output.
 
 ### Further reading
 
@@ -1303,7 +1310,7 @@ Expected result:
 
 ## Topic
 
-You will create one follow-up issue from the feature form and assign it to GitHub Copilot Coding Agent using the RPI Agent custom agent if it is available on the default branch.
+You will create one follow-up issue from the feature form and assign it to GitHub Copilot Coding Agent using the RPI Agent custom agent if it is available on the default branch. Then you will review its pull request with Copilot code review and see how secret scanning push protection stops a leaked credential.
 
 ![Assign issue to Coding Agent with custom agent](assets/l6-coding-agent-assignment.png)
 
@@ -1409,6 +1416,99 @@ When the PR is ready, check:
 
 </div>
 
+### Step 4: Request a Copilot code review
+
+On the pull request, under **Reviewers**, click **Request** next to **Copilot**.
+
+You can also run this from the repository root. Replace `PR-NUMBER` with the pull request number:
+
+```powershell
+gh pr edit PR-NUMBER --add-reviewer @copilot
+```
+
+Expected result:
+- Copilot posts a review with comments and, where it can, suggested changes.
+- The comments follow the conventions in `.github\copilot-instructions.md`: minimal API under `/api`, in-memory state, accessible markup, and tests for every behaviour change.
+- The review is a **Comment**, not an approval. A human still approves and merges.
+
+Compare it with the review phase you ran in Level 3:
+
+| | RPI review (Level 3) | Copilot code review |
+| --- | --- | --- |
+| Where it runs | Your Copilot CLI or VS Code session | On the pull request on GitHub.com |
+| What it checks | The plan, the acceptance criteria and the changes record | The diff, against the repository instructions |
+| Output | A review log and findings to fix | Review comments and suggested changes on the PR |
+| Who sees it | You | Everyone who reviews the PR |
+
+<div class="info" data-title="Usage units and automatic reviews">
+
+> Each Copilot code review consumes **AI credits**. On private repositories it also uses **GitHub Actions minutes**. A manual request is attributed to the user who requests it. Check the current rates in [Copilot billing](https://docs.github.com/en/copilot/concepts/billing-and-usage) instead of relying on workshop material. A repository administrator can request a review on every pull request with the **Automatically request Copilot code review** branch ruleset rule. See [Configuring code review by GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-on-github/set-up-copilot/configure-code-review).
+
+</div>
+
+## Secret scanning and push protection
+
+Copilot cloud agent already runs secret scanning on the code it generates. Push protection applies the same check to every push, whether it comes from a person, a Codespace or an agent.
+
+<div class="warning" data-title="Licence-dependent: facilitator demo by default">
+
+> Your workshop repository is **private**. For private repositories owned by an organization, secret scanning and push protection require **GitHub Secret Protection** to be enabled. On public repositories, secret scanning runs for free. If Secret Protection is not available, watch the facilitator demo. Use only the generated fake key below. **Never** use a real credential, even a revoked one.
+
+</div>
+
+### Step 1: Enable push protection
+
+In the repository, open **Settings → Advanced Security**. Under **Secret Protection**, click **Enable**, then click **Enable** next to **Push protection**.
+
+### Step 2: Add a workshop custom pattern
+
+Generate a fake key from the repository root. It is not a real credential:
+
+```powershell
+"MCWS_" + -join ((48..57) + (65..90) | Get-Random -Count 32 | ForEach-Object { [char]$_ })
+```
+
+Under **Secret Protection**, to the right of **Custom patterns**, click **New pattern**, then enter:
+- Pattern name: `Music Catalog workshop key`
+- Secret format: `MCWS_[A-Z0-9]{32}`
+- Test string: the key you generated
+
+Click **Save and dry run**, then **Publish pattern**, then **Enable** push protection for the pattern.
+
+### Step 3: Try to push the fake key
+
+Run from the repository root. Paste your generated key in place of `PASTE-KEY-HERE`:
+
+```powershell
+git switch -c demo/push-protection
+Set-Content -Path demo.env -Value "MUSIC_CATALOG_KEY=PASTE-KEY-HERE"
+git add demo.env
+git commit -m "Demo: push protection"
+git push -u origin demo/push-protection
+```
+
+Expected result:
+- The push is **rejected**. The output names the **Music Catalog workshop key** pattern, the file and the commit.
+- No alert is created, because nothing reached the repository.
+
+<div class="important" data-title="Do not bypass">
+
+> The rejection message offers a link to bypass the block. Do not use it. A bypass creates a secret scanning alert, and an administrator must review it.
+
+</div>
+
+### Step 4: Clean up
+
+```powershell
+git switch main
+git branch -D demo/push-protection
+Remove-Item demo.env -ErrorAction SilentlyContinue
+```
+
+Expected result:
+- `git status` shows a clean working tree on `main`.
+- The fake key never reached GitHub.
+
 ## Commit checkpoint
 
 No local commit is required for this level unless you changed local files. Run:
@@ -1431,7 +1531,7 @@ You will connect the afternoon into one operating model.
 
 ## What you practiced
 
-You started with a clean starter app. You used DT Coach to constrain the problem. You used RPI Agent to research, plan, implement, and review a full-stack slice. You converted methodology into repository-owned dependencies with APM and a lockfile. You used policy to show how governance can block unapproved agent packages. You packaged team conventions as a Copilot plugin marketplace. You compiled gh-aw workflows for backlog triage and accessibility review. You created a follow-up issue for Coding Agent.
+You started with a clean starter app. You used DT Coach to constrain the problem. You used RPI Agent to research, plan, implement, and review a full-stack slice. You converted methodology into repository-owned dependencies with APM and a lockfile. You used policy to show how governance can block unapproved agent packages. You packaged team conventions as a Copilot plugin marketplace. You compiled gh-aw workflows for backlog triage and accessibility review. You created a follow-up issue for Coding Agent, reviewed its pull request with Copilot code review, and saw push protection block a leaked key.
 
 ## Operating model
 
@@ -1443,6 +1543,8 @@ You started with a clean starter app. You used DT Coach to constrain the problem
 | Plugin marketplace | Shared Music Catalog conventions. | Marketplace and settings made plugin enablement explicit. |
 | gh-aw | Ran backlog and accessibility workflows. | `safe-outputs` limited writes. |
 | Coding Agent | Picked up one scoped follow-up issue. | Human issue, setup workflow, firewall, PR review. |
+| Copilot code review | Reviewed the agent's PR against repository instructions. | Comments only; a human approves and merges. |
+| Secret scanning | Blocked a fake key at push time. | Push protection and audited bypasses (Secret Protection licence). |
 
 <div class="important" data-title="Human judgment stays in the loop">
 

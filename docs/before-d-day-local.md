@@ -20,6 +20,8 @@ Enterprise policies take precedence over organization policies. Details: [prereq
 - [ ] A **Copilot Business or Enterprise** seat is assigned to every attendee.
 - [ ] **Copilot in the CLI** is enabled.
 - [ ] The **Copilot cloud agent** is enabled and allowed on the attendees' repositories.
+- [ ] **Copilot code review** is enabled in the Copilot policies (Afternoon 2, Level 6).
+- [ ] Optional: **GitHub Secret Protection** can be enabled on the attendees' private repositories for the push protection exercise (Afternoon 2, Level 6). Otherwise the facilitator demos it.
 - [ ] The **models** you plan to demonstrate are enabled. Auto model selection only picks from allowed models.
 - [ ] **MCP servers** are allowed in Copilot.
 - [ ] **Plugins and marketplaces** allow `microsoft/hve-core` and a repository marketplace.

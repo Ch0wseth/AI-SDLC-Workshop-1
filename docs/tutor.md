@@ -41,7 +41,7 @@ Part 1 totals 100 minutes and Part 2 totals 45 minutes.
 | 2:10 | Break | 10 | Implementation committed, tests pass | |
 | 2:20 | Level 4 APM, policy and marketplace | 40 | Lockfile committed and policy audited | Start `apm install` first, explain the lockfile and policy while it runs; demo the audit from recordings |
 | 3:00 | Level 5 Agentic workflows | 40 | Daily backlog issue created | Show a prerecorded run |
-| 3:40 | Level 6 Copilot cloud agent | 15 | Pull request opened by Copilot | Show a prerecorded pull request |
+| 3:40 | Level 6 Copilot cloud agent, code review and push protection | 15 | Pull request opened by Copilot and reviewed by Copilot code review | Show a prerecorded pull request and review; always demo push protection yourself |
 | 3:55 | Recap | 5 | | |
 | 4:00 | End | | | |
 
@@ -56,7 +56,7 @@ Level 3 and the break together form an 80-minute block. The Extra Credits page i
    4. Run `gh aw compile` and `gh aw run daily-backlog`, and confirm the summary issue is created.
    5. Assign a test issue to Copilot and confirm a pull request opens.
 2. Compare the upstream repositories with the pinned commits listed in [CONTRIBUTING.md](../CONTRIBUTING.md#upstream-pins), and adjust the timings above if levels changed.
-3. Record these fallback artifacts: a passing `apm audit --ci --policy apm-policy.yml`, a failing audit with the deny rule, a daily-backlog issue, an a11y-review issue, and a Copilot cloud agent pull request.
+3. Record these fallback artifacts: a passing `apm audit --ci --policy apm-policy.yml`, a failing audit with the deny rule, a daily-backlog issue, an a11y-review issue, a Copilot cloud agent pull request with its Copilot code review, and a push rejected by push protection with the workshop custom pattern.
 4. Check that the HVE-Core commit pinned in `solutions/afternoon-2/apm.yml` still resolves. If you bump it, update the workshop text as well.
 5. Validate the plugin marketplace from a clean profile: `copilot plugin marketplace add <your-org>/<your-repo>`, `copilot plugin marketplace browse music-catalog-marketplace`, then `copilot plugin install music-catalog-conventions@music-catalog-marketplace`.
 6. Capture the screenshots listed in each `assets/README.md`.
@@ -75,6 +75,8 @@ Level 3 and the break together form an 80-minute block. The Extra Credits page i
 | gh-aw workflow cannot authenticate | Run fails at the agent step | Check `permissions: copilot-requests: write`, or configure the `COPILOT_GITHUB_TOKEN` secret |
 | Copilot cloud agent does not show the RPI Agent | Custom agent missing from the picker | Agents must be in `.github/agents` on the default branch; merge first |
 | Copilot cloud agent setup fails | `copilot-setup-steps` job red | The Actions log shows the failing restore; the firewall is on by default |
+| Copilot is missing from **Reviewers** | Copilot code review policy disabled, or the attendee has no licence that includes it | Enable the **Copilot code review** policy, or demo the review yourself |
+| **Advanced Security** shows no Secret Protection or custom patterns | No GitHub Secret Protection licence for private repositories | Demo push protection from a licensed repository |
 
 ## Messaging guardrails
 
