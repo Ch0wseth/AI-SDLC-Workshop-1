@@ -28,8 +28,9 @@ permissions:
   actions: read
   copilot-requests: write   # Copilot inference for the validation agent, no PAT required
 
-engine: copilot
-model: gpt-5.5
+engine:
+  id: copilot
+  model: gpt-5.5
 timeout-minutes: 20
 
 jobs:
