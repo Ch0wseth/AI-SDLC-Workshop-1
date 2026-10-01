@@ -505,7 +505,7 @@ Manually check that the DT output does not add extra features. Reject additions 
 
 <div class="info" data-title="Extended track">
 
-> This track adds about 40 minutes. Your facilitator tells you whether the room runs it hands-on, watches it as a demo, or skips it. Level 3 works without it: if you skip it, go to the commit checkpoint.
+> This track adds about 40 minutes. Your facilitator tells you whether the room runs it hands-on, watches it as a demo, or skips it. Level 3 works without it: if you skip it, go to [Curate what you commit](#curate-what-you-commit).
 
 </div>
 
@@ -694,30 +694,145 @@ Expected result:
 - Nothing changes on GitHub.
 - In Level 5, the daily backlog workflow automates this same triage every weekday.
 
-### Step 9: Commit the requirement documents
+### Step 9: Hand off to curation
+
+Do not commit yet. The BRD and PRD go through the curation checklist in the next section, and you commit them there together with the Design Thinking record.
+
+Note the parent issue number. You use it in Level 3.
+
+## Curate what you commit
+
+### Topic
+
+HVE-Core agents keep two kinds of output apart:
+
+- **Working state.** Session notes, research, plans, change logs and handoff files. HVE-Core agents write them under `.copilot-tracking\` in your repository. They are drafts for the agent and for you, they can contain raw notes or meeting content, and they are never committed. HVE-Core lists `.copilot-tracking/` in its own `.gitignore`, and the workshop template does the same.
+- **Deliverables.** Reviewed documents that other people rely on: the BRD, the PRD, architecture decision records (ADRs), and a short record of the Design Thinking decisions. You commit them next to the code, after a human review.
+
+The rule is simple: never commit the tracking folder. Curate what matters out of it into a reviewed file, then commit that file.
+
+| Agent | Working state (ignored) | Committed deliverable | Source |
+| --- | --- | --- | --- |
+| **DT Coach** | Coaching state and method notes under `.copilot-tracking\` | A curated decision record. HVE-Core documents no committed location, so the workshop uses `docs\project-planning\playlist-design-decisions.md` | [Design Thinking](https://microsoft.github.io/hve-core/docs/design-thinking/) |
+| **Meeting Analyst** | Extracted transcript notes | Nothing. Anonymize what feeds the PRD, then delete the notes after handoff | [Security model](https://microsoft.github.io/hve-core/docs/security/security-model) |
+| **BRD Builder** | Session state under `.copilot-tracking\` | `docs\project-planning\<name>-brd.md` | [Product definition](https://microsoft.github.io/hve-core/docs/hve-guide/lifecycle/product-definition) |
+| **PRD Builder** | Session state under `.copilot-tracking\` | `docs\project-planning\<name>.md` | [Product definition](https://microsoft.github.io/hve-core/docs/hve-guide/lifecycle/product-definition) |
+| **ADR Creator** | Draft notes under `.copilot-tracking\` | `docs\decisions\` (used in the Level 3 Tech Lead extension) | [Agents catalog](https://microsoft.github.io/hve-core/docs/agents/) |
+| **Functional Planner** and **Backlog Manager** | Planning logs and `handoff.md` under `.copilot-tracking\` | GitHub issues, not files | [TPM guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tpm) |
+| **RPI Agent** (Level 3) | Research, plans, change logs and reviews under `.copilot-tracking\` | The code, the tests and the pull request | [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-engineering) |
+
+<div class="important" data-title="Workshop recommendation">
+
+> HVE-Core documents where the BRD, PRD and ADRs go. It does not document a committed location for Design Thinking output. Saving a curated record in `docs\project-planning` next to the BRD and PRD is a workshop recommendation, not an HVE-Core rule.
+
+</div>
+
+### Step 1: Check that the tracking folder is ignored
+
+Run from the repository root:
+
+```powershell
+git check-ignore -v .copilot-tracking
+```
+
+Expected result:
+- Git prints the `.gitignore` rule that ignores `.copilot-tracking/`.
+- If it prints nothing, add `.copilot-tracking/` to `.gitignore` and commit that change first.
+
+### Step 2: Sort the working state
+
+Run:
+
+```powershell
+Get-ChildItem .copilot-tracking -Recurse -File | Select-Object -ExpandProperty FullName
+git status
+```
+
+For each file, decide:
+
+- **Keep locally.** Agent working state you may reuse later, such as DT Coach state or the backlog handoff. It stays ignored.
+- **Curate.** Content that should become part of a deliverable, such as the Design Thinking decisions. You copy the outcome, not the file.
+- **Delete.** Raw meeting or transcript notes, once their content has been anonymized into the PRD.
+
+Expected result:
+- `git status` shows no `.copilot-tracking` entries.
+- If you ran the extended track, it shows the BRD and PRD under `docs\project-planning` as new files.
+
+### Step 3: Write the Design Thinking record
+
+Select **DT Coach**. Copy paste the following prompt:
+
+```text
+Write a curated Design Thinking decision record for the Music Catalog playlist slice to docs/project-planning/playlist-design-decisions.md.
+
+Use only the six locked decisions from this session:
+1. user-visible capability
+2. API endpoints
+3. front-end states
+4. duplicate handling
+5. accessibility expectation
+6. out-of-scope items
+
+Add a short problem statement and the success criteria.
+Do not include coaching notes, session state, file paths under .copilot-tracking, names, quotes, or raw notes.
+Edit only that one file.
+```
+
+Expected result:
+- One new file, `docs\project-planning\playlist-design-decisions.md`, with the problem, the six decisions and the success criteria.
+- No other file changes.
+
+### Step 4: Review before you commit
+
+Open each file you plan to commit and check:
+
+- [ ] No names, email addresses, quotes or customer details. Use roles such as "workshop participant" instead.
+- [ ] No paths or links into `.copilot-tracking\`. HVE-Core instructions forbid referencing tracking files from committed content, because they are not in the repository.
+- [ ] Out-of-scope items are still listed as out of scope.
+- [ ] The Markdown is valid. Run:
+
+```powershell
+npx markdownlint-cli2 "docs/project-planning/*.md"
+```
+
+- [ ] You read every file yourself. Agent output is a draft until a human approves it.
+
+### Step 5: Commit the reviewed deliverables
+
+Stage the reviewed folder by path, not with `git add -A`:
+
+```powershell
+git add docs\project-planning
+git status
+git commit -m "Add playlist slice design record, BRD and PRD"
+```
+
+Expected result:
+- The commit contains only files under `docs\project-planning`.
+- `.copilot-tracking\` still exists on your machine but is not part of the commit.
+
+HVE-Core references:
+
+- [Install HVE-Core as an extension](https://microsoft.github.io/hve-core/docs/getting-started/methods/extension) and [Setup in the lifecycle guide](https://microsoft.github.io/hve-core/docs/hve-guide/lifecycle/setup): `.copilot-tracking/` is local working state and belongs in `.gitignore`.
+- [Copilot tracking instructions](https://github.com/microsoft/hve-core/blob/main/.github/instructions/hve-core/copilot-tracking.instructions.md): what agents write to the tracking folder, and why committed content must not reference it.
+- [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-engineering): why RPI keeps research and plans as files outside the conversation.
+- [Security model](https://microsoft.github.io/hve-core/docs/security/security-model): sensitive meeting content and the gitignore mitigation.
+- [Product definition](https://microsoft.github.io/hve-core/docs/hve-guide/lifecycle/product-definition), [TPM guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tpm) and [Business Program Manager guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/business-program-manager): where the BRD and PRD live and who reviews them.
+- [Design Thinking](https://microsoft.github.io/hve-core/docs/design-thinking/) and the [agents catalog](https://microsoft.github.io/hve-core/docs/agents/).
+- [HVE-Core custom agents](https://github.com/microsoft/hve-core/blob/main/.github/CUSTOM-AGENTS.md) and the [HVE-Core planning documents](https://github.com/microsoft/hve-core/tree/main/docs/planning), as examples of committed, curated planning content.
+
+## Commit checkpoint
 
 Run:
 
 ```powershell
 git status
-git add docs\project-planning
-git commit -m "Add playlist slice BRD and PRD"
+git log --oneline -1
 ```
 
 Expected result:
-- The BRD and PRD are committed next to the code they describe.
-- Note the parent issue number. You use it in Level 3.
-
-## Commit checkpoint
-
-No repository file should change outside the extended track. Run:
-
-```powershell
-git status
-```
-
-Expected result:
-- Your working tree is clean.
+- Your working tree is clean, and `.copilot-tracking\` does not appear.
+- The last commit holds your curated files under `docs\project-planning`.
 - You have a shared feature scope for RPI.
 
 ---
@@ -828,12 +943,14 @@ Expected result:
 
 ### Step 3: Research checkpoint
 
-If there are no file changes, no commit is needed. If your tool wrote notes intentionally, commit them only after reviewing:
+HVE-Core writes research notes under `.copilot-tracking\`, which is ignored. No commit is needed. Run:
 
 ```powershell
 git status
-git add -A; git commit -m "Record RPI research notes"
 ```
+
+Expected result:
+- The working tree is clean, and `.copilot-tracking\` does not appear.
 
 ## Plan phase
 
@@ -879,7 +996,7 @@ git status
 ```
 
 Expected result:
-- The working tree is clean unless you intentionally saved plan notes.
+- The working tree is clean. Plan notes stay in the ignored `.copilot-tracking\` folder.
 
 ## Implement phase
 
@@ -967,7 +1084,7 @@ Expected result:
 
 ### Step 5: Commit implementation checkpoint
 
-Run from the repository root:
+Run from the repository root. Check `git status` first: it should list only source and test files, never `.copilot-tracking\`.
 
 ```powershell
 git status
@@ -1022,7 +1139,7 @@ Expected result:
 
 ### Step 3: Commit review checkpoint
 
-Run from the repository root:
+Run from the repository root. Check `git status` first: review notes stay in the ignored `.copilot-tracking\` folder.
 
 ```powershell
 git status

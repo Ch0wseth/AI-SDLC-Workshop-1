@@ -103,7 +103,7 @@ changed_outside_tracking() {
 }
 
 tree_clean_check() {
-  # HVE-Core may intentionally write notes under .copilot-tracking/; the lab allows reviewed notes.
+  # HVE-Core writes working state under .copilot-tracking/: ignored working state, never committed.
   if [ -z "$(git status --porcelain)" ]; then
     check "working tree clean" true
   elif [ -z "$(changed_outside_tracking)" ]; then

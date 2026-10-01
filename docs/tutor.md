@@ -36,7 +36,8 @@ Part 1 totals 100 minutes and Part 2 totals 45 minutes.
 | --- | --- | --- | --- | --- |
 | 0:00 | Level 0 Setup | 10 | Starter green | Skip the tour |
 | 0:10 | Level 1 HVE-Core plugin | 15 | `copilot plugin list` shows hve-core | Use the VS Code extension |
-| 0:25 | Level 2 Design Thinking | 35 | DT decisions captured | Hand out the decision summary |
+| 0:25 | Level 2 Design Thinking | 25 | DT decisions captured | Hand out the decision summary |
+| 0:50 | Level 2 Curate what you commit | 10 | Design record committed, `.copilot-tracking` ignored | Show `git check-ignore` and commit the provided record |
 | 1:00 | Level 3 RPI | 70 | Playlist feature merged and tests green | Share your finished branch |
 | 2:10 | Break | 10 | Implementation committed, tests pass | |
 | 2:20 | Level 4 APM, policy and marketplace | 40 | Lockfile committed and policy audited | Start `apm install` first, explain the lockfile and policy while it runs; demo the audit from recordings |
@@ -57,7 +58,7 @@ The core agenda above does not include the role-based extended tracks. Choose ho
 | Tech Lead: ADR Creator, Code Review agent, `/git-commit` | End of Level 3 | 10 to 15 | Tech Lead, Engineer | Early finishers |
 | Security Architect: report-only security review delegated to Copilot cloud agent | End of Level 5 | about 20, plus agent run time | Security Architect | Facilitator demo, or hands-on for a security-focused room |
 
-To keep the afternoon at 240 minutes when you run a track hands-on, take the time from elsewhere: shorten the DT Coach prompts in Level 2, demo Level 4 from recordings, or move Level 5 accessibility and Extra Credits to a demo. For a PM-only audience, run Levels 0 to 2 with the Product Manager track, then Level 5, and demo the rest.
+To keep the afternoon at 240 minutes when you run a track hands-on, take the time from elsewhere: shorten the DT Coach prompts in Level 2 (keep the 10-minute curation block), demo Level 4 from recordings, or move Level 5 accessibility and Extra Credits to a demo. For a PM-only audience, run Levels 0 to 2 with the Product Manager track, then Level 5, and demo the rest.
 
 Rules for the tracks:
 - Meeting Analyst needs a Microsoft 365 Copilot licence and WorkIQ, and cannot read local transcripts. Always demo it yourself, or skip it.
