@@ -2,7 +2,7 @@
 
 A two-afternoon, fully hands-on workshop (about 4 hours each). It starts with individual GitHub Copilot primitives and ends with a governed, agentic software development lifecycle: repository-owned packages, policy, structured Research → Plan → Implement → Review execution, automated backlog management, and controlled delegation to the Copilot cloud agent.
 
-> **Before D-Day:** every attendee and administrator must complete the [prerequisites and pre-D-Day checks](docs/prerequisites.md). Most setup problems on the day come from licences, organization policies, and corporate networks, and none of them can be fixed in the room.
+> **Before D-Day:** every attendee and administrator must complete the checklist for the delivery option your organization chose: [Codespaces](docs/before-d-day-codespace.md), [local dev container](docs/before-d-day-devcontainer.md) or [local tools](docs/before-d-day-local.md). The shared reference is [docs/prerequisites.md](docs/prerequisites.md). Most setup problems on the day come from licences, organization policies, and corporate networks, and none of them can be fixed in the room.
 
 ## At a glance
 
@@ -82,17 +82,17 @@ Each step reuses what the previous one introduced, and adds one layer of sharing
 
 Both labs support three ways to work. Pick one per attendee before D-Day.
 
-| Option | Summary | Best when |
-| --- | --- | --- |
-| 🥇 **GitHub Codespaces** | Nothing to install; a preconfigured cloud environment | Your network and organization allow Codespaces (recommended) |
-| 🥈 **Local dev container** | The same environment in Docker or Podman on your machine | Codespaces is blocked, but containers are allowed |
-| 🥉 **Local tools** | Install Git, Node.js, .NET, GitHub CLI, Copilot CLI, APM and gh-aw yourself | Containers are not allowed |
+| Option | Summary | Best when | Before D-Day checklist |
+| --- | --- | --- | --- |
+| 🥇 **GitHub Codespaces** | Nothing to install; a preconfigured cloud environment | Your network and organization allow Codespaces (recommended) | [before-d-day-codespace.md](docs/before-d-day-codespace.md) |
+| 🥈 **Local dev container** | The same environment in Docker or Podman on your machine | Codespaces is blocked, but containers are allowed | [before-d-day-devcontainer.md](docs/before-d-day-devcontainer.md) |
+| 🥉 **Local tools** | Install Git, Node.js, .NET, GitHub CLI, Copilot CLI, APM and gh-aw yourself | Containers are not allowed | [before-d-day-local.md](docs/before-d-day-local.md) |
 
-Full steps for each option, including Podman and the `docker` alias, are in the [prerequisites](docs/prerequisites.md#4-per-option-setup).
+Each checklist is self-contained: organization settings, network rules, attendee installation, D-7 and D-1 checks, and troubleshooting for that option only. The [prerequisites](docs/prerequisites.md) page keeps the full comparison and the complete endpoint table.
 
 ## Pre-D-Day checklist (summary)
 
-The complete list, with commands and owners, is in [docs/prerequisites.md](docs/prerequisites.md).
+The complete lists, with commands and owners, are in the per-option checklists above.
 
 **Every attendee**
 
@@ -101,7 +101,8 @@ The complete list, with commands and owners, is in [docs/prerequisites.md](docs/
 - [ ] A delivery option chosen and tested:
   - Codespaces: a test Codespace opens in the browser and in VS Code
   - Dev container: **Docker** or **Podman** works (`docker run --rm hello-world`, or Podman with `dev.containers.dockerPath` set to `podman` and an optional `docker` alias)
-  - Local tools: Git, Node.js 22, .NET 10, GitHub CLI, Copilot CLI, APM CLI and gh-aw all print a version
+  - Local tools: Git, Node.js 22, .NET 8 (Afternoon 1) and .NET 10 (Afternoon 2), GitHub CLI, Copilot CLI, APM CLI and gh-aw all print a version
+- [ ] Afternoon 1 fork of `Philess/gh-copilot-demo` runs: API on port 3000 and viewer on port 3001
 - [ ] Network checks pass from the network you will use on the day: `github.com`, `api.github.com`, `*.githubcopilot.com`, `*.github.dev`, the Codespaces tunnel at `global.rel.tunnels.api.visualstudio.com`, and `ghcr.io`
 
 **Organization or enterprise owners**
@@ -120,6 +121,7 @@ The complete list, with commands and owners, is in [docs/prerequisites.md](docs/
 | Path | Purpose |
 | --- | --- |
 | [docs/prerequisites.md](docs/prerequisites.md) | Shared prerequisites, network allowlist, organization settings and checklists |
+| [docs/before-d-day-codespace.md](docs/before-d-day-codespace.md), [docs/before-d-day-devcontainer.md](docs/before-d-day-devcontainer.md), [docs/before-d-day-local.md](docs/before-d-day-local.md) | Before D-Day checklist for each delivery option |
 | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) | Afternoon 1 lab guide |
 | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) | Afternoon 2 lab guide |
 | [docs/tutor.md](docs/tutor.md) | Facilitator guide: timing, pre-flight, risks and messaging guardrails |
