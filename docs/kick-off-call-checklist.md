@@ -28,6 +28,7 @@ Organization → **Settings → Copilot → Policies**
 - [ ] **Copilot in the IDE / Copilot Chat**: enabled.
 - [ ] **Copilot CLI**: enabled.
 - [ ] **Copilot cloud agent**: enabled.
+- [ ] **Copilot code review**: enabled.
 - [ ] **MCP servers in Copilot**: enabled.
 - [ ] **Preview features**: enabled, if the facilitator plans to show them.
 - [ ] No policy blocks installing **plugins** or using a **marketplace** (needed for `microsoft/hve-core`).
@@ -112,6 +113,13 @@ These can run from the volunteer's machine, or be handed to the network team.
   ```
 
 - [ ] Is there TLS inspection or a proxy? If yes, note it as a gap.
+
+## 11. Code security (optional, Afternoon 2 Level 6)
+
+Organization → **Settings → Advanced Security**
+
+- [ ] **GitHub Secret Protection** can be enabled on the attendees' private repositories. If not, the facilitator demos push protection instead. Note the decision.
+- [ ] Repository administrators can enable Secret Protection, push protection and custom patterns. Enterprise or organization settings may lock them.
 
 ## Gaps and owners
 
