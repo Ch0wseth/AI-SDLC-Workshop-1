@@ -23,7 +23,7 @@ The [README crescendo](../README.md#the-crescendo) explains the order to attende
 
 ## Design decisions
 
-These decisions shape the content. Changing one usually affects several modules, the solutions and the workshop tester.
+These decisions shape the content. Changing one usually affects several modules, the solutions and the workshop tester. The problem, scope, stakeholders and assumptions behind them are in the [design documentation](design/README.md).
 
 | # | Decision | Why |
 | --- | --- | --- |
@@ -115,7 +115,7 @@ Describe the change and its acceptance criteria to `/rpi`, or run the phases you
 /rpi task="Re-verify Level 4 against the latest APM release and update the guide and solutions"
 ```
 
-During Research, give the agent this handbook, [CONTRIBUTING.md](../CONTRIBUTING.md) and [tutor.md](tutor.md#messaging-guardrails) so it inherits the decisions, writing rules and guardrails. Expect the agent to verify commands against official documentation before it changes a guide.
+During Research, give the agent this handbook, the [design documentation](design/README.md), [CONTRIBUTING.md](../CONTRIBUTING.md) and [tutor.md](tutor.md#messaging-guardrails) so it inherits the decisions, writing rules and guardrails. Expect the agent to verify commands against official documentation before it changes a guide.
 
 ### Step 3: Validate and open the pull request
 

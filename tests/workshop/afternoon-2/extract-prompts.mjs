@@ -27,6 +27,7 @@ const byLead = (lead) => blocks.find((b) => b.lead === lead);
 const wanted = {
   'dt-start': byFirstLine('/dt-start-project'),
   'dt-summary': byFirstLine('Summarize the final decisions'),
+  'dt-record': byFirstLine('Write a curated Design Thinking decision record'),
   'rpi-research': byFirstLine('/rpi-research'),
   'rpi-plan': byFirstLine('/rpi-plan'),
   'rpi-implement': byFirstLine('/rpi-implement'),
