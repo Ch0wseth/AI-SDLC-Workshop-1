@@ -62,7 +62,7 @@ Each run consumes several independent usage units. Do not add them up as one "co
 - **Copilot CLI usage** for the DT and RPI prompts. The run saves a `usage/*.json` per prompt (`--usage-output-file`).
 - **Agentic workflow inference** for the sandbox `daily-backlog` and `a11y-review` runs and for this validator.
 - **One Copilot Coding Agent session** for the Level 6 issue.
-- **Actions minutes** for the runner that orchestrates the run, up to about 5.5 hours.
+- **Actions minutes** for the runner that orchestrates the run, up to 6 hours (the lab itself is capped at 4 hours by `LAB_TIMEOUT_S`).
 
 See the official GitHub billing documentation for current rates; this repository makes no price claims. Path filters (`docs/afternoon-2/**`, `solutions/afternoon-2/**`, `src/**`, `tests/**`, `.github/**` and the dev container) limit runs to relevant changes.
 

@@ -305,7 +305,8 @@ fi
 # wait_aw_run <step-id> <workflow> <title>
 wait_aw_run() {
   local id=$1 wf=$2 title=$3 since run_id state concl
-  since=$(date -u +%FT%TZ)
+  # Two minutes of margin for clock skew between the Codespace and GitHub.
+  since=$(date -u -d '-2 minutes' +%FT%TZ)
   step "$id" "Level 5" "$title" literal 300 "gh aw run $wf"
   local run_code=$STEP_CODE run_dur=$STEP_DUR
   run_id=""
@@ -333,7 +334,13 @@ wait_aw_run() {
 
 gh issue list -R "$SANDBOX_REPO" --state open --json number,title > "$RESULTS_DIR/issues-before-daily-backlog.json" 2>/dev/null
 wait_aw_run l5-run-daily-backlog daily-backlog "Run daily backlog (gh aw run daily-backlog)"
-issue=$(gh issue list -R "$SANDBOX_REPO" --state open --search '"[Daily backlog]" in:title' --json number,body --jq '.[0]' 2>/dev/null)
+# Filter titles locally instead of using --search, whose index can lag behind a just-created issue.
+issue=""
+for _ in 1 2 3 4 5 6; do
+  issue=$(gh issue list -R "$SANDBOX_REPO" --state open --limit 50 --json number,title,body \
+    --jq '[.[] | select(.title | startswith("[Daily backlog]"))][0] // empty' 2>/dev/null)
+  [ -n "$issue" ] && break; sleep 10
+done
 if [ -n "$issue" ] && [ "$issue" != null ]; then
   echo "$issue" > "$RESULTS_DIR/daily-backlog-issue.json"
   echo "$issue" | grep -q 'Recommended implementation order' && check "summary has ## Recommended implementation order" true || check "summary has ## Recommended implementation order" false
@@ -394,7 +401,8 @@ else
   step l6-pr "Level 6" "Coding Agent opens a PR that references the issue" emulated 60 'true'
   PR="" waited=0
   while [ "$waited" -lt "$CODING_AGENT_WAIT_S" ]; do
-    PR=$(gh pr list -R "$SANDBOX_REPO" --state all --search "$ISSUE_NUMBER" --json number,author \
+    # The sandbox is new, so any Copilot-authored PR is the one for this issue; avoids search-index lag.
+    PR=$(gh pr list -R "$SANDBOX_REPO" --state all --limit 20 --json number,author \
       --jq '[.[] | select(.author.login | test("copilot"; "i"))][0].number // empty' 2>/dev/null)
     [ -n "$PR" ] && break; sleep 60; waited=$((waited + 60))
   done

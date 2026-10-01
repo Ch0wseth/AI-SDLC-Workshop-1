@@ -12,7 +12,7 @@
 #   SANDBOX_OWNER         user or organization that owns sandboxes
 #   SANDBOX_NAME          sandbox repository name, must start with "workshop-tester-"
 #   OUT_DIR               local output directory (uploaded as the run artifact)
-# Optional: CODESPACE_MACHINE (default standardLinux32gb), LAB_TIMEOUT_S (default 16200),
+# Optional: CODESPACE_MACHINE (default standardLinux32gb), LAB_TIMEOUT_S (default 14400),
 #           SOURCE_REPO, SOURCE_SHA, RUN_URL (metadata for the report)
 set -u
 
@@ -21,7 +21,8 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 case $SANDBOX_NAME in workshop-tester-*) ;; *) echo "SANDBOX_NAME must start with workshop-tester-" >&2; exit 2;; esac
 SANDBOX_REPO="$SANDBOX_OWNER/$SANDBOX_NAME"
 CODESPACE_MACHINE=${CODESPACE_MACHINE:-standardLinux32gb}
-LAB_TIMEOUT_S=${LAB_TIMEOUT_S:-16200}
+# Budget within the 360-minute lab_run job: setup (<= 72 min) + lab + collect (10) + cleanup (<= 17).
+LAB_TIMEOUT_S=${LAB_TIMEOUT_S:-14400}
 export COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN:-${GH_TOKEN-}}
 STATE="$OUT_DIR/state.env"
 SANDBOX_MARKER="Ephemeral workshop tester sandbox (safe to delete)"
@@ -77,9 +78,10 @@ setup() {
 
   step infra-codespace infra "Create the Codespace on the sandbox" translated 1200 \
     "gh codespace create -R '$SANDBOX_REPO' -b main -m '$CODESPACE_MACHINE' --idle-timeout 120m --retention-period 1h --default-permissions"
-  CODESPACE=$(grep -Eo '^[a-z0-9-]+-[a-z0-9]+$' "$RESULTS_DIR/steps/infra-codespace.log" | tail -n1)
+  # The sandbox is new, so its only Codespace is the one just created. Parsing the create output is a fallback.
+  CODESPACE=$(gh codespace list -R "$SANDBOX_REPO" --json name --jq '.[0].name // empty' 2>/dev/null)
   if [ -z "$CODESPACE" ]; then
-    CODESPACE=$(gh codespace list -R "$SANDBOX_REPO" --json name --jq '.[0].name // empty' 2>/dev/null)
+    CODESPACE=$(grep -Eo '^[a-z0-9]+(-[a-z0-9]+)+$' "$RESULTS_DIR/steps/infra-codespace.log" | tail -n1)
   fi
   [ -n "$CODESPACE" ] && { check "Codespace created" true "$CODESPACE"; save_state CODESPACE "$CODESPACE"; } || check "Codespace created" false
   finish_step
@@ -154,7 +156,7 @@ cleanup() {
   step infra-sweep infra "Delete orphaned sandboxes and Codespaces from earlier runs" translated 600 "
     gh codespace list --json name,repository --jq '.[] | select(.repository | test(\"/workshop-tester-\")) | select(.repository != \"$SANDBOX_REPO\") | .name' |
       while read -r cs; do echo \"delete codespace \$cs\"; gh codespace delete -c \"\$cs\" --force; done
-    gh repo list '$SANDBOX_OWNER' --limit 200 --json nameWithOwner,description --jq '.[] | select(.nameWithOwner | test(\"/workshop-tester-\")) | select(.description | startswith(\"$SANDBOX_MARKER\")) | select(.nameWithOwner != \"$SANDBOX_REPO\") | .nameWithOwner' |
+    gh repo list '$SANDBOX_OWNER' --limit 200 --json nameWithOwner,description --jq '.[] | select(.nameWithOwner | test(\"/workshop-tester-\")) | select((.description // \"\") | startswith(\"$SANDBOX_MARKER\")) | select(.nameWithOwner != \"$SANDBOX_REPO\") | .nameWithOwner' |
       while read -r r; do echo \"delete repo \$r\"; gh repo delete \"\$r\" --yes; done
     true"
   finish_step

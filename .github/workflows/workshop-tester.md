@@ -37,7 +37,7 @@ jobs:
   lab_run:
     needs: [activation]
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 360
     permissions:
       contents: read
     env:
