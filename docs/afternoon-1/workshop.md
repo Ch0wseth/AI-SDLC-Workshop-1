@@ -118,7 +118,7 @@ When a section below says **Open upstream Level N**, switch to the lab tab, comp
 | A fork of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo) | Every option below starts from your fork. |
 | A browser | For this guide, the upstream lab, and github.com. |
 
-Complete the [prerequisites and pre-D-Day checks](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/prerequisites.md) before the session. They cover the licence, VS Code, Docker or Podman, network allowlist, and organization settings.
+Complete the [prerequisites and pre-D-Day checks](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/prerequisites.md) before the session. They cover the licence, VS Code, Docker or Podman, network allowlist, and organization settings. For a checklist limited to your delivery option, use [Codespaces](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-codespace.md), [local dev container](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-devcontainer.md) or [local tools](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-local.md).
 
 Fork the demo repository first: open [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), select **Fork**, and keep your own account as the owner.
 

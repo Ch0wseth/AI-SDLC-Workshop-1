@@ -5,6 +5,8 @@ This guide applies to both afternoons:
 - **Afternoon 1 — GitHub Copilot Zero to Hero**
 - **Afternoon 2 — AI SDLC with GitHub and GitHub Copilot**
 
+For a shorter checklist that covers only the delivery option you chose, use [before-d-day-codespace.md](before-d-day-codespace.md), [before-d-day-devcontainer.md](before-d-day-devcontainer.md) or [before-d-day-local.md](before-d-day-local.md). This page remains the full reference.
+
 Complete it **at least one week before the session (D-7)**. Then repeat the quick checks the day before (D-1). Items marked **Admin** need an organization or enterprise owner. Many features in Afternoon 2 are previews or depend on policy settings. Check each one in the tenant you will use on the day, because a feature that works on a personal account may be disabled in your organization.
 
 <div class="important" data-title="Synthetic data only">
@@ -20,7 +22,7 @@ Every attendee picks **one** of three options. They all lead to the same lab ste
 | | 🥇 Option 1: GitHub Codespaces | 🥈 Option 2: Local dev container | 🥉 Option 3: Local tools |
 | --- | --- | --- | --- |
 | What runs where | A cloud VM, reached from the browser or from VS Code | A container on your machine, run by Docker or Podman | Tools installed directly on your machine |
-| What you install | Nothing (VS Code desktop is optional) | VS Code, the Dev Containers extension, Docker or Podman | VS Code and the full tool list in [section 4](#4-option-3-local-tools) |
+| What you install | Nothing (VS Code desktop is optional) | VS Code, the Dev Containers extension, Docker or Podman | VS Code and the full tool list in [section 4](#option-3-local-tools) |
 | Environment | Identical for everyone; tools are preinstalled | Identical for everyone; tools are preinstalled | Depends on your machine |
 | Main risk | Corporate network blocks the Codespaces tunnel | Container engine licence, virtualization, or disk space | Version drift and missing tools |
 | Network needs | GitHub, Codespaces and Copilot endpoints ([section 6](#6-network-and-firewall)) | Same, plus the container registries and package registries | Same, plus the tool installers and package registries |
