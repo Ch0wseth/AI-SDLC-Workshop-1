@@ -23,6 +23,8 @@ Afternoon 2 uses this repository as a template. It is a small music catalog mono
 
 In Afternoon 2, attendees use HVE-Core's RPI workflow to build one capability: **browse tracks and add them to a single in-memory playlist**.
 
+For a preconfigured environment, open the repository in GitHub Codespaces or use VS Code's **Dev Containers: Reopen in Container** command. The root `.devcontainer.json` provides Git, Node.js 22, .NET 10, GitHub CLI, GitHub Copilot CLI, APM CLI, the `gh-aw` extension, Copilot extensions, restored .NET dependencies and installed front-end dependencies. Authentication, Copilot licensing and organization policies must still be configured as described in the [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md).
+
 ```bash
 dotnet test
 cd src/front
