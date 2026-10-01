@@ -3,7 +3,7 @@
 This guide is for tutors and facilitators. It holds **all timing** for both afternoons (4 hours each), the pre-flight checklist, known risks and messaging guardrails. The attendee guides contain no time codes, so keep timing changes in this file only.
 
 - Attendee content: [GitHub Copilot Zero to Hero](afternoon-1/workshop.md) and [AI SDLC with GitHub and GitHub Copilot](afternoon-2/workshop.md)
-- Attendee checklist: [prerequisites](afternoon-2/prerequisites.md)
+- Attendee checklist: [prerequisites and pre-D-Day checks](prerequisites.md)
 - Maintaining the content: [CONTRIBUTING.md](../CONTRIBUTING.md)
 
 GitHub Copilot Zero to Hero runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on attendee forks of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds Levels 7 to 9 from this repository. AI SDLC with GitHub and GitHub Copilot switches to the Music Catalog template in this repository.

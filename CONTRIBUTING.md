@@ -10,7 +10,7 @@ The attendee guides (`docs/afternoon-*/workshop.md`) only contain what attendees
 | --- | --- |
 | `docs/afternoon-1/workshop.md` | GitHub Copilot Zero to Hero (wraps the upstream GHCopilotHoL lab, adds Levels 7 to 9) |
 | `docs/afternoon-2/workshop.md` | AI SDLC with GitHub and GitHub Copilot |
-| `docs/afternoon-2/prerequisites.md` | Attendee checklist for AI SDLC with GitHub and GitHub Copilot |
+| `docs/prerequisites.md` | Shared prerequisites, network allowlist, organization settings and pre-D-Day checklists for both afternoons |
 | `docs/tutor.md` | Timing, pre-flight, risks and messaging guardrails for tutors |
 | `docs/afternoon-*/assets/` | Screenshots and their placeholder lists |
 | `solutions/afternoon-2/` | Reference files for blocked attendees (`apm.yml`, policy, workflows) |
