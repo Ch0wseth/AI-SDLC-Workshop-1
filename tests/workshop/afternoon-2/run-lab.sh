@@ -105,6 +105,9 @@ step l2-git-status "Level 2" "Commit checkpoint: git status" literal 30 'git sta
 tree_clean_check
 finish_step
 
+skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \
+  "extended track: multi-turn agent Q&A with human confirmation before /backlog-execute writes issues; Meeting Analyst needs Microsoft 365 and WorkIQ"
+
 # ---------------------------------------------------------------- Level 3
 copilot_prompt l3-research "Level 3" "RPI research (/rpi-research)" rpi-research 1800
 for f in Program.cs tracks.json App.tsx; do
@@ -185,6 +188,9 @@ step l3-review-commit "Level 3" "Commit review checkpoint" translated 60 \
   'git status; git add -A; git commit -m "Review playlist slice" || echo "nothing to commit"'
 tree_clean_check
 finish_step
+
+skip_step l3-tech-lead "Level 3" "Tech Lead extension (ADR Creator, Code Review agent, /git-commit)" \
+  "extended track: human-gated agents that pause for scope and perspective confirmation"
 
 step break-status "Break" "Working tree clean before the break" literal 30 'git status'
 tree_clean_check
@@ -372,6 +378,9 @@ finish_step
 step l5-git-status "Level 5" "Commit checkpoint: git status" literal 30 'git status'
 tree_clean_check
 finish_step
+
+skip_step l5-security-delegation "Level 5" "Extended track: delegate a security review to Copilot cloud agent" \
+  "extended track: a second Copilot PR would collide with the Level 6 PR detection; the gh-aw variant needs a GH_AW_AGENT_TOKEN PAT"
 
 # ---------------------------------------------------------------- Level 6
 P=$RESULTS_DIR/prompts
