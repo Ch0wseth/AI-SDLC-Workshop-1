@@ -101,12 +101,27 @@ log_has '409|conflict|reject|duplicate' && check "summary states duplicate add i
 log_has 'empty' && check "summary mentions the empty state" true || check "summary mentions the empty state" false
 finish_step
 
-step l2-git-status "Level 2" "Commit checkpoint: git status" literal 30 'git status'
-tree_clean_check
-finish_step
-
 skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \
   "extended track: multi-turn agent Q&A with human confirmation before /backlog-execute writes issues; Meeting Analyst needs Microsoft 365 and WorkIQ"
+
+step l2-curate-ignored "Level 2" "Curate: check that the tracking folder is ignored" literal 30 'git check-ignore -v .copilot-tracking'
+git check-ignore -q .copilot-tracking/probe && check ".copilot-tracking/ is ignored" true || check ".copilot-tracking/ is ignored" false
+finish_step
+
+copilot_prompt l2-dt-record "Level 2" "Curate: write the Design Thinking record" dt-record 900 --continue
+rec=docs/project-planning/playlist-design-decisions.md
+[ -s "$rec" ] && check "decision record written" true || check "decision record written" false "missing $rec"
+[ -s "$rec" ] && ! grep -q '\.copilot-tracking' "$rec" && check "record has no tracking paths" true || check "record has no tracking paths" false
+finish_step
+
+step l2-curate-commit "Level 2" "Curate: commit the reviewed deliverables" translated 60 \
+  'git add docs/project-planning && git status && git commit -m "Add playlist slice design record, BRD and PRD"'
+[ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
+finish_step
+
+step l2-git-status "Level 2" "Commit checkpoint: git status" literal 30 'git status; git log --oneline -1'
+tree_clean_check
+finish_step
 
 # ---------------------------------------------------------------- Level 3
 copilot_prompt l3-research "Level 3" "RPI research (/rpi-research)" rpi-research 1800
@@ -116,8 +131,8 @@ done
 tree_clean_check
 finish_step
 
-step l3-research-checkpoint "Level 3" "Research checkpoint (commit notes only if written)" translated 60 \
-  'git status; if [ -n "$(git status --porcelain)" ]; then git add -A && git commit -m "Record RPI research notes"; else echo "no changes, no commit needed"; fi'
+step l3-research-checkpoint "Level 3" "Research checkpoint: git status" literal 30 'git status'
+tree_clean_check
 finish_step
 
 copilot_prompt l3-plan "Level 3" "RPI plan (/rpi-plan)" rpi-plan 1800 --continue
@@ -126,8 +141,8 @@ log_has 'npm test' && check "plan includes npm test" true || check "plan include
 tree_clean_check
 finish_step
 
-step l3-plan-checkpoint "Level 3" "Plan checkpoint: git status" translated 60 \
-  'git status; if [ -n "$(git status --porcelain)" ]; then git add -A && git commit -m "Record RPI plan notes"; fi'
+step l3-plan-checkpoint "Level 3" "Plan checkpoint: git status" literal 30 'git status'
+tree_clean_check
 finish_step
 
 copilot_prompt l3-implement "Level 3" "RPI implement (/rpi-implement)" rpi-implement 3600 --continue

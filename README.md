@@ -129,6 +129,8 @@ The complete lists, with commands and owners, are in the per-option checklists a
 | [solutions/afternoon-2](solutions/afternoon-2) | Reference solution files for Afternoon 2 |
 | [tests/workshop/afternoon-2](tests/workshop/afternoon-2/README.md) | An agentic workflow that replays the Afternoon 2 lab in a throwaway Codespace on every change to `main` and files an issue when a step fails |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Writing rules, upstream pins, MOAW preview and validation |
+| [docs/maintainer-handbook.md](docs/maintainer-handbook.md) | Design decisions, verified facts, open assumptions and how to resume the work |
+| [docs/design/README.md](docs/design/README.md) | Curated Design Thinking outcomes: problem and scope, stakeholders, assumptions |
 
 ## Starter application (Afternoon 2)
 

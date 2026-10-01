@@ -2,7 +2,7 @@
 
 Thanks for helping keep this workshop accurate. Copilot, Copilot CLI, APM, HVE-Core and GitHub agentic workflows change quickly, so most contributions are about keeping the labs aligned with current documentation.
 
-The attendee guides (`docs/afternoon-*/workshop.md`) only contain what attendees practice. Maintainer guidance lives in this file, and facilitator timing lives in [docs/tutor.md](docs/tutor.md).
+The attendee guides (`docs/afternoon-*/workshop.md`) only contain what attendees practice. Maintainer guidance lives in this file, facilitator timing lives in [docs/tutor.md](docs/tutor.md), and design decisions, open assumptions and how to resume the work live in [docs/maintainer-handbook.md](docs/maintainer-handbook.md). The curated Design Thinking outcomes behind those decisions live in [docs/design/](docs/design/README.md); HVE-Core working state under `.copilot-tracking/` is never committed.
 
 ## Repository layout
 
