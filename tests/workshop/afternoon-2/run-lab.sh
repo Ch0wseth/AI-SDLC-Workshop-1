@@ -10,6 +10,7 @@
 #   RESULTS_DIR           default /tmp/workshop-tester
 #   WORKFLOW_WAIT_S       max wait for each gh-aw run (default 1800)
 #   CODING_AGENT_WAIT_S   max wait for the Coding Agent task and PR (default 3600)
+#   CODE_REVIEW_WAIT_S    max wait for the Copilot code review on that PR (default 900)
 set -u
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -17,6 +18,7 @@ REPO_DIR=$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel)
 export RESULTS_DIR=${RESULTS_DIR:-/tmp/workshop-tester}
 WORKFLOW_WAIT_S=${WORKFLOW_WAIT_S:-1800}
 CODING_AGENT_WAIT_S=${CODING_AGENT_WAIT_S:-3600}
+CODE_REVIEW_WAIT_S=${CODE_REVIEW_WAIT_S:-900}
 export CI=true DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 NPM_CONFIG_UPDATE_NOTIFIER=false GH_PROMPT_DISABLED=1
 # shellcheck source=lib.sh
 . "$SCRIPT_DIR/lib.sh"
@@ -103,6 +105,9 @@ step l2-git-status "Level 2" "Commit checkpoint: git status" literal 30 'git sta
 tree_clean_check
 finish_step
 
+skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \
+  "extended track: multi-turn agent Q&A with human confirmation before /backlog-execute writes issues; Meeting Analyst needs Microsoft 365 and WorkIQ"
+
 # ---------------------------------------------------------------- Level 3
 copilot_prompt l3-research "Level 3" "RPI research (/rpi-research)" rpi-research 1800
 for f in Program.cs tracks.json App.tsx; do
@@ -183,6 +188,9 @@ step l3-review-commit "Level 3" "Commit review checkpoint" translated 60 \
   'git status; git add -A; git commit -m "Review playlist slice" || echo "nothing to commit"'
 tree_clean_check
 finish_step
+
+skip_step l3-tech-lead "Level 3" "Tech Lead extension (ADR Creator, Code Review agent, /git-commit)" \
+  "extended track: human-gated agents that pause for scope and perspective confirmation"
 
 step break-status "Break" "Working tree clean before the break" literal 30 'git status'
 tree_clean_check
@@ -371,6 +379,9 @@ step l5-git-status "Level 5" "Commit checkpoint: git status" literal 30 'git sta
 tree_clean_check
 finish_step
 
+skip_step l5-security-delegation "Level 5" "Extended track: delegate a security review to Copilot cloud agent" \
+  "extended track: a second Copilot PR would collide with the Level 6 PR detection; the gh-aw variant needs a GH_AW_AGENT_TOKEN PAT"
+
 # ---------------------------------------------------------------- Level 6
 P=$RESULTS_DIR/prompts
 step l6-create-issue "Level 6" "Create the follow-up issue from the feature form" emulated 120 \
@@ -432,7 +443,31 @@ else
   fi
   STEP_DUR=$waited
   finish_step
+
+  if [ -z "$PR" ]; then
+    skip_step l6-code-review "Level 6" "Request a Copilot code review on the PR" "no Copilot PR to review"
+  else
+    step l6-code-review "Level 6" "Request a Copilot code review on the PR" translated 60 \
+      "gh pr edit $PR -R $SANDBOX_REPO --add-reviewer @copilot"
+    note "PR-NUMBER replaced by the Copilot PR; -R targets the sandbox"
+    REVIEW_CODE=$STEP_CODE waited=0 reviews=0
+    if [ "$REVIEW_CODE" -eq 0 ]; then
+      while [ "$waited" -lt "$CODE_REVIEW_WAIT_S" ]; do
+        reviews=$(gh pr view "$PR" -R "$SANDBOX_REPO" --json reviews \
+          --jq '[.reviews[] | select(.author.login | test("copilot-pull-request-reviewer|^copilot$"; "i"))] | length' 2>/dev/null)
+        [ "${reviews:-0}" -gt 0 ] && break; sleep 30; waited=$((waited + 30))
+      done
+      gh pr view "$PR" -R "$SANDBOX_REPO" --json reviews > "$RESULTS_DIR/code-review.json" 2>&1
+    fi
+    [ "$REVIEW_CODE" -eq 0 ] && check "Copilot added as a reviewer" true || check "Copilot added as a reviewer" false
+    [ "${reviews:-0}" -gt 0 ] && check "Copilot posted a review" true || check "Copilot posted a review" false "no review after ${waited}s"
+    STEP_DUR=$waited
+    finish_step
+  fi
 fi
+
+skip_step l6-push-protection "Level 6" "Secret scanning push protection with a workshop custom pattern" \
+  "facilitator demo: needs GitHub Secret Protection on the private sandbox and settings-UI steps (custom pattern, dry run)"
 
 step l6-git-status "Level 6" "Commit checkpoint: git status" literal 30 'git status'
 tree_clean_check

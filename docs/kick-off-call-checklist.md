@@ -28,6 +28,7 @@ Organization → **Settings → Copilot → Policies**
 - [ ] **Copilot in the IDE / Copilot Chat**: enabled.
 - [ ] **Copilot CLI**: enabled.
 - [ ] **Copilot cloud agent**: enabled.
+- [ ] **Copilot code review**: enabled.
 - [ ] **MCP servers in Copilot**: enabled.
 - [ ] **Preview features**: enabled, if the facilitator plans to show them.
 - [ ] No policy blocks installing **plugins** or using a **marketplace** (needed for `microsoft/hve-core`).
@@ -112,6 +113,22 @@ These can run from the volunteer's machine, or be handed to the network team.
   ```
 
 - [ ] Is there TLS inspection or a proxy? If yes, note it as a gap.
+
+## 11. Code security (optional, Afternoon 2 Level 6)
+
+Organization → **Settings → Advanced Security**
+
+- [ ] **GitHub Secret Protection** can be enabled on the attendees' private repositories. If not, the facilitator demos push protection instead. Note the decision.
+- [ ] Repository administrators can enable Secret Protection, push protection and custom patterns. Enterprise or organization settings may lock them.
+
+## 12. Extended role tracks (optional, Afternoon 2)
+
+Decide which extended tracks run hands-on, run as a demo, or are skipped. See the [tutor guide](tutor.md#extended-tracks-outside-the-240-minutes).
+
+- [ ] **Product Manager track (Level 2):** the MCP servers policy allows the GitHub MCP server, and the volunteer can create an issue with a sub-issue in their repository.
+- [ ] **Meeting Analyst demo:** the facilitator has a Microsoft 365 Copilot licence and WorkIQ access. Otherwise, skip the demo.
+- [ ] **Security delegation (Level 5):** the volunteer can assign an issue to Copilot and choose a custom agent.
+- [ ] **gh-aw label-gated delegation demo:** the PAT policy allows a fine-grained PAT for the facilitator's sandbox repository.
 
 ## Gaps and owners
 

@@ -105,6 +105,13 @@ Principle: **context is the product**. The quality of an agent's output depends 
 
 - `copilot-setup-steps.yml` prepares its environment. Repository instructions and custom agents shape its behaviour.
 - Branch protection, required reviews, and CI remain the gates. The agent proposes the change and humans approve it.
+- By default, the agent checks its own changes with CodeQL, the GitHub Advisory Database, secret scanning and Copilot code review before it completes the pull request ([risks and mitigations](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations)).
+
+### Copilot code review and secret scanning
+
+- [Copilot code review](https://docs.github.com/en/copilot/concepts/agents/code-review) reviews a pull request like a human reviewer. It reads the repository custom instructions, such as `.github/copilot-instructions.md`, from the pull request's head branch.
+- [Secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning) detects credentials in the Git history. [Push protection](https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection) blocks a push that contains a secret before it reaches the repository.
+- Both act on pull requests and pushes. They review agent output in the same way as human output.
 
 ### Further reading
 
@@ -326,7 +333,7 @@ Expected result:
 
 ## Topic
 
-You will install HVE-Core as a personal Copilot CLI plugin and identify the HVE agents used later: DT Coach, RPI Agent, Backlog Manager, Accessibility Reviewer, and Accessibility Planner.
+You will install HVE-Core as a personal Copilot CLI plugin and identify the HVE agents used later: DT Coach, RPI Agent, Backlog Manager, Accessibility Reviewer, and Accessibility Planner. The extended tracks also use BRD Builder, PRD Builder, Functional Planner, Code Review, ADR Creator, and Security Reviewer.
 
 ![HVE-Core plugin installed in Copilot CLI](assets/l1-hve-plugin-installed.png)
 
@@ -423,6 +430,8 @@ Expected result:
 
 You will use HVE-Core DT Coach to frame the feature. To keep the room aligned, the inputs and decisions are fixed. The output should identify one capability: browse tracks and add a track to a single in-memory playlist. Duplicate adds are rejected. An empty-state is shown.
 
+An extended Product Manager track then turns these decisions into a BRD, a PRD, and GitHub issues with the HVE-Core planning agents.
+
 ![DT Coach framing the playlist capability](assets/l2-dt-coach-framing.png)
 
 ## Start a DT project
@@ -492,9 +501,216 @@ Manually check that the DT output does not add extra features. Reject additions 
 
 ![DT decisions summary](assets/l2-dt-decisions.png)
 
+## Extended track: Product Manager with HVE-Core
+
+<div class="info" data-title="Extended track">
+
+> This track adds about 40 minutes. Your facilitator tells you whether the room runs it hands-on, watches it as a demo, or skips it. Level 3 works without it: if you skip it, go to the commit checkpoint.
+
+</div>
+
+This track follows the HVE-Core [TPM guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tpm) and [Business Program Manager guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/business-program-manager). You turn the decisions you just locked into requirement documents, then into a tracked backlog of GitHub issues. In Level 3, a developer picks up that backlog.
+
+### The PM agent chain
+
+Use the agents in this order:
+
+| Order | Stage in the TPM guide | HVE-Core agent or command | What it produces | Writes to GitHub? |
+| --- | --- | --- | --- | --- |
+| 1 | Discovery | **DT Coach** (done above) | A framed problem and locked decisions | No |
+| 2 | Discovery, optional | **Meeting Analyst** | Requirements extracted from Microsoft 365 meeting transcripts | No |
+| 3 | Product definition | **BRD Builder** | A business requirements document (BRD) in `docs\project-planning` | No |
+| 4 | Product definition | **PRD Builder** | A product requirements document (PRD) in `docs\project-planning` | No |
+| 5 | Decomposition | **Functional Planner** | A GitHub issue hierarchy plan and a handoff file you can review | No, read-only |
+| 6 | Execution | **Backlog Manager** with `/backlog-execute run` | GitHub issues and sub-issues | **Yes**, after you confirm |
+| 7 | Sprint planning | **Backlog Manager** with `/backlog-plan sprint` | A recommended order and dependencies | No, read-only |
+
+Why this order:
+
+- **Why before what.** The BRD states the business need and who benefits. The PRD states what the product does and how to test it. The TPM guide recommends writing the BRD before creating any work item.
+- **Planning is separate from writing.** Functional Planner and `/backlog-plan` cannot change the tracker. Only `/backlog-execute` writes to GitHub, and only after you review the handoff and confirm the repository.
+- **One owner per role.** In the Business Program Manager guide (beta), a BPM stops at the BRD and user stories, then works with a TPM, who manages the issues. In this track, you play both roles.
+
+<div class="important" data-title="Workshop simulation">
+
+> The role guides and agent behaviour are documented by HVE-Core. The stakeholder facts, the short question rounds, and one person playing both PM roles are a workshop simulation. Agent output still needs your review before it reaches GitHub.
+
+</div>
+
+### Step 1: Prepare your Copilot surface
+
+Use VS Code Copilot Chat or Copilot CLI with the HVE-Core plugin from Level 1.
+
+The backlog agents read and write GitHub through the GitHub MCP server. By default, Copilot CLI enables only a subset of the built-in GitHub MCP server tools. Creating issues and sub-issues needs the full set, so start Copilot CLI from the repository root with:
+
+```powershell
+copilot --enable-all-github-mcp-tools
+```
+
+In VS Code, add and sign in to the GitHub MCP server. See [Use MCP servers in VS Code](https://code.visualstudio.com/docs/copilot/customization/mcp-servers).
+
+To switch agents, type `/agent` in Copilot CLI and choose the agent, or use the agent picker in VS Code.
+
+<div class="info" data-title="Configuration option">
+
+> `--enable-all-github-mcp-tools` is a Copilot CLI option. It lets the session use write tools on GitHub with your identity. Use it only for this track, and review every operation before you confirm it.
+
+</div>
+
+### Step 2 (facilitator demo, optional): Meeting Analyst
+
+**Meeting Analyst** reads meeting transcripts from Microsoft 365 through the WorkIQ MCP server, extracts requirements, and hands off to PRD Builder. It needs a Microsoft 365 Copilot licence and WorkIQ, and it cannot read a local transcript file.
+
+The playlist slice has no real meetings, so attendees skip this step. The stakeholder facts in the next prompt stand in for a transcript.
+
+### Step 3: Write the BRD
+
+Select **BRD Builder**. Copy paste the following prompt:
+
+```text
+Create a business requirements document for the Music Catalog playlist slice.
+
+Use only these facts. Do not invent stakeholders, metrics, or dates:
+- Business problem: workshop participants need one small, realistic feature to practise a governed agentic SDLC end to end.
+- Sponsor: the workshop facilitator. Users: workshop participants acting as listeners of a synthetic music catalog.
+- Business objective: a listener can browse the catalog and collect tracks in a single playlist during a session.
+- Success criteria: every participant ships the slice with passing tests during the workshop; a duplicate add is rejected with a visible message; the empty playlist state is visible; controls are accessible by role and label.
+- Constraints: one playlist, in-memory state only, no users, authentication, persistence, reorder, remove, search, or playlist creation.
+- Source: the locked Design Thinking decisions for this slice.
+
+Ask at most three clarifying questions, then write the BRD. Record anything you cannot confirm as an open question instead of guessing.
+```
+
+Answer its questions from the fixed scope.
+
+Expected result:
+- BRD Builder shows its requirements-planning disclaimer, then creates a BRD such as `docs\project-planning\music-catalog-playlist-slice-brd.md`. The exact file name can differ.
+- Objectives and success criteria trace back to the facts above.
+- Out-of-scope items are listed as out of scope.
+- BRD Builder offers a handoff to PRD Builder.
+
+### Step 4: Turn the BRD into a PRD
+
+Accept the handoff, or select **PRD Builder**. Copy paste the following prompt:
+
+```text
+Create a product requirements document for the Music Catalog playlist slice from the BRD in docs/project-planning.
+
+Product requirements:
+- GET /api/tracks returns the 12 tracks from src/api/Data/tracks.json.
+- GET /api/playlist returns the single in-memory playlist.
+- POST /api/playlist/{trackId} adds a track, returns 404 for an unknown id, and returns 409 for a duplicate.
+- The front end shows the track list with accessible Add buttons, a playlist panel, the empty-state text "Your playlist is empty. Add a track to get started.", and a visible duplicate message.
+- xUnit tests cover the API. Vitest and Testing Library tests cover the UI.
+
+Non-functional requirements: in-memory state only, no new libraries or external services, accessible markup.
+
+Write each requirement with testable acceptance criteria. Ask at most three clarifying questions.
+```
+
+Expected result:
+- PRD Builder creates a PRD such as `docs\project-planning\music-catalog-playlist-slice.md`, with functional requirements, acceptance criteria, and non-functional requirements.
+- The requirements match the fixed behaviour of Level 3, so the PM and the developer share one contract.
+
+Read both documents before you continue. Remove any scope creep. The issues you create next link to these documents.
+
+### Step 5: Plan the GitHub issue hierarchy
+
+Select **Functional Planner**. Copy paste the following prompt, replacing `<owner>/<repo>` with your repository:
+
+```text
+Plan a GitHub issue hierarchy for <owner>/<repo> from the playlist slice PRD in docs/project-planning.
+
+Platform: GitHub. Do not create, update, or comment on anything.
+Use the generic platform-native lens and this shape:
+- one parent issue for the playlist slice
+- sub-issues for the tracks API, the playlist API with 404 and 409 handling, the front-end track list and playlist panel, and the tests
+Give each sub-issue a title, a short description, the area (api, front, or both) in the body, acceptance criteria copied from the PRD, and a link to the PRD.
+Do not add labels, milestones, or assignees. Mark anything you cannot validate as needs_review. Finish with a handoff I can review.
+```
+
+Expected result:
+- Functional Planner confirms the repository, reads the existing issues, and writes a planning log and a `handoff.md`. It tells you where they are.
+- No issue exists on GitHub yet.
+
+Open `handoff.md`. Check that it lists one parent issue, four sub-issues, and acceptance criteria that match the PRD.
+
+<div class="tip" data-title="Reference outputs">
+
+> To compare your BRD, PRD, and handoff with a hand-written sample, open `solutions\afternoon-2\docs\project-planning`. The samples show the expected shape and scope, not the exact text an agent produces.
+
+</div>
+
+### Step 6: Create the issues
+
+Use the Functional Planner **Execute Hierarchy** handoff, or select **Backlog Manager**. Copy paste the following prompt, replacing `<owner>/<repo>`:
+
+```text
+Execute the reviewed playlist slice hierarchy handoff from Functional Planner against the GitHub repository <owner>/<repo>.
+
+List the operations first and wait for my confirmation before the first create.
+Create the parent issue first, then each sub-issue, and link each one as a sub-issue of the parent.
+Do not assign anyone, including Copilot.
+```
+
+Expected result:
+- Backlog Manager confirms GitHub and your repository, then hands the operations to its GitHub Backlog Executor subagent.
+- After you confirm, the parent issue and four sub-issues exist, linked as sub-issues.
+- No issue is assigned to Copilot. Delegation stays a human decision, which you make in Level 6.
+
+<div class="tip" data-title="Write tools missing">
+
+> If the executor reports that it cannot create issues, restart Copilot CLI with `copilot --enable-all-github-mcp-tools`, or check that the GitHub MCP server is signed in within VS Code. As a fallback, create the five issues yourself with `gh issue create`, using the content of `handoff.md`.
+
+</div>
+
+### Step 7: Verify the backlog on GitHub
+
+Run:
+
+```powershell
+gh issue list --state open
+```
+
+Then open the parent issue on GitHub.
+
+Expected result:
+- Five open issues: one parent and four sub-issues.
+- The parent issue shows its sub-issues and their progress.
+
+### Step 8: Get a sprint order (read-only)
+
+Select **Backlog Manager**. Copy paste the following prompt, replacing `<owner>/<repo>`:
+
+```text
+/backlog-plan sprint
+
+Plan the next iteration for <owner>/<repo> from the open playlist slice issues.
+Read-only: recommend an implementation order with dependencies and say which issues can be developed in parallel. Do not change any issue.
+```
+
+Expected result:
+- An order such as the tracks API, then the playlist API, then the front end, with tests alongside each step.
+- Nothing changes on GitHub.
+- In Level 5, the daily backlog workflow automates this same triage every weekday.
+
+### Step 9: Commit the requirement documents
+
+Run:
+
+```powershell
+git status
+git add docs\project-planning
+git commit -m "Add playlist slice BRD and PRD"
+```
+
+Expected result:
+- The BRD and PRD are committed next to the code they describe.
+- Note the parent issue number. You use it in Level 3.
+
 ## Commit checkpoint
 
-No repository file should change. Run:
+No repository file should change outside the extended track. Run:
 
 ```powershell
 git status
@@ -522,6 +738,40 @@ You will use the RPI Agent to implement the playlist slice. The target behavior 
 - Tests: xUnit for API behavior and Vitest + Testing Library for UI behavior.
 
 ![RPI Agent phase walkthrough](assets/l3-rpi-agent-walkthrough.png)
+
+## Work as a developer
+
+This level follows the HVE-Core [Engineer guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/engineer) and [Tech Lead guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tech-lead).
+
+| Engineer guide stage | HVE-Core command | Where in this level |
+| --- | --- | --- |
+| Research | `/rpi-research` | Research phase |
+| Plan | `/rpi-plan` | Plan phase |
+| Implement | `/rpi-implement` | Implement phase |
+| Review | `/rpi-review` | Review phase |
+| Commit and pull request | `/git-commit`, `/pull-request` | Tech Lead extension |
+
+Apply these practices from the guides:
+
+- **Start from the work item.** If you ran the Product Manager track in Level 2, open the parent issue. Its acceptance criteria match the fixed requirements in the prompts below. If you skipped the track, the prompts are your work item.
+- **You are the gate between phases.** Read each phase output before you start the next one. Reject anything outside scope.
+- **Clear context between phases when it fills up.** The Engineer guide recommends `/clear` between RPI phases: each phase saves its output to files, and the next phase reads those files instead of the chat history. This workshop keeps one session for simplicity. Use `/clear` when the agent drifts or the context is full.
+- **Let the Tech Lead tools add judgement.** The Tech Lead guide adds architecture decision records (ADR Creator), multi-perspective review (Code Review) and coding standards that activate by file type. You try them in the optional Tech Lead extension after the Review phase.
+
+### One agent runs the phases
+
+The phase commands are not separate agents, and each one also works on its own without RPI Agent. **RPI Agent** is the HVE-Core agent that coordinates them. It runs `/rpi-research`, `/rpi-plan` and `/rpi-implement`, then `/rpi-review`, and saves each phase's output to files so the next phase and later sessions can pick up where it stopped.
+
+You can drive it in two ways:
+
+| Mode | How you start it | When to use it |
+| --- | --- | --- |
+| Phase by phase (this level) | Select **RPI Agent**, then run one `/rpi-*` command at a time | Learning RPI, or when you want to check each phase before the next one |
+| Full loop | `/rpi task="..."` | A well-scoped task you trust the agent to carry through |
+
+With `/rpi`, RPI Agent asks how much control you want, unless your request already says (for example, "use automatic mode"). It offers four choices: run end to end, keep going but check with you on unclear decisions, research and plan with you then stop before implementation, or work through each phase with you. In VS Code, the agent's **Full Auto** button starts the end-to-end choice. It still stops for safety confirmations and blockers. Use `/rpi continue=...` to resume a saved task, and `/rpi followUp=...` to start a new task from a review finding.
+
+This level drives the phases one at a time so you see each output. Level 6 hands the full loop to RPI Agent on Copilot cloud agent.
 
 ## Research phase
 
@@ -785,6 +1035,87 @@ git add -A; git commit -m "Review playlist slice"
 
 </div>
 
+## Tech Lead extension (optional)
+
+<div class="info" data-title="Extended track">
+
+> This extension adds 10 to 15 minutes. Use it if you finish early or if your facilitator runs it as a demo.
+
+</div>
+
+### Step 1: Record the in-memory decision as an ADR
+
+Select **ADR Creator**. Copy paste the following prompt:
+
+```text
+Capture an architecture decision record for the Music Catalog playlist slice: the playlist state is kept in memory in the API process, not in a database or in tracks.json.
+
+Context: a workshop slice with a single playlist and no users. API tests use WebApplicationFactory.
+Consequences to cover: the state is lost on restart, it works for a single API instance only, and a later persistence change would replace it.
+Keep it short and ask at most two clarifying questions.
+```
+
+Expected result:
+- ADR Creator drafts a decision record with context, decision, and consequences, then asks you to confirm it.
+- When you confirm, it saves the final ADR as a numbered file in `docs\planning\adrs`, for example `0001-in-memory-playlist-state.md`. Keep it there; Step 3 commits it.
+
+A sample ADR is in `solutions\afternoon-2\docs\planning\adrs\0001-in-memory-playlist-state.md`.
+
+### Step 2: Review the change with the Code Review agent
+
+Select **Code Review**. Copy paste the following prompt:
+
+```text
+Review the local commits for the playlist slice since the commit "Baseline Afternoon 2 starter".
+
+Use the standard profile with the functional, standards, accessibility, and security perspectives at basic depth.
+Report findings only. Do not edit files.
+```
+
+Code Review asks you to confirm the scope and the perspectives before it runs.
+
+Expected result:
+- A short walkthrough of the change, then one findings report merged from each perspective.
+- Findings that `/rpi-review` missed, or a confirmation that there are none.
+
+How it differs from `/rpi-review`:
+
+| | `/rpi-review` | Code Review agent |
+| --- | --- | --- |
+| Reviews against | The plan, the requirements and the changes record | The diff, from several perspectives |
+| Who steers | The RPI flow | You choose the scope, perspectives and depth |
+| Typical use | Close the RPI loop | A Tech Lead check before a pull request |
+
+In Level 6, Copilot code review adds a third reviewer on the pull request itself.
+
+### Step 3: Commit with `/git-commit`
+
+If Steps 1 and 2 left changes to keep, type:
+
+```text
+/git-commit
+```
+
+Expected result:
+- The agent stages your changes and proposes a conventional commit message for you to accept or edit.
+
+<div class="tip" data-title="Close the PM backlog from a commit">
+
+> If you created issues in the Level 2 Product Manager track, add a line such as `Closes #12` to a commit message for each sub-issue this slice implements. GitHub closes those issues when the commit reaches the default branch, which happens when you push in Level 4.
+
+</div>
+
+### Step 4: Draft the pull request with `/pull-request`
+
+Type:
+
+```text
+/pull-request action=prepare
+```
+
+Expected result:
+- The agent reads the committed diff of your branch, runs quick checks on the changed areas, and shows you a pull request title and description.
+- With `action=prepare`, nothing is written to GitHub. You do not push until Level 4, so keep the draft as the description for a pull request you open later.
 ---
 
 # Break
@@ -1085,7 +1416,7 @@ Expected result:
 
 ## Topic
 
-You will install gh-aw, initialize the repository, copy two workflow source files, compile them to `.lock.yml`, and run the daily backlog workflow. You will then inspect the accessibility workflow pattern.
+You will install gh-aw, initialize the repository, copy two workflow source files, compile them to `.lock.yml`, and run the daily backlog workflow. You will then inspect the accessibility workflow pattern. An extended track shows how to delegate a security review to Copilot cloud agent with the HVE-Core Security Reviewer.
 
 ![gh-aw workflow compilation](assets/l5-ghaw-compile.png)
 
@@ -1238,6 +1569,7 @@ gh issue create --title "Add an API test for an unknown track id" --body "Cover 
 
 Expected result:
 - `gh issue list` shows at least two open issues.
+- If you ran the Level 2 Product Manager track, its issues are in the backlog too. Any issues you closed from a commit are no longer open.
 
 ### Step 4: Run daily backlog
 
@@ -1297,13 +1629,177 @@ git status
 Expected result:
 - Your local working tree is clean.
 
+## Extended track: delegate a security review to Copilot cloud agent
+
+<div class="info" data-title="Extended track">
+
+> This track takes about 20 minutes, plus the time the agent runs. Your facilitator tells you whether to run it. It needs the Level 4 commit, which puts the HVE-Core agents on your default branch, and it needs Copilot cloud agent to be enabled.
+
+</div>
+
+This track follows the HVE-Core [Security Architect guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/security-architect). In that guide, a security architect:
+
+1. Plans controls with **Security Planner**.
+2. Adds supply-chain review with **SSSC Planner**.
+3. Adds **RAI Planner** only when the system has AI components.
+4. Tracks risks with `/risk-register`.
+5. Checks the implementation with `/rpi-review` and **Security Reviewer**.
+6. Uses `/incident-response` in operations.
+
+Here, you hand the Security Reviewer run to Copilot cloud agent. The review runs on GitHub instead of on your machine, and comes back as a pull request that a human reviews.
+
+<div class="warning" data-title="Assistive tools only">
+
+> The HVE-Core security agents are assistive tools. They do not replace SAST, DAST, SCA, penetration testing, or review by a qualified person. A qualified person must validate every finding before anyone acts on it.
+
+</div>
+
+| Mechanism | Classification |
+| --- | --- |
+| Security Planner, SSSC Planner, RAI Planner, Security Reviewer | HVE-Core agents, documented by HVE-Core |
+| Custom agents for Copilot cloud agent, read from `.github\agents` on the default branch | Documented capability |
+| Assigning an issue to Copilot with a custom agent through the REST API (`agent_assignment.custom_agent`) | Documented capability, public preview |
+| The gh-aw `assign-to-agent` safe output | Documented gh-aw capability, needs a fine-grained PAT |
+| Security Reviewer and its subagents running inside Copilot cloud agent | Workshop pattern: check what the report says it ran |
+| A report-only security pull request | Workshop pattern |
+
+### Step 1: Check that Security Reviewer is on the default branch
+
+Run:
+
+```powershell
+gh api "repos/{owner}/{repo}/contents/.github/agents" --jq ".[].name"
+```
+
+Expected result:
+- `security-reviewer.agent.md` is listed.
+- If it is missing, check that your Level 4 commit included `.github` and that you pushed it. You can still continue: assign the issue without a custom agent. The default Copilot agent follows the issue instructions, but without the HVE-Core orchestration.
+
+### Step 2: Create the security review issue
+
+Run:
+
+```powershell
+$body = @'
+## Goal
+
+Run a security review of the Music Catalog playlist slice with the HVE-Core Security Reviewer in audit mode.
+
+## Scope
+
+- src/api
+- src/front/src
+
+## Deliverable
+
+- One pull request that adds docs/security/playlist-security-review.md.
+- For each finding: severity, file and line, description, recommendation, and whether the finding was verified.
+- Do not change application code. Fixes become separate issues after human review.
+
+## Note
+
+These findings are AI-assisted. A qualified person must validate them before anyone acts on them.
+'@
+$url = gh issue create --title "[Security]: Review the playlist slice" --body $body
+$issue = $url.Split('/')[-1]
+$url
+```
+
+Expected result:
+- A new issue exists, and `$issue` holds its number.
+
+### Step 3: Assign the issue to Copilot with Security Reviewer
+
+Choose one option.
+
+**Option A: GitHub UI.** Open the issue. Under **Assignees**, choose **Copilot**. When the dialog lets you choose a custom agent, choose **Security Reviewer**. Then copy paste the following additional instructions:
+
+```text
+Report only. Follow the issue: review src/api and src/front/src in audit mode, then open one pull request that adds docs/security/playlist-security-review.md. Do not change application code. List which security skills you applied and mark every finding as verified or unverified.
+```
+
+**Option B: command line.** This uses the documented REST API for assigning issues to Copilot, which is in public preview. Run from the same PowerShell session:
+
+```powershell
+$repo = gh repo view --json nameWithOwner --jq .nameWithOwner
+$payload = @{
+  assignees        = @('copilot-swe-agent[bot]')
+  agent_assignment = @{
+    target_repo         = $repo
+    base_branch         = 'main'
+    custom_agent        = 'security-reviewer'
+    custom_instructions = 'Report only. Add docs/security/playlist-security-review.md and do not change application code. List which security skills you applied and mark every finding as verified or unverified.'
+    model               = ''
+  }
+} | ConvertTo-Json -Depth 3
+$payload | gh api --method POST "repos/$repo/issues/$issue/assignees" --input -
+```
+
+Expected result:
+- Copilot is an assignee and opens a draft pull request.
+- In the agent session, you can see it profile the code base and apply security skills.
+
+<div class="info" data-title="Workshop note">
+
+> This workshop passes the agent file name without `.agent.md` as `custom_agent`. That is the format the gh-aw examples use. If the assignment ignores the custom agent, use Option A and pick the agent in the UI.
+
+</div>
+
+### Step 4: Review the security pull request
+
+When the pull request is ready, check:
+
+- Only `docs\security\playlist-security-review.md` changed.
+- Each finding points to a file and a line that you can open.
+- The report lists the skills it applied.
+- You verify at least one finding yourself and mark false positives.
+
+A sample report with illustrative findings is in `solutions\afternoon-2\docs\security\playlist-security-review.md`. Use it to compare the shape, not the findings.
+
+Expected result:
+- Nothing merges without a human decision.
+- Each finding you accept becomes an issue. You can create these issues with Backlog Manager, as in the Level 2 Product Manager track.
+
+### Step 5 (facilitator demo): Delegate with a label and gh-aw
+
+The solution workflow `solutions\afternoon-2\.github\workflows\security-review-delegation.md` automates Step 3, while a human still decides:
+
+- **Trigger:** a person adds the `security-review` label to an issue.
+- **Agent job:** it only reads the issue and checks that it is a scoped security review request. It cannot write to GitHub.
+- **Safe output:** `assign-to-agent` performs the assignment with `custom-agent: security-reviewer`, `target: triggering`, and `max: 1`. The `names: [security-review]` trigger filter is the label gate.
+- **Authentication:** assigning Copilot needs a fine-grained PAT stored as the `GH_AW_AGENT_TOKEN` secret. The PAT needs read access to metadata and write access to actions, contents, issues, and pull requests. The default `GITHUB_TOKEN` and GitHub App tokens are not accepted.
+
+Run from the repository root:
+
+```powershell
+Copy-Item solutions\afternoon-2\.github\workflows\security-review-delegation.md .github\workflows\security-review-delegation.md
+gh aw compile
+gh label create security-review --description "Delegate a security review to Copilot cloud agent"
+gh secret set GH_AW_AGENT_TOKEN
+git add .github\workflows\security-review-delegation.md .github\workflows\security-review-delegation.lock.yml
+git commit -m "Add label-gated security review delegation"
+git push
+```
+
+`gh secret set` prompts for the value, so the PAT does not end up in your shell history. Then create a new security review issue, as in Step 2, and add the `security-review` label to it.
+
+Expected result:
+- The workflow runs, and Copilot is assigned with Security Reviewer.
+- Without the label, or without the secret, nothing is assigned.
+
+<div class="warning" data-title="Long-lived credential">
+
+> A PAT is a long-lived credential. Limit it to this repository, set a short expiry, and delete it after the workshop.
+
+</div>
+
 ---
 
 # Level 6: Coding Agent delegation
 
 ## Topic
 
-You will create one follow-up issue from the feature form and assign it to GitHub Copilot Coding Agent using the RPI Agent custom agent if it is available on the default branch.
+You will create one follow-up issue from the feature form and assign it to GitHub Copilot Coding Agent using the RPI Agent custom agent if it is available on the default branch. Then you will review its pull request with Copilot code review and see how secret scanning push protection stops a leaked credential.
 
 ![Assign issue to Coding Agent with custom agent](assets/l6-coding-agent-assignment.png)
 
@@ -1409,6 +1905,99 @@ When the PR is ready, check:
 
 </div>
 
+### Step 4: Request a Copilot code review
+
+On the pull request, under **Reviewers**, click **Request** next to **Copilot**.
+
+You can also run this from the repository root. Replace `PR-NUMBER` with the pull request number:
+
+```powershell
+gh pr edit PR-NUMBER --add-reviewer @copilot
+```
+
+Expected result:
+- Copilot posts a review with comments and, where it can, suggested changes.
+- The comments follow the conventions in `.github\copilot-instructions.md`: minimal API under `/api`, in-memory state, accessible markup, and tests for every behaviour change.
+- The review is a **Comment**, not an approval. A human still approves and merges.
+
+Compare it with the review phase you ran in Level 3:
+
+| | RPI review (Level 3) | Copilot code review |
+| --- | --- | --- |
+| Where it runs | Your Copilot CLI or VS Code session | On the pull request on GitHub.com |
+| What it checks | The plan, the acceptance criteria and the changes record | The diff, against the repository instructions |
+| Output | A review log and findings to fix | Review comments and suggested changes on the PR |
+| Who sees it | You | Everyone who reviews the PR |
+
+<div class="info" data-title="Usage units and automatic reviews">
+
+> Each Copilot code review consumes **AI credits**. On private repositories it also uses **GitHub Actions minutes**. A manual request is attributed to the user who requests it. Check the current rates in [Copilot billing](https://docs.github.com/en/copilot/concepts/billing-and-usage) instead of relying on workshop material. A repository administrator can request a review on every pull request with the **Automatically request Copilot code review** branch ruleset rule. See [Configuring code review by GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-on-github/set-up-copilot/configure-code-review).
+
+</div>
+
+## Secret scanning and push protection
+
+Copilot cloud agent already runs secret scanning on the code it generates. Push protection applies the same check to every push, whether it comes from a person, a Codespace or an agent.
+
+<div class="warning" data-title="Licence-dependent: facilitator demo by default">
+
+> Your workshop repository is **private**. For private repositories owned by an organization, secret scanning and push protection require **GitHub Secret Protection** to be enabled. On public repositories, secret scanning runs for free. If Secret Protection is not available, watch the facilitator demo. Use only the generated fake key below. **Never** use a real credential, even a revoked one.
+
+</div>
+
+### Step 1: Enable push protection
+
+In the repository, open **Settings → Advanced Security**. Under **Secret Protection**, click **Enable**, then click **Enable** next to **Push protection**.
+
+### Step 2: Add a workshop custom pattern
+
+Generate a fake key from the repository root. It is not a real credential:
+
+```powershell
+"MCWS_" + -join ((48..57) + (65..90) | Get-Random -Count 32 | ForEach-Object { [char]$_ })
+```
+
+Under **Secret Protection**, to the right of **Custom patterns**, click **New pattern**, then enter:
+- Pattern name: `Music Catalog workshop key`
+- Secret format: `MCWS_[A-Z0-9]{32}`
+- Test string: the key you generated
+
+Click **Save and dry run**, then **Publish pattern**, then **Enable** push protection for the pattern.
+
+### Step 3: Try to push the fake key
+
+Run from the repository root. Paste your generated key in place of `PASTE-KEY-HERE`:
+
+```powershell
+git switch -c demo/push-protection
+Set-Content -Path demo.env -Value "MUSIC_CATALOG_KEY=PASTE-KEY-HERE"
+git add demo.env
+git commit -m "Demo: push protection"
+git push -u origin demo/push-protection
+```
+
+Expected result:
+- The push is **rejected**. The output names the **Music Catalog workshop key** pattern, the file and the commit.
+- No alert is created, because nothing reached the repository.
+
+<div class="important" data-title="Do not bypass">
+
+> The rejection message offers a link to bypass the block. Do not use it. A bypass creates a secret scanning alert, and an administrator must review it.
+
+</div>
+
+### Step 4: Clean up
+
+```powershell
+git switch main
+git branch -D demo/push-protection
+Remove-Item demo.env -ErrorAction SilentlyContinue
+```
+
+Expected result:
+- `git status` shows a clean working tree on `main`.
+- The fake key never reached GitHub.
+
 ## Commit checkpoint
 
 No local commit is required for this level unless you changed local files. Run:
@@ -1431,18 +2020,24 @@ You will connect the afternoon into one operating model.
 
 ## What you practiced
 
-You started with a clean starter app. You used DT Coach to constrain the problem. You used RPI Agent to research, plan, implement, and review a full-stack slice. You converted methodology into repository-owned dependencies with APM and a lockfile. You used policy to show how governance can block unapproved agent packages. You packaged team conventions as a Copilot plugin marketplace. You compiled gh-aw workflows for backlog triage and accessibility review. You created a follow-up issue for Coding Agent.
+You started with a clean starter app. You used DT Coach to constrain the problem. You used RPI Agent to research, plan, implement, and review a full-stack slice. You converted methodology into repository-owned dependencies with APM and a lockfile. You used policy to show how governance can block unapproved agent packages. You packaged team conventions as a Copilot plugin marketplace. You compiled gh-aw workflows for backlog triage and accessibility review. You created a follow-up issue for Coding Agent, reviewed its pull request with Copilot code review, and saw push protection block a leaked key.
+
+If you ran the extended tracks, you also worked in three roles: as a Product Manager, you went from BRD to PRD to tracked GitHub issues; as a Tech Lead, you added an ADR and a multi-perspective code review; as a Security Architect, you delegated a report-only security review to Copilot cloud agent.
 
 ## Operating model
 
 | Layer | What it did today | Governance point |
 | ----- | ----------------- | ---------------- |
 | DT Coach | Framed the capability and boundaries. | Humans accepted fixed decisions. |
+| PM agents (extended) | BRD Builder, PRD Builder, Functional Planner and Backlog Manager turned decisions into issues. | Planning is read-only; only a confirmed `/backlog-execute` writes to GitHub. |
 | RPI Agent | Sequenced research, plan, implement, review. | Tests and commits verified progress. |
 | APM | Installed HVE-Core into the repo with a SHA pin. | `apm.lock.yaml` and policy audit made it reproducible. |
 | Plugin marketplace | Shared Music Catalog conventions. | Marketplace and settings made plugin enablement explicit. |
 | gh-aw | Ran backlog and accessibility workflows. | `safe-outputs` limited writes. |
+| Security Reviewer (extended) | Ran a report-only security review in Copilot cloud agent. | A human labels or assigns, and a qualified person validates every finding. |
 | Coding Agent | Picked up one scoped follow-up issue. | Human issue, setup workflow, firewall, PR review. |
+| Copilot code review | Reviewed the agent's PR against repository instructions. | Comments only; a human approves and merges. |
+| Secret scanning | Blocked a fake key at push time. | Push protection and audited bypasses (Secret Protection licence). |
 
 <div class="important" data-title="Human judgment stays in the loop">
 

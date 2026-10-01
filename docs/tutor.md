@@ -41,11 +41,30 @@ Part 1 totals 100 minutes and Part 2 totals 45 minutes.
 | 2:10 | Break | 10 | Implementation committed, tests pass | |
 | 2:20 | Level 4 APM, policy and marketplace | 40 | Lockfile committed and policy audited | Start `apm install` first, explain the lockfile and policy while it runs; demo the audit from recordings |
 | 3:00 | Level 5 Agentic workflows | 40 | Daily backlog issue created | Show a prerecorded run |
-| 3:40 | Level 6 Copilot cloud agent | 15 | Pull request opened by Copilot | Show a prerecorded pull request |
+| 3:40 | Level 6 Copilot cloud agent, code review and push protection | 15 | Pull request opened by Copilot and reviewed by Copilot code review | Show a prerecorded pull request and review; always demo push protection yourself |
 | 3:55 | Recap | 5 | | |
 | 4:00 | End | | | |
 
 Level 3 and the break together form an 80-minute block. The Extra Credits page is optional: use it only for early finishers or as a facilitator-led discussion.
+
+### Extended tracks (outside the 240 minutes)
+
+The core agenda above does not include the role-based extended tracks. Choose how to use them before the day:
+
+| Track | Where | Extra minutes | HVE-Core role guide | Best use |
+| --- | --- | --- | --- | --- |
+| Product Manager: DT Coach → (Meeting Analyst) → BRD Builder → PRD Builder → Functional Planner → Backlog Manager → GitHub issues | End of Level 2 | about 40 | TPM, Business Program Manager (beta) | Hands-on for a PM-heavy room, otherwise a facilitator demo |
+| Tech Lead: ADR Creator, Code Review agent, `/git-commit` | End of Level 3 | 10 to 15 | Tech Lead, Engineer | Early finishers |
+| Security Architect: report-only security review delegated to Copilot cloud agent | End of Level 5 | about 20, plus agent run time | Security Architect | Facilitator demo, or hands-on for a security-focused room |
+
+To keep the afternoon at 240 minutes when you run a track hands-on, take the time from elsewhere: shorten the DT Coach prompts in Level 2, demo Level 4 from recordings, or move Level 5 accessibility and Extra Credits to a demo. For a PM-only audience, run Levels 0 to 2 with the Product Manager track, then Level 5, and demo the rest.
+
+Rules for the tracks:
+- Meeting Analyst needs a Microsoft 365 Copilot licence and WorkIQ, and cannot read local transcripts. Always demo it yourself, or skip it.
+- Only `/backlog-execute` writes to GitHub. Make attendees read the Functional Planner handoff before they confirm.
+- Present the HVE-Core security agents as assistive only. They never replace SAST, DAST, SCA, or qualified human review.
+- The gh-aw label-gated delegation (`security-review-delegation.md`) needs a fine-grained PAT stored as `GH_AW_AGENT_TOKEN`. Use your own sandbox and delete the PAT afterwards. Do not ask attendees to create one.
+- Hand-written reference outputs for all three tracks (BRD, PRD, backlog handoff, ADR, security report) are in [solutions/afternoon-2/docs](../solutions/afternoon-2/docs/README.md). Use them for demos, or as a fallback when an agent run fails.
 
 ## Pre-flight (day before)
 
@@ -56,7 +75,7 @@ Level 3 and the break together form an 80-minute block. The Extra Credits page i
    4. Run `gh aw compile` and `gh aw run daily-backlog`, and confirm the summary issue is created.
    5. Assign a test issue to Copilot and confirm a pull request opens.
 2. Compare the upstream repositories with the pinned commits listed in [CONTRIBUTING.md](../CONTRIBUTING.md#upstream-pins), and adjust the timings above if levels changed.
-3. Record these fallback artifacts: a passing `apm audit --ci --policy apm-policy.yml`, a failing audit with the deny rule, a daily-backlog issue, an a11y-review issue, and a Copilot cloud agent pull request.
+3. Record these fallback artifacts: a passing `apm audit --ci --policy apm-policy.yml`, a failing audit with the deny rule, a daily-backlog issue, an a11y-review issue, a Copilot cloud agent pull request with its Copilot code review, and a push rejected by push protection with the workshop custom pattern.
 4. Check that the HVE-Core commit pinned in `solutions/afternoon-2/apm.yml` still resolves. If you bump it, update the workshop text as well.
 5. Validate the plugin marketplace from a clean profile: `copilot plugin marketplace add <your-org>/<your-repo>`, `copilot plugin marketplace browse music-catalog-marketplace`, then `copilot plugin install music-catalog-conventions@music-catalog-marketplace`.
 6. Capture the screenshots listed in each `assets/README.md`.
@@ -75,6 +94,11 @@ Level 3 and the break together form an 80-minute block. The Extra Credits page i
 | gh-aw workflow cannot authenticate | Run fails at the agent step | Check `permissions: copilot-requests: write`, or configure the `COPILOT_GITHUB_TOKEN` secret |
 | Copilot cloud agent does not show the RPI Agent | Custom agent missing from the picker | Agents must be in `.github/agents` on the default branch; merge first |
 | Copilot cloud agent setup fails | `copilot-setup-steps` job red | The Actions log shows the failing restore; the firewall is on by default |
+| Copilot is missing from **Reviewers** | Copilot code review policy disabled, or the attendee has no licence that includes it | Enable the **Copilot code review** policy, or demo the review yourself |
+| **Advanced Security** shows no Secret Protection or custom patterns | No GitHub Secret Protection licence for private repositories | Demo push protection from a licensed repository |
+| Backlog Executor cannot create issues | The PM track stops at `/backlog-execute` | Restart Copilot CLI with `--enable-all-github-mcp-tools`, or sign in to the GitHub MCP server in VS Code; fallback: `gh issue create` from `handoff.md` |
+| Security Reviewer missing for Copilot cloud agent | The custom agent is not listed, or the assignment ignores it | Check that `.github\agents\security-reviewer.agent.md` is on the default branch; otherwise assign without a custom agent |
+| Security delegation workflow does nothing | The label was added but no assignment happened | Check the `GH_AW_AGENT_TOKEN` secret and that the issue still has the `security-review` label |
 
 ## Messaging guardrails
 

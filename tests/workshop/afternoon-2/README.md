@@ -73,6 +73,7 @@ Each run consumes several independent usage units. Do not add them up as one "co
 - **Copilot CLI usage** for the DT and RPI prompts. The run saves a `usage/*.json` per prompt (`--usage-output-file`).
 - **Agentic workflow inference** for the sandbox `daily-backlog` and `a11y-review` runs and for this validator.
 - **One Copilot Coding Agent session** for the Level 6 issue.
+- **One Copilot code review** on the Coding Agent pull request (AI credits, plus Actions minutes on the private sandbox).
 - **Actions minutes** for the runner that orchestrates the run, up to 6 hours (the lab itself is capped at 4 hours by `LAB_TIMEOUT_S`).
 
 See the official GitHub billing documentation for current rates; this repository makes no price claims. Path filters (`docs/afternoon-2/**`, `solutions/afternoon-2/**`, `src/**`, `tests/**`, `.github/**` and the dev container) limit runs to relevant changes.
@@ -82,7 +83,13 @@ See the official GitHub billing documentation for current rates; this repository
 - Copilot CLI prompts are model output. The checks verify the lab's acceptance criteria (endpoints, status codes, tests, files), not identical code.
 - Whether `copilot -p` expands plugin prompts such as `/rpi-research`, and how `--continue` behaves with `-p`, depend on the Copilot CLI version. A failure there is reported as a tester limitation, not a lab defect.
 - Level 0 Step 1 offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
-- Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Coding Agent PR JSON).
+- Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Coding Agent PR JSON, the Copilot code review JSON).
+- The Level 6 push protection demo is always recorded as skipped. It needs GitHub Secret Protection on the private sandbox, plus settings-UI steps (custom pattern and dry run) that the tester does not automate.
+- The extended tracks are always recorded as skipped:
+  - **Level 2 Product Manager track:** multi-turn agent Q&A, and a human confirms before `/backlog-execute` writes issues.
+  - **Level 3 Tech Lead extension:** human-gated agents.
+  - **Level 5 security delegation:** a second Copilot pull request would collide with the Level 6 PR detection, and the gh-aw variant needs a `GH_AW_AGENT_TOKEN` PAT.
+  - The new text prompts in these tracks deliberately avoid the first lines and leads that `extract-prompts.mjs` matches, so they do not replace the core prompts.
 
 ## Run the lab script by hand
 
