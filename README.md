@@ -2,7 +2,7 @@
 
 A two-afternoon, fully hands-on workshop (about 4 hours each). It starts with individual GitHub Copilot primitives and ends with a governed, agentic software development lifecycle: repository-owned packages, policy, structured Research → Plan → Implement → Review execution, automated backlog management, and controlled delegation to the Copilot cloud agent.
 
-> **Before D-Day:** every attendee and administrator must complete the checklist for the delivery option your organization chose: [Codespaces](docs/before-d-day-codespace.md), [local dev container](docs/before-d-day-devcontainer.md) or [local tools](docs/before-d-day-local.md). The shared reference is [docs/prerequisites.md](docs/prerequisites.md). Most setup problems on the day come from licences, organization policies, and corporate networks, and none of them can be fixed in the room.
+> **Before D-Day:** every attendee and administrator must complete the checklist for the delivery option your organization chose: [Codespaces](docs/before-d-day-codespace.md), [local dev container](docs/before-d-day-devcontainer.md) or [local tools](docs/before-d-day-local.md). The shared reference is [docs/prerequisites.md](docs/prerequisites.md); organization owners can walk through [docs/kick-off-call-checklist.md](docs/kick-off-call-checklist.md) live during the kick-off call. Most setup problems on the day come from licences, organization policies, and corporate networks, and none of them can be fixed in the room.
 
 ## At a glance
 
@@ -122,6 +122,7 @@ The complete lists, with commands and owners, are in the per-option checklists a
 | --- | --- |
 | [docs/prerequisites.md](docs/prerequisites.md) | Shared prerequisites, network allowlist, organization settings and checklists |
 | [docs/before-d-day-codespace.md](docs/before-d-day-codespace.md), [docs/before-d-day-devcontainer.md](docs/before-d-day-devcontainer.md), [docs/before-d-day-local.md](docs/before-d-day-local.md) | Before D-Day checklist for each delivery option |
+| [docs/kick-off-call-checklist.md](docs/kick-off-call-checklist.md) | Live organization checklist (licences, policies, Actions, Codespaces, network) to walk through during the kick-off call |
 | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) | Afternoon 1 lab guide |
 | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) | Afternoon 2 lab guide |
 | [docs/tutor.md](docs/tutor.md) | Facilitator guide: timing, pre-flight, risks and messaging guardrails |
