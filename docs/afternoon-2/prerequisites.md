@@ -1,6 +1,6 @@
-# Afternoon 2 — Full pre-requisites checklist
+# AI SDLC with GitHub and GitHub Copilot — Full pre-requisites checklist
 
-Use this checklist **at least one week before** the session. Items marked **Admin** need an organization or enterprise owner. Many Afternoon 2 features are previews or depend on policy settings, so check each one in the target tenant. Do not assume a feature is available because it works on a personal account.
+Use this checklist **at least one week before** the session. Items marked **Admin** need an organization or enterprise owner. Many features of this lab are previews or depend on policy settings, so check each one in the target tenant. Do not assume a feature is available because it works on a personal account.
 
 ## Attendee workstation
 

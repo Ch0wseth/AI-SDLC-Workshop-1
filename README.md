@@ -4,27 +4,27 @@ This is a two-afternoon, fully hands-on workshop (4 hours each) that moves from 
 
 | Afternoon | Focus | Content |
 | --- | --- | --- |
-| 1 | Copilot primitives: runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds Agent Skills, Copilot CLI and plugins | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) |
-| 2 | HVE-Core, Design Thinking, RPI, APM and policy, plugin marketplace, agentic workflows, Coding Agent | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) |
+| 1 — **GitHub Copilot Zero to Hero** | Copilot primitives: runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds Agent Skills, Copilot CLI and plugins | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) |
+| 2 — **AI SDLC with GitHub and GitHub Copilot** | HVE-Core, Design Thinking, RPI, APM and policy, plugin marketplace, agentic workflows, Copilot cloud agent (coding agent) | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) |
 
 Supporting material:
 
-- [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md)
+- [AI SDLC with GitHub and GitHub Copilot prerequisites](docs/afternoon-2/prerequisites.md)
 - [Facilitator runbook](docs/afternoon-2/facilitator-runbook.md)
-- [Afternoon 2 solution files](solutions/afternoon-2)
-- [Workshop tester](tests/workshop/afternoon-2/README.md): an agentic workflow that replays the full Afternoon 2 lab in a throwaway Codespace on every change to `main` and files an issue when a step fails
+- [AI SDLC with GitHub and GitHub Copilot solution files](solutions/afternoon-2)
+- [Workshop tester](tests/workshop/afternoon-2/README.md): an agentic workflow that replays the full AI SDLC with GitHub and GitHub Copilot lab in a throwaway Codespace on every change to `main` and files an issue when a step fails
 
 ## Starter application
 
-In Afternoon 2, each attendee works in their own copy of this repository, created from the template or by copying it (Level 0 Step 1). It is a small music catalog mono-repo:
+In AI SDLC with GitHub and GitHub Copilot, each attendee works in their own copy of this repository, created from the template or by copying it (Level 0 Step 1). It is a small music catalog mono-repo:
 
 - `src/api` is a .NET 10 minimal API. It exposes `GET /api/hello` and ships 12 synthetic tracks in `Data/tracks.json`.
 - `src/front` is a React, TypeScript and Vite front end.
 - `tests/api` holds the xUnit integration tests.
 
-In Afternoon 2, attendees use HVE-Core's RPI workflow to build one capability: **browse tracks and add them to a single in-memory playlist**.
+In AI SDLC with GitHub and GitHub Copilot, attendees use HVE-Core's RPI workflow to build one capability: **browse tracks and add them to a single in-memory playlist**.
 
-For a preconfigured environment, open the repository in GitHub Codespaces or use VS Code's **Dev Containers: Reopen in Container** command. The root `.devcontainer.json` pulls a prebuilt image (`ghcr.io/justrebl/ai-sdlc-workshop/devcontainer`) that already contains Git, Node.js 22, .NET 10, GitHub CLI, GitHub Copilot CLI and APM CLI, then adds the `gh-aw` extension, Copilot extensions, restored .NET dependencies and installed front-end dependencies. Authentication, Copilot licensing and organization policies must still be configured as described in the [Afternoon 2 prerequisites](docs/afternoon-2/prerequisites.md).
+For a preconfigured environment, open the repository in GitHub Codespaces or use VS Code's **Dev Containers: Reopen in Container** command. The root `.devcontainer.json` pulls a prebuilt image (`ghcr.io/justrebl/ai-sdlc-workshop/devcontainer`) that already contains Git, Node.js 22, .NET 10, GitHub CLI, GitHub Copilot CLI and APM CLI, then adds the `gh-aw` extension, Copilot extensions, restored .NET dependencies and installed front-end dependencies. Authentication, Copilot licensing and organization policies must still be configured as described in the [AI SDLC with GitHub and GitHub Copilot prerequisites](docs/afternoon-2/prerequisites.md).
 
 ```bash
 dotnet test

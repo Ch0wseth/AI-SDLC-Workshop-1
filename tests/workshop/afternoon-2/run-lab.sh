@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Replays the entire Afternoon 2 lab (docs/afternoon-2/workshop.md, Levels 0-6) inside a Codespace
+# Replays the entire AI SDLC with GitHub and GitHub Copilot lab (docs/afternoon-2/workshop.md, Levels 0-6) inside a Codespace
 # opened on a throwaway sandbox repository. Every step is recorded in $RESULTS_DIR/results.jsonl.
 #
 # Required environment:

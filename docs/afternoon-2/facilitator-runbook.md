@@ -1,12 +1,12 @@
 # Facilitator runbook — Agentic SDLC with GitHub Copilot
 
-This runbook covers both afternoons (4 hours each). Attendee content lives in [Afternoon 1](../afternoon-1/workshop.md) and [Afternoon 2](workshop.md). The attendee checklist is [prerequisites.md](prerequisites.md).
+This runbook covers both afternoons (4 hours each). Attendee content lives in [Afternoon 1: GitHub Copilot Zero to Hero](../afternoon-1/workshop.md) and [Afternoon 2: AI SDLC with GitHub and GitHub Copilot](workshop.md). The attendee checklist is [prerequisites.md](prerequisites.md).
 
 Afternoon 1 runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on attendee forks of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds Levels 7 to 9 from this repository. Afternoon 2 switches to the Music Catalog template in this repository.
 
 ## Timing plan
 
-### Afternoon 1 — Copilot primitives (240 min)
+### Afternoon 1 — GitHub Copilot Zero to Hero (240 min)
 
 | Block | Minutes | Source | Checkpoint |
 | --- | --- | --- | --- |
@@ -23,9 +23,9 @@ Afternoon 1 runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philes
 | Level 9 Agent Plugins | 15 | This repository | Plugin installed then removed |
 | Recap | 10 | This repository | |
 
-Before the session, compare the upstream repositories with the commits recorded in the Afternoon 1 guide and adjust the timeboxes if levels changed. If late, skip the upstream side quests first, then shorten Level 9 to the CLI commands.
+Before the session, compare the upstream repositories with the commits recorded in the GitHub Copilot Zero to Hero guide and adjust the timeboxes if levels changed. If late, skip the upstream side quests first, then shorten Level 9 to the CLI commands.
 
-### Afternoon 2 — HVE-Core, RPI, APM and agentic workflows (240 min)
+### Afternoon 2 — AI SDLC with GitHub and GitHub Copilot (240 min)
 
 | Block | Minutes | Checkpoint | If late |
 | --- | --- | --- | --- |

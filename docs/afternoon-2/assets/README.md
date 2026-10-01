@@ -1,8 +1,8 @@
-# Afternoon 2 screenshot placeholders
+# AI SDLC with GitHub and GitHub Copilot screenshot placeholders
 
 This folder intentionally contains placeholders referenced by `docs\afternoon-2\workshop.md`. Capture real screenshots during a dry run and save them with these exact names.
 
-- `banner.png` — MOAW banner image for the Afternoon 2 workshop page.
+- `banner.png` — MOAW banner image for the AI SDLC with GitHub and GitHub Copilot workshop page.
 - `a2-route-map.png` — Visual route map from setup through HVE, RPI, APM, gh-aw, Coding Agent, and extra credits.
 - `l0-starting-repository.png` — VS Code view of the clean starter repository layout before Level 0 validation.
 - `l1-hve-plugin-installed.png` — Copilot CLI showing HVE-Core plugin installed or listed.

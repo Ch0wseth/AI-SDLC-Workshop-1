@@ -1,4 +1,4 @@
-# Repository-level APM policy used in Afternoon 2, Level 4.
+# Repository-level APM policy used in AI SDLC with GitHub and GitHub Copilot, Level 4.
 # Schema: https://microsoft.github.io/apm/reference/policy-schema/  (v0.2 working-draft schema)
 # Evaluate with: apm audit --ci --policy apm-policy.yml   (the --policy flag is marked experimental)
 # Organization and enterprise policies can only tighten these rules (inheritance via `extends`).
