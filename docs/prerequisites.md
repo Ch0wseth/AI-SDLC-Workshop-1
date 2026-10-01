@@ -184,6 +184,16 @@ npm test
 
 Skip this section on an unrestricted home network. On a corporate network, proxy, or VPN, share it with your network team **before D-7**.
 
+Several network requirements are often confused. Give your network team the row that applies to each delivery option:
+
+| Requirement | What to use |
+| --- | --- |
+| Workstation (corporate firewall or proxy) → Codespaces | `gh api meta --jq '.domains.codespaces'` ([troubleshooting guide](https://docs.github.com/en/codespaces/troubleshooting/troubleshooting-your-connection-to-github-codespaces)) |
+| Workstation → Copilot (VS Code, Copilot CLI) | `github.com`, plus `gh api meta --jq '.domains.website, .domains.copilot'` and the extra endpoints in the [Copilot allowlist reference](https://docs.github.com/en/copilot/reference/copilot-allowlist-reference) |
+| Codespace → public internet (npm, NuGet, APM docs, `ghcr.io`) | Nothing to allow: codespaces [reach the public internet by default](https://docs.github.com/en/codespaces/developing-in-a-codespace/connecting-to-a-private-network) and inbound connections are [blocked](https://docs.github.com/en/codespaces/reference/security-in-github-codespaces) |
+| Codespace → private or on-premises resources | Not needed for this workshop. It would require a VPN, because codespace IP addresses are dynamic |
+| GitHub organization **IP allow list** | **Incompatible with Codespaces:** codespace creation is disabled for repositories owned by an organization with IP allow lists enabled. Use Option 2 or 3, or run the lab in an organization without IP allow lists. See [Managing allowed IP addresses for your organization](https://docs.github.com/en/enterprise-cloud@latest/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-allowed-ip-addresses-for-your-organization) |
+
 ### 6.1 Endpoints to allow
 
 GitHub publishes its current domains in the [meta API](https://docs.github.com/en/rest/meta/meta#get-github-meta-information). Use it as the source of truth, because the lists below can change:
@@ -201,10 +211,10 @@ gh api meta --jq '.domains.packages'
 | Copilot authentication | `github.com/login/*`, `github.com/copilot/*`, `api.github.com/user`, `api.github.com/copilot_internal/*` | All options | [Copilot allowlist reference](https://docs.github.com/en/copilot/reference/copilot-allowlist-reference) |
 | Copilot service | `*.githubcopilot.com` (covers `api.githubcopilot.com` and the `*.individual.`, `*.business.` and `*.enterprise.githubcopilot.com` plan endpoints), `copilot-proxy.githubusercontent.com`, `origin-tracker.githubusercontent.com`, `copilot-reports.github.com`, `default.exp-tas.com` | All options | Same |
 | Copilot telemetry | `collector.github.com`, `copilot-telemetry.githubusercontent.com` | All options | Same |
-| Codespaces | `*.github.dev`, `*.visualstudio.com` (including `global.rel.tunnels.api.visualstudio.com`), `*.vscode-webview.net`, `*.azureedge.net`, `*.msecnd.net`, `*.windows.net`, `*.microsoft.com` | Option 1 | [Troubleshooting your connection to GitHub Codespaces](https://docs.github.com/en/codespaces/troubleshooting/troubleshooting-your-connection-to-github-codespaces) |
+| Codespaces | `*.github.dev`, `*.visualstudio.com` (including `global.rel.tunnels.api.visualstudio.com`), `*.vscode-webview.net`, `*.azureedge.net`, `*.msecnd.net`, `*.windows.net`, `*.microsoft.com` | Option 1 (authoritative list: `.domains.codespaces`) | [Troubleshooting your connection to GitHub Codespaces](https://docs.github.com/en/codespaces/troubleshooting/troubleshooting-your-connection-to-github-codespaces) |
 | VS Code | `update.code.visualstudio.com`, `marketplace.visualstudio.com`, `*.gallery.vsassets.io`, `*.gallerycdn.vsassets.io`, `vscode.download.prss.microsoft.com` | All options | [Network connections in VS Code](https://code.visualstudio.com/docs/setup/network) |
 | Container images | `ghcr.io`, `*.ghcr.io`, `pkg-containers.githubusercontent.com`, `mcr.microsoft.com`, `*.data.mcr.microsoft.com` | Option 2 (`mcr.microsoft.com` only when rebuilding the image) | `gh api meta --jq '.domains.packages'` |
-| Package registries | `registry.npmjs.org`, `api.nuget.org`, `*.nuget.org` | Options 2 and 3, and inside Codespaces | — |
+| Package registries | `registry.npmjs.org`, `api.nuget.org`, `*.nuget.org` | Options 2 and 3 (a codespace reaches them without any allowlist) | — |
 | Lab content | `microsoft.github.io` (APM docs), `moaw.dev`, `raw.githubusercontent.com`, the `microsoft/hve-core` repository, `www.w3.org` (accessibility workflow) | All options | — |
 
 Add these only if they apply to you:
@@ -251,6 +261,7 @@ Enterprise policies take precedence: if an enterprise owner has set a policy, th
 | Copilot | MCP servers policy allows MCP in Copilot | A1, A2 | MCP tools in VS Code, Copilot CLI and the cloud agent |
 | Copilot | Plugin and marketplace settings allow installing plugins from `microsoft/hve-core` and from a repository marketplace | A1 (Level 9), A2 (Levels 1 and 4) | HVE-Core and marketplace exercises |
 | Codespaces | Codespaces enabled for the attendees on private repositories | A2 (and A1 if forks are private) | Option 1 |
+| Codespaces | Organization **IP allow list** not enabled (it disables codespace creation) | A1, A2 | Option 1; otherwise use Option 2 or 3 |
 | Codespaces | Billing ownership chosen (organization or user), spending limit set, and machine-type, idle-timeout and retention policies reviewed | A1, A2 | Avoid blocked Codespace creation on the day |
 | Actions | GitHub Actions enabled on attendee repositories | A2 | gh-aw workflows and the cloud agent setup steps |
 | Actions | Allowed actions include `actions/*` and `github/gh-aw-actions/*` (or all actions) | A2 | Used by the compiled `.lock.yml` workflows and by `copilot-setup-steps.yml` |

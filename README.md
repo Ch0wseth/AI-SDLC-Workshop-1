@@ -109,9 +109,10 @@ The complete list, with commands and owners, is in [docs/prerequisites.md](docs/
 - [ ] Copilot seats assigned to all attendees
 - [ ] Copilot policies: Copilot CLI, Copilot cloud agent, MCP servers, allowed models, preview features, and plugins or marketplaces
 - [ ] Codespaces enabled for attendees on private repositories, with a billing owner and spending limit
+- [ ] No organization IP allow list on the organization hosting the attendee repositories (it disables Codespaces)
 - [ ] GitHub Actions enabled, and `actions/*` and `github/gh-aw-actions/*` allowed
 - [ ] Members can create private repositories from a template and fork public repositories
-- [ ] Network team has the allowlist, including TLS-inspection exclusions
+- [ ] Network team has the allowlist (`gh api meta --jq '.domains.codespaces'` for Codespaces, plus the Copilot allowlist), including TLS-inspection exclusions
 - [ ] Budgets reviewed for Copilot usage, Actions minutes and Codespaces
 
 ## Repository contents
