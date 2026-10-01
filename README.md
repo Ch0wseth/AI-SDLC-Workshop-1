@@ -35,9 +35,9 @@ npm test
 
 ## Prebuilt devcontainer image
 
-The image is defined in [`.github/devcontainer-image/`](.github/devcontainer-image/) and published to GitHub Container Registry by the [Devcontainer image workflow](.github/workflows/devcontainer-image.yml) on every change to that folder on `main`, weekly and on demand. Each build is tagged `latest` and `tree-<hash>`, where `<hash>` is the first 12 characters of the folder's Git tree hash; the workshop tester pins the sandbox Codespace to the `tree-<hash>` tag of the tested commit.
+The image is defined in [`.github/devcontainer-image/`](.github/devcontainer-image/) and published to GitHub Container Registry by the [Devcontainer image workflow](.github/workflows/devcontainer-image.yml) only when a file under `.github/devcontainer-image/.devcontainer/` changes on `main` (pull requests that touch it build the image without publishing). Each build is tagged `latest` and `tree-<hash>`, where `<hash>` is the first 12 characters of the folder's Git tree hash; the workshop tester pins the sandbox Codespace to the `tree-<hash>` tag of the tested commit.
 
-If you create your own copy of this template, run the workflow once (`gh workflow run devcontainer-image.yml`), set the `devcontainer` package visibility to **Public** in its package settings, and replace `justrebl/ai-sdlc-workshop` in the root `.devcontainer.json` with your lowercase `owner/repo`.
+If you create your own copy of this template, replace `justrebl/ai-sdlc-workshop` in the root `.devcontainer.json` with your lowercase `owner/repo`, push any change under `.github/devcontainer-image/.devcontainer/` to `main` to publish the first image, then set the `devcontainer` package visibility to **Public** in its package settings.
 
 ## Publishing on MOAW
 

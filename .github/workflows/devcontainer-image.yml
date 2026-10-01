@@ -7,16 +7,10 @@ on:
   push:
     branches: [main]
     paths:
-      - ".github/devcontainer-image/**"
-      - ".github/workflows/devcontainer-image.yml"
+      - ".github/devcontainer-image/.devcontainer/**"
   pull_request:
     paths:
-      - ".github/devcontainer-image/**"
-      - ".github/workflows/devcontainer-image.yml"
-  schedule:
-    # Weekly refresh picks up base image patches and the latest Copilot CLI and APM releases.
-    - cron: "17 4 * * 1"
-  workflow_dispatch:
+      - ".github/devcontainer-image/.devcontainer/**"
 
 permissions:
   contents: read
