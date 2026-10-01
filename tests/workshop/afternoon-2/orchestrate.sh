@@ -21,7 +21,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 case $SANDBOX_NAME in workshop-tester-*) ;; *) echo "SANDBOX_NAME must start with workshop-tester-" >&2; exit 2;; esac
 SANDBOX_REPO="$SANDBOX_OWNER/$SANDBOX_NAME"
 CODESPACE_MACHINE=${CODESPACE_MACHINE:-standardLinux32gb}
-# Budget within the 360-minute lab_run job: setup (<= 80 min, image wait included) + lab + collect (10) + cleanup (<= 17).
+# Budget within the 360-minute lab_run job: setup (<= 80 min, image wait included) + lab + collect (10) + cleanup (<= 15, step timeout).
 LAB_TIMEOUT_S=${LAB_TIMEOUT_S:-14400}
 export COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN:-${GH_TOKEN-}}
 STATE="$OUT_DIR/state.env"
@@ -168,22 +168,32 @@ collect() {
 }
 
 cleanup() {
-  if [ -n "${CODESPACE-}" ]; then
-    step infra-delete-codespace infra "Delete the Codespace" translated 300 "gh codespace delete -c '$CODESPACE' --force"
-    finish_step
-  fi
-  if [ -n "${SANDBOX_CREATED-}" ]; then
-    step infra-delete-sandbox infra "Delete the sandbox repository" translated 120 "gh repo delete '$SANDBOX_REPO' --yes"
-    finish_step
-  fi
-  # Sweep sandboxes and Codespaces left by earlier runs that could not clean up (cancelled jobs, runner loss).
-  step infra-sweep infra "Delete orphaned sandboxes and Codespaces from earlier runs" translated 600 "
-    gh codespace list --json name,repository --jq '.[] | select(.repository | test(\"/workshop-tester-\")) | select(.repository != \"$SANDBOX_REPO\") | .name' |
-      while read -r cs; do echo \"delete codespace \$cs\"; gh codespace delete -c \"\$cs\" --force; done
-    gh repo list '$SANDBOX_OWNER' --limit 200 --json nameWithOwner,description --jq '.[] | select(.nameWithOwner | test(\"/workshop-tester-\")) | select((.description // \"\") | startswith(\"$SANDBOX_MARKER\")) | select(.nameWithOwner != \"$SANDBOX_REPO\") | .nameWithOwner' |
-      while read -r r; do echo \"delete repo \$r\"; gh repo delete \"\$r\" --yes; done
+  # Resources are found by name, not only from saved state, so a cancellation between creating a resource and
+  # recording it still cleans up. The Codespace goes first: it is billed while it exists.
+  step infra-delete-codespace infra "Delete the Codespace" translated 240 "
+    { [ -n '${CODESPACE-}' ] && echo '${CODESPACE-}'
+      gh codespace list --json name,repository --jq '.[] | select(.repository == \"$SANDBOX_REPO\") | .name'
+    } | sort -u | while read -r cs; do [ -n \"\$cs\" ] && { echo \"delete codespace \$cs\"; gh codespace delete -c \"\$cs\" --force; }; done
     true"
   finish_step
+  step infra-delete-sandbox infra "Delete the sandbox repository" translated 60 "
+    if gh repo view '$SANDBOX_REPO' --json description --jq .description 2>/dev/null | grep -qF '$SANDBOX_MARKER'; then
+      gh repo delete '$SANDBOX_REPO' --yes
+    else echo 'no sandbox repository to delete'; fi"
+  finish_step
+  # A cancelled job has a 5-minute grace period: skip the sweep, the sandbox_cleanup job and the next run cover it.
+  if [ "${JOB_STATUS-}" = cancelled ]; then
+    echo "run cancelled: skipped the orphan sweep"
+  else
+    # Sweep sandboxes and Codespaces left by earlier runs that could not clean up (cancelled jobs, runner loss).
+    step infra-sweep infra "Delete orphaned sandboxes and Codespaces from earlier runs" translated 600 "
+      gh codespace list --json name,repository --jq '.[] | select(.repository | test(\"/workshop-tester-\")) | select(.repository != \"$SANDBOX_REPO\") | .name' |
+        while read -r cs; do echo \"delete codespace \$cs\"; gh codespace delete -c \"\$cs\" --force; done
+      gh repo list '$SANDBOX_OWNER' --limit 200 --json nameWithOwner,description --jq '.[] | select(.nameWithOwner | test(\"/workshop-tester-\")) | select((.description // \"\") | startswith(\"$SANDBOX_MARKER\")) | select(.nameWithOwner != \"$SANDBOX_REPO\") | .nameWithOwner' |
+        while read -r r; do echo \"delete repo \$r\"; gh repo delete \"\$r\" --yes; done
+      true"
+    finish_step
+  fi
   # Last line of defence: no token may leave the runner inside the artifact.
   grep -rlE '(gh[pousr]_|github_pat_)[A-Za-z0-9_]{20,}' "$OUT_DIR" 2>/dev/null | while read -r f; do redact "$f"; done
 }
