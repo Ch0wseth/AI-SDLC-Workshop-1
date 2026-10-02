@@ -1084,12 +1084,18 @@ Expected result:
 
 ### Step 5: Commit implementation checkpoint
 
-Run from the repository root. Check `git status` first: it should list only source and test files, never `.copilot-tracking\`.
+Run from the repository root. Check `git status` first: pending changes should be limited to the approved source, tests and necessary test setup files, never `.copilot-tracking\`. If the implementation was already committed and the working tree is clean, inspect those commits with `git log -3 --stat` and continue without creating an empty commit.
 
 ```powershell
 git status
 git add -A; git commit -m "Implement playlist slice with RPI"
 ```
+
+Expected result:
+- Pending implementation changes are committed and the working tree is clean.
+- If the implementation was already committed, a clean working tree and the existing implementation commits satisfy this checkpoint; "nothing to commit" is not a failure.
+- `.copilot-tracking\` is not included in any commit.
+- A real staging or commit error must be resolved before continuing.
 
 ## Review phase
 

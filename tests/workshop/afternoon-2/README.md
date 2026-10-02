@@ -34,6 +34,8 @@ Every step has a mode that the validator reports:
 The validator agent compares the lab's steps against the result ids to detect coverage drift. It classifies each problem as a lab defect, a solution or code defect, a product or environment change, a tester limitation, or an infrastructure failure.
 It must use only the lab's guided steps, supplied links, and captured results. It does not browse for alternate instructions or infer undocumented procedures. The `report` job writes an Actions run summary with job status, per-level counts, and failed or warned steps, even when the validator cannot finish. Missing results or interrupted jobs are marked **Incomplete**, not passed; the downloadable artifact retains detailed logs.
 
+Level 3 captures `HEAD` before implementation and compares the approved source/test paths afterward, including untracked files. Implementation commits count as edits even when the working tree is clean. The checkpoint commits only a nonempty index; staging or commit errors still fail the step. Run the local regression fixtures with `bash tests/workshop/afternoon-2/git-checkpoint.test.sh`.
+
 ## Setup
 
 The workflow is opt-in. It does nothing until the variable below is set, so forks, attendee copies and the sandbox itself never run it.

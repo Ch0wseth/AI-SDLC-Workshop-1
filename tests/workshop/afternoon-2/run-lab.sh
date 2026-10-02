@@ -145,9 +145,14 @@ step l3-plan-checkpoint "Level 3" "Plan checkpoint: git status" literal 30 'git 
 tree_clean_check
 finish_step
 
+implementation_base=$(git rev-parse HEAD) || exit 1
 copilot_prompt l3-implement "Level 3" "RPI implement (/rpi-implement)" rpi-implement 3600 --continue
-[ -n "$(changed_outside_tracking)" ] && check "agent edited repository files" true "$(changed_outside_tracking | head -n 20)" \
-  || check "agent edited repository files" false "no change outside .copilot-tracking/"
+if implementation_changes=$(implementation_changes_since "$implementation_base"); then
+  [ -n "$implementation_changes" ] && check "agent edited implementation files" true "$(printf '%s\n' "$implementation_changes" | head -n 20)" \
+    || check "agent edited implementation files" false "no implementation change since $implementation_base"
+else
+  check "agent edited implementation files" false "could not compare implementation with $implementation_base"
+fi
 grep -rqs 'Your playlist is empty. Add a track to get started.' src/front/src \
   && check "exact empty-state text present in src/front/src" true || check "exact empty-state text present in src/front/src" false
 finish_step
@@ -186,8 +191,12 @@ note "browser checks (rendered list, empty state, duplicate message) are covered
 finish_step
 pkill -f 'dotnet run' 2>/dev/null; pkill -f 'vite' 2>/dev/null
 
+export -f commit_checkpoint
 step l3-implement-commit "Level 3" "Commit implementation checkpoint" translated 60 \
-  'git status; git add -A; git commit -m "Implement playlist slice with RPI"'
+  'commit_checkpoint "Implement playlist slice with RPI"'
+tree_clean_check
+[ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true \
+  || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
 finish_step
 
 copilot_prompt l3-review "Level 3" "RPI review (/rpi-review)" rpi-review 2400 --continue
