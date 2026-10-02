@@ -4,7 +4,7 @@
 #
 # Required environment:
 #   SANDBOX_REPO          owner/name of the sandbox repository (the Codespace's own repository)
-#   GH_TOKEN              token for gh (sandbox issues, workflow runs, Coding Agent assignment)
+#   GH_TOKEN              sandbox-scoped token for gh (sandbox issues, workflow runs, Copilot cloud agent assignment)
 #   COPILOT_GITHUB_TOKEN  token for Copilot CLI (fine-grained PAT with the Copilot Requests permission)
 # Optional:
 #   RESULTS_DIR           default /tmp/workshop-tester
@@ -122,6 +122,9 @@ finish_step
 step l2-git-status "Level 2" "Commit checkpoint: git status" literal 30 'git status; git log --oneline -1'
 tree_clean_check
 finish_step
+
+skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \
+  "extended track: multi-turn agent Q&A with human confirmation before /backlog-execute writes issues; Meeting Analyst needs Microsoft 365 and WorkIQ"
 
 # ---------------------------------------------------------------- Level 3
 copilot_prompt l3-research "Level 3" "RPI research (/rpi-research)" rpi-research 1800
@@ -274,7 +277,7 @@ step l4-settings-repo "Level 4" "Replace YOUR-ORG/YOUR-REPO in settings.json" tr
 grep -q "$SANDBOX_REPO" .github/copilot/settings.json && check "settings.json points to the sandbox repository" true || check "settings.json points to the sandbox repository" false
 finish_step
 
-# push_fallback <step-id>: retry a rejected push with the tester token so later levels can still run.
+# push_fallback <step-id>: retry a rejected push with the sandbox-scoped tester token so later levels can still run.
 push_fallback() {
   if [ "$STEP_CODE" -ne 0 ]; then
     note "git push with the Codespace credential failed; retrying with the tester token to continue the run"
@@ -482,7 +485,7 @@ else
     note "PR-NUMBER replaced by the Copilot PR; -R targets the sandbox"
     REVIEW_CODE=$STEP_CODE waited=0 reviews=0
     if [ "$REVIEW_CODE" -ne 0 ] && log_has "requires one of the following scopes: \['read:org'\]"; then
-      note "tester credential limitation: WORKSHOP_TESTER_TOKEN needs read:org to request a Copilot review; this step remains failed"
+      note "tester credential limitation: Codespace sandbox token needs organization-read authorization (GitHub reported read:org) to request a Copilot review; this step remains failed"
     fi
     if [ "$REVIEW_CODE" -eq 0 ]; then
       while [ "$waited" -lt "$CODE_REVIEW_WAIT_S" ]; do

@@ -45,6 +45,10 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.WORKSHOP_TESTER_TOKEN }}
       COPILOT_GITHUB_TOKEN: ${{ secrets.WORKSHOP_TESTER_COPILOT_TOKEN }}
+      # Scoped token forwarded into the Codespace instead of the broad infrastructure token.
+      SANDBOX_TOKEN: ${{ secrets.WORKSHOP_TESTER_SANDBOX_TOKEN }}
+      # Set to 'true' to block unlisted egress from the Codespace; the default only audits it.
+      EGRESS_LOCK: ${{ vars.WORKSHOP_TESTER_EGRESS_LOCK }}
       SANDBOX_OWNER: ${{ vars.WORKSHOP_TESTER_OWNER || github.repository_owner }}
       SANDBOX_NAME: workshop-tester-${{ github.run_id }}-${{ github.run_attempt }}
       CODESPACE_MACHINE: ${{ vars.WORKSHOP_TESTER_MACHINE || 'standardLinux32gb' }}
@@ -155,6 +159,10 @@ steps:
       name: workshop-tester-results
       path: /tmp/gh-aw/agent/lab-run
 
+# Firewall for the validation agent only; the Codespace is guarded by tests/workshop/afternoon-2/egress.sh.
+network:
+  allowed: [defaults, github]
+
 tools:
   github: false
   bash: ["cat", "ls", "find", "grep", "head", "tail", "wc", "jq", "sed -n"]
@@ -197,6 +205,7 @@ All inputs are under `/tmp/gh-aw/agent/lab-run/`:
 - `lab/workshop-tester/sessions/*.md`: the Copilot CLI session transcripts.
 - `lab/workshop-tester/usage/*.json`: Copilot CLI usage statistics for each prompt step.
 - `lab/workshop-tester/daily-backlog-issue.json`, `coding-agent-pr.json` and `coding-agent-pr-checks.txt`, when they were produced.
+- `lab/workshop-tester/egress/`: Codespace network evidence. `mode` is `audit`, `locked` or `lock-failed`. `hosts.txt` has one tab-separated line per distinct destination: time, method, `host:port`, `listed` or `unlisted`, and `forwarded` or `refused`. `allowlist.txt` is the effective allowlist.
 
 If `lab/` is missing, the lab never ran. Report the infrastructure failure from `infra/results.jsonl`.
 
@@ -214,17 +223,19 @@ If `lab/` is missing, the lab never ran. Report the infrastructure failure from 
    - **Product or environment change**: a tool, CLI flag, plugin, model, policy or GitHub feature behaved differently than documented. Quote the exact error.
    - **Tester limitation**: the failure comes only from emulation, for example `/plugin` replayed as `copilot plugin list` or prompts sent through `copilot -p`, and a participant would not hit it.
    - **Infrastructure failure**: tokens, sandbox creation, Codespace, SSH or timeouts.
-5. Copilot CLI usage: summarize each prompt step from `usage/*.json`, using the units those files report. Do not convert them into premium requests, credits or money.
+5. Egress: read `egress/mode` and `egress/hosts.txt`. Every `unlisted` destination is a finding: classify it as a **Product or environment change** when a tool started calling a new host, or as a **Lab defect** when the lab itself sends participants there. In `locked` mode, a `refused` line that matches a failed step explains that failure. If the folder is missing, report "egress evidence missing" as an infrastructure failure.
+6. Copilot CLI usage: summarize each prompt step from `usage/*.json`, using the units those files report. Do not convert them into premium requests, credits or money.
 
 ## Output
 
-- If all executed checks passed, documented skips are accounted for, and you found no defect or coverage drift, call `noop`. Include a one-line summary with the number of steps and the total duration.
+- If all executed checks passed, documented skips are accounted for, and you found no lab defect, solution defect, product change, unlisted egress or coverage drift, call `noop`. Include a one-line summary with the number of steps and the total duration.
 - Otherwise create **one** issue with this structure:
   - Title: a short summary of the most important failure.
   - `## Summary`: the overall verdict, source commit, link to the run (from `meta.json`), and steps passed, failed, warned and skipped.
   - `## Results by level`: a table with Level | Steps | Pass | Fail | Warn | Skip | Notes.
   - `## Problems`: one subsection per problem. Give the classification, the step `id` and the documented expected result. Add evidence of 15 lines at most from the log, and the smallest suggested fix: the exact doc text to change, or the file to fix.
   - `## Coverage drift`: list it, or write "none".
+  - `## Egress`: the mode, the number of distinct destinations, and a table of `unlisted` or `refused` hosts with method and outcome. Write "no unlisted egress" when there is none, or "egress evidence missing".
   - `## Copilot CLI usage`: a table by prompt step, in the reported units.
   - `## Notes`: tester limitations and assumptions.
 - Never include tokens, secrets or full environment dumps. Quote only short log excerpts.

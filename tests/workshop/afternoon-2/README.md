@@ -45,20 +45,22 @@ The workflow is opt-in. It does nothing until the variable below is set, so fork
 | Variable | `WORKSHOP_TESTER_ENABLED` | `true` |
 | Variable (optional) | `WORKSHOP_TESTER_OWNER` | Account or organization that owns the sandbox repos. Defaults to this repository's owner. |
 | Variable (optional) | `WORKSHOP_TESTER_MACHINE` | Codespace machine type. Defaults to `standardLinux32gb`. |
-| Secret | `WORKSHOP_TESTER_TOKEN` | User token for a dedicated tester account with scopes `repo`, `workflow`, `delete_repo`, `codespace`. It creates and deletes the sandbox, pushes workflow files, runs `gh aw run` and assigns the issue to the Coding Agent (the assignment API requires a user token, not a GitHub App or `GITHUB_TOKEN`). |
+| Secret | `WORKSHOP_TESTER_TOKEN` | Runner-only classic PAT for a dedicated tester account with scopes `repo`, `workflow`, `delete_repo`, `codespace`. It creates and deletes the sandbox and Codespace and pushes the initial snapshot. It never enters the Codespace; the lab uses `WORKSHOP_TESTER_SANDBOX_TOKEN` for workflow runs and cloud-agent assignment. |
 | Secret | `WORKSHOP_TESTER_COPILOT_TOKEN` | Fine-grained PAT for the same account with the **Copilot Requests** permission, used by Copilot CLI and by the sandbox's gh-aw workflows. Falls back to `WORKSHOP_TESTER_TOKEN` if unset. |
+| Secret | `WORKSHOP_TESTER_SANDBOX_TOKEN` | Fine-grained PAT forwarded into the Codespace as `GH_TOKEN`. Required: the run fails closed without it. |
+| Variable (optional) | `WORKSHOP_TESTER_EGRESS_LOCK` | `true` blocks unlisted egress from the Codespace. Unset, egress is only audited. See [Security guardrails](#security-guardrails). |
 
 ### Token permissions
 
 | Secret | Token type | Exact permissions | Why |
 | --- | --- | --- | --- |
-| `WORKSHOP_TESTER_TOKEN` | Classic PAT | `repo`, `workflow`, `delete_repo`, `codespace`, `read:org` | Create and push the private sandbox (including `.github/workflows`), create and delete the Codespace, delete the sandbox, run `gh aw run`, assign the issue to the Coding Agent, and request Copilot review via `gh pr edit --add-reviewer @copilot`. Fine-grained PATs cannot yet cover all of these for a user-owned sandbox created at run time. |
+| `WORKSHOP_TESTER_TOKEN` | Classic PAT | `repo`, `workflow`, `delete_repo`, `codespace` | Runner only: create and push the private sandbox, create and delete the Codespace, delete the sandbox. It never enters the Codespace. Fine-grained PATs cannot yet cover all of these for a user-owned sandbox created at run time. |
+| `WORKSHOP_TESTER_SANDBOX_TOKEN` | Fine-grained PAT | Resource owner: the sandbox owner. Repository access: **All repositories** (the sandbox is created at run time). Repository permissions: **Contents**, **Issues**, **Pull requests**, **Actions** and **Workflows** read and write; **Metadata** read. | Used inside the Codespace by the lab: push workflow files, run `gh aw run`, read runs, create the issue and assign it to the Copilot cloud agent. The Copilot review request also needs organization-read authorization; if GitHub reports missing `read:org`, the step remains failed with a credential-limitation note. No `delete_repo`, no `codespace` scope, or infrastructure token is sent to the Codespace. |
 | `WORKSHOP_TESTER_COPILOT_TOKEN` | Fine-grained PAT | Account permission **Copilot Requests: Read** only, no repository access | Copilot CLI inference and the sandbox gh-aw engine. |
 
-Store **both** tokens as **Actions** repository secrets (Settings > Secrets and variables > Actions). A Codespaces secret is not visible to the workflow; the orchestrator injects the Copilot token into the sandbox Codespace itself.
+Store **all three** tokens as **Actions** repository secrets (Settings > Secrets and variables > Actions). A Codespaces secret is not visible to the workflow; the orchestrator injects the sandbox and Copilot tokens into the sandbox Codespace itself.
 
-Hardening: issue both tokens from a dedicated bot account, not a personal account; use a short expiry and rotate; keep `WORKSHOP_TESTER_ENABLED` unset until both secrets exist.
-If the classic token was created without `read:org`, its owner must grant that scope and update the Actions secret before rerunning Level 6. The tester records a missing-scope review request as a failed step with a credential-limitation note; it does not bypass the review.
+Hardening: issue all three tokens from a dedicated bot account, not a personal account; use a short expiry and rotate; keep `WORKSHOP_TESTER_ENABLED` unset until all three secrets exist. A dedicated sandbox organization narrows the sandbox token's **All repositories** access to throwaway repositories. If the Codespace token used for the Copilot review request lacks organization-read authorization (the API may report the required classic scope as `read:org`), the tester records the step as failed with a credential-limitation note; it does not bypass the review or expose the runner's infrastructure token to the Codespace.
 
 The tester account also needs:
 
@@ -69,7 +71,31 @@ The tester account also needs:
 Then run it once by hand: `gh workflow run workshop-tester.lock.yml`, or `gh aw run workshop-tester`.
 
 > [!IMPORTANT]
-> gh-aw compiled this workflow in safe update mode and flagged both secrets as new restricted secrets. They are used only in the `lab_run` custom job, which runs outside the agent firewall. The agent and detection jobs never receive them and only read the uploaded artifact.
+> gh-aw compiled this workflow in safe update mode and flagged the tester secrets as new restricted secrets. They are used only in the `lab_run` custom job, which runs outside the agent firewall. The agent and detection jobs never receive them and only read the uploaded artifact.
+
+## Security guardrails
+
+The Codespace runs model-driven Copilot CLI sessions with a GitHub token, so the tester limits what it can reach and records what it did. GitHub documents that a Codespace has its own isolated network, blocks inbound connections, and **allows outbound internet access** ([Security in GitHub Codespaces](https://docs.github.com/codespaces/reference/security-in-github-codespaces)). There is no product setting that restricts Codespace egress, so the egress controls below are workshop-level hardening.
+
+| Control | Kind | What it does |
+| --- | --- | --- |
+| Scoped sandbox token (`WORKSHOP_TESTER_SANDBOX_TOKEN`) | Configuration option (fine-grained PAT) | The Codespace never receives the classic infrastructure token. Copilot CLI prompts also run with `GH_TOKEN` and `GITHUB_TOKEN` removed from their environment. |
+| Idle timeout `--idle-timeout 45m` | Product capability ([`gh codespace create`](https://cli.github.com/manual/gh_codespace_create)) | A Codespace orphaned by a lost runner stops after 45 minutes; the next run's orphan sweep deletes it. |
+| Copilot CLI tool limits | Configuration option (Copilot CLI flags) | Prompts run with `--deny-tool` for `curl`, `wget`, `gh auth`, `git push` and `ssh`, and `--allow-url` only for `github.com` and `api.github.com`. `--add-dir` grants access to the results folder `/tmp/workshop-tester`. |
+| Egress audit (always on) | Workshop-level hardening ([`egress.sh`](egress.sh)) | A local proxy on `127.0.0.1:3128` logs every destination that honors `HTTPS_PROXY`/`HTTP_PROXY` and marks it `listed` or `unlisted` against the allowlist. The validator reports every unlisted host. |
+| Egress lock (opt-in, `WORKSHOP_TESTER_EGRESS_LOCK=true`) | Workshop-level hardening (`iptables` in the Codespace) | The proxy refuses unlisted hosts, and an `iptables`/`ip6tables` chain matched to the lab user's uid rejects new direct outbound connections except loopback and DNS. The proxy itself runs as root, outside that match. Established connections such as the active SSH session are kept. If the lock cannot be applied, the lab is skipped and the run is reported as an infrastructure failure. |
+| Validator firewall `network: allowed: [defaults, github]` | Product capability (gh-aw network permissions) | Limits the **validation agent** only. It does not apply to the Codespace. |
+
+The allowlist is [`egress-allowlist.txt`](egress-allowlist.txt) (GitHub, npm, NuGet/.NET, PyPI hosts) plus the domains GitHub publishes for Codespaces and Copilot in its meta API (`gh api meta --jq '.domains'`, see [Troubleshooting your connection to GitHub Codespaces](https://docs.github.com/codespaces/troubleshooting/troubleshooting-your-connection-to-github-codespaces) and the [Copilot allowlist reference](https://docs.github.com/copilot/reference/copilot-allowlist-reference)). Evidence lands in the artifact under `lab/workshop-tester/egress/` (`mode`, `hosts.txt`, `connections.log`, `allowlist.txt`).
+
+Do not use an organization IP allow list to restrict the sandbox owner: GitHub Codespaces cannot be used with repositories owned by an organization that enables one ([Managing allowed IP addresses for your organization](https://docs.github.com/enterprise-cloud@latest/organizations/keeping-your-organization-secure/managing-security-settings-for-your-organization/managing-allowed-ip-addresses-for-your-organization)).
+
+Residual risks:
+
+- The audit only sees traffic that honors the proxy variables. Node.js `fetch` honors them only with `NODE_USE_ENV_PROXY=1` (Node.js 24 and later), which `egress.sh` sets; other clients may bypass the audit unless the lock is on.
+- The lock needs passwordless `sudo` and `NET_ADMIN` in the dev container image. That is not verified for every image; a failure skips the lab rather than running it unguarded.
+- The lock may interrupt `gh codespace ssh` if the SSH agent shares the user id, which is why it is opt-in. Validate it with one manual run before enabling it.
+- Whether a fine-grained PAT can assign an issue to the Copilot cloud agent and push workflow files in every account setup is not yet verified by a live run. A failure appears in the Level 6 or workflow steps and is reported as an infrastructure failure.
 
 ## Cost and usage
 
@@ -102,7 +128,9 @@ See the official GitHub billing documentation for current rates; this repository
 Inside a Codespace on a scratch repository you own:
 
 ```bash
-export SANDBOX_REPO=<owner>/<scratch-repo> GH_TOKEN=<token> COPILOT_GITHUB_TOKEN=<fine-grained-token>
+export SANDBOX_REPO=<owner>/<scratch-repo> GH_TOKEN=<sandbox-scoped-fine-grained-token> COPILOT_GITHUB_TOKEN=<fine-grained-token>
+bash tests/workshop/afternoon-2/egress.sh start   # optional: audit egress; EGRESS_LOCK=true to block unlisted hosts
+set -a; . ~/.workshop-tester.env; set +a
 bash tests/workshop/afternoon-2/run-lab.sh
 cat /tmp/workshop-tester/summary.json
 ```

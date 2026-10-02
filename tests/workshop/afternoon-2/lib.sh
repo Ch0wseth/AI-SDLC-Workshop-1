@@ -24,7 +24,7 @@ redact() {
   # Never keep tokens in logs, even if a tool echoes its environment.
   local f=$1 v
   [ -f "$f" ] || return 0
-  for v in "${GH_TOKEN-}" "${COPILOT_GITHUB_TOKEN-}"; do
+  for v in "${GH_TOKEN-}" "${COPILOT_GITHUB_TOKEN-}" "${SANDBOX_TOKEN-}"; do
     if [ -n "$v" ]; then sed -i "s|${v}|***|g" "$f"; fi
   done
   sed -i -E 's/(gh[pousr]_|github_pat_)[A-Za-z0-9_]{20,}/***/g' "$f"
@@ -32,7 +32,7 @@ redact() {
 
 redact_str() {
   local s=$1 v
-  for v in "${GH_TOKEN-}" "${COPILOT_GITHUB_TOKEN-}"; do
+  for v in "${GH_TOKEN-}" "${COPILOT_GITHUB_TOKEN-}" "${SANDBOX_TOKEN-}"; do
     if [ -n "$v" ]; then s=${s//"$v"/***}; fi
   done
   printf '%s' "$s" | sed -E 's/(gh[pousr]_|github_pat_)[A-Za-z0-9_]{20,}/***/g'
@@ -143,9 +143,15 @@ copilot_prompt() {
     STEP_ID=$id STEP_LEVEL=$level STEP_TITLE=$title STEP_MODE=emulated STEP_CMD="" STEP_CODE=1 STEP_DUR=0
     return
   fi
+  # Least privilege: the agent never sees the sandbox token (Copilot CLI authenticates with COPILOT_GITHUB_TOKEN),
+  # cannot call obvious network or credential commands, and its URL tools only reach GitHub. Shell commands can
+  # still open connections; only the optional egress lock (infra-harden) blocks those.
   step "$id" "$level" "$title" emulated "$to" \
-    "copilot -p \"\$(cat '$file')\" --allow-all --no-ask-user --no-color --log-dir '$RESULTS_DIR/copilot-logs' --usage-output-file '$RESULTS_DIR/usage/$id.json' --share '$RESULTS_DIR/sessions/$id.md' $extra"
-  note "interactive prompt replayed with copilot -p --allow-all ${extra}"
+    "env -u GH_TOKEN -u GITHUB_TOKEN copilot -p \"\$(cat '$file')\" --allow-all-tools \
+      --deny-tool='shell(curl)' --deny-tool='shell(wget)' --deny-tool='shell(gh auth)' --deny-tool='shell(git push)' --deny-tool='shell(ssh)' \
+      --allow-url=github.com --allow-url=api.github.com --add-dir '$RESULTS_DIR' \
+      --no-ask-user --no-color --log-dir '$RESULTS_DIR/copilot-logs' --usage-output-file '$RESULTS_DIR/usage/$id.json' --share '$RESULTS_DIR/sessions/$id.md' $extra"
+  note "interactive prompt replayed with copilot -p --allow-all-tools (curl, wget, gh auth, git push and ssh denied; URLs limited to GitHub; GH_TOKEN unset) ${extra}"
   redact "$RESULTS_DIR/sessions/$id.md"
 }
 

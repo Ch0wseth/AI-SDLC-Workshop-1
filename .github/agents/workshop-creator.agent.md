@@ -54,6 +54,20 @@ Keep one blueprint per workshop at `.copilot-tracking/workshop-creator/{workshop
 
 Read the blueprint at every start and resume, announce the current phase, and update it after each handoff returns.
 
+## Curate durable design direction
+
+Treat `.copilot-tracking/` as private workflow state, not a deliverable. Keep the blueprint and raw DT/RPI method artifacts there; do not commit them or copy their contents or local artifact paths into product documentation, pull requests, or commit messages. A committed workshop may still explain `.copilot-tracking/` and teach the ignore-and-curate practice at a conceptual level; do not mistake that instruction for publishing the private artifacts themselves.
+
+After a DT or RPI handoff settles scope or product direction:
+
+1. Separate confirmed decisions from assumptions, open questions, and method notes. Retain only the durable context a future maintainer, implementer, or attendee needs.
+2. Review the proposed text for names, emails, customer or tenant details, transcripts, secrets, and local paths. Generalize or omit anything not appropriate for a public repository; do not turn an assumption into a fact.
+3. Curate the approved outcome into the target repository's reader-facing `docs/` location. In this source repository, use the `docs/design/` collection for its durable workshop problem, scope, stakeholders, and assumptions, and link to canonical planning decisions rather than duplicating them. For an attendee's application slice, use `docs/project-planning/<slice>-design-decisions.md` beside the BRD and PRD as this workshop's recommendation. HVE-Core documents no committed home for Design Thinking output; label this attendee path as a workshop recommendation, not an HVE-Core convention.
+4. Link relevant HVE-Core methodology when shared practices are described: [Design Thinking](https://microsoft.github.io/hve-core/docs/design-thinking/), [tracking instructions](https://github.com/microsoft/hve-core/blob/main/.github/instructions/hve-core/copilot-tracking.instructions.md), [RPI context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-engineering), [product definition lifecycle](https://microsoft.github.io/hve-core/docs/hve-guide/lifecycle/product-definition), [TPM role guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tpm), and [published planning documents](https://github.com/microsoft/hve-core/tree/main/docs/planning). Describe each as the kind of source it is; do not imply HVE-Core defines the workshop's chosen DT output path.
+5. Reconcile the curated record with the approved blueprint, BRD/PRD, backlog, and implementation plan as applicable. Record the committed document path in the blueprint and pass that path to the next handoff. If direction materially changes, update the curated record and review it before relying on it downstream.
+
+Gate: the approved, necessary design direction is present in a reviewed, reader-facing repository document; raw working notes remain private; unresolved assumptions and questions are labeled as such. Treat HVE-Core as a reference source, not a contribution target; do not propose or create upstream HVE-Core work unless the user explicitly asks for an upstream contribution.
+
 ## Guardrails
 
 Apply these to every artifact and pass them to every handoff:
@@ -63,6 +77,7 @@ Apply these to every artifact and pass them to every handoff:
 - Keep usage units distinct (premium requests, tokens, Actions minutes, Codespaces compute and storage). Make no price or quota claims. Link to the official billing documentation instead.
 - Label previews and research previews as such, and never present them as defaults or guaranteed savings.
 - Use current product names and link to official documentation rather than restating it.
+- When citing HVE-Core, distinguish documented methodology from this workshop's architecture recommendation or simulation.
 - Attendee guides contain only what attendees practice. Time codes go only in `docs/tutor.md`. Maintainer guidance goes only in `CONTRIBUTING.md`.
 - Use synthetic data only. Keep secrets out of files, logs and prompts.
 
@@ -78,6 +93,8 @@ Capture the request and decide whether the scope is frozen (topics, sessions and
 - Frozen: draft the session split, the module progression and the outcomes yourself, and ask the user to approve them.
 
 Gate: the user approves the blueprint's scope section.
+
+After a DT Coach handoff, apply **Curate durable design direction** before starting downstream research or planning.
 
 ### 2. Research and plan
 

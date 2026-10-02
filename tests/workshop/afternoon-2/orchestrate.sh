@@ -7,12 +7,15 @@
 #   orchestrate.sh cleanup  delete the Codespace, the sandbox repository and orphaned sandboxes from older runs
 #
 # Required environment:
-#   GH_TOKEN              tester token (create/delete repositories, Codespaces, workflows, issues, Coding Agent)
+#   GH_TOKEN              tester token, used on the runner only (create/delete the sandbox repository and Codespace)
+#   SANDBOX_TOKEN         sandbox-scoped token sent to the Codespace as GH_TOKEN (fine-grained PAT limited to the
+#                         sandbox owner: Contents, Issues, Pull requests, Actions, Workflows read/write)
 #   COPILOT_GITHUB_TOKEN  Copilot CLI token (fine-grained PAT with Copilot Requests); defaults to GH_TOKEN
 #   SANDBOX_OWNER         user or organization that owns sandboxes
 #   SANDBOX_NAME          sandbox repository name, must start with "workshop-tester-"
 #   OUT_DIR               local output directory (uploaded as the run artifact)
 # Optional: CODESPACE_MACHINE (default standardLinux32gb), LAB_TIMEOUT_S (default 14400),
+#           EGRESS_LOCK=true (block Codespace egress outside the allowlist; the run fails closed if it cannot),
 #           SOURCE_REPO, SOURCE_SHA, RUN_URL (metadata for the report)
 set -u
 
@@ -47,7 +50,12 @@ setup() {
     "${SOURCE_REPO-}" "${SOURCE_SHA-}" "${RUN_URL-}" "$SANDBOX_REPO" "$CODESPACE_MACHINE" > "$OUT_DIR/meta.json"
 
   step infra-tokens infra "Tester secrets are configured" translated 30 \
-    '[ -n "${GH_TOKEN-}" ] && echo "GH_TOKEN set" || { echo "WORKSHOP_TESTER_TOKEN secret is missing"; exit 1; }; gh api user --jq .login'
+    '[ -n "${GH_TOKEN-}" ] && echo "GH_TOKEN set" || { echo "WORKSHOP_TESTER_TOKEN secret is missing"; exit 1; }
+     [ -n "${SANDBOX_TOKEN-}" ] && echo "SANDBOX_TOKEN set" || { echo "WORKSHOP_TESTER_SANDBOX_TOKEN secret is missing: the Codespace never receives the tester token"; exit 1; }
+     gh api user --jq .login'
+  if [ -n "${SOURCE_REPO-}" ] && [ "${SANDBOX_OWNER}" = "${SOURCE_REPO%%/*}" ]; then
+    note "sandboxes share the owner of the source repository; set WORKSHOP_TESTER_OWNER to a dedicated account so the sandbox-scoped token cannot reach other repositories"
+  fi
   finish_step
   [ "$STEP_CODE" -eq 0 ] || return 1
 
@@ -101,7 +109,7 @@ setup() {
   save_state SANDBOX_CREATED 1
 
   step infra-codespace infra "Create the Codespace on the sandbox" translated 1200 \
-    "gh codespace create -R '$SANDBOX_REPO' -b main -m '$CODESPACE_MACHINE' --idle-timeout 120m --retention-period 1h --default-permissions"
+    "gh codespace create -R '$SANDBOX_REPO' -b main -m '$CODESPACE_MACHINE' --idle-timeout 45m --retention-period 1h --default-permissions"
   # The sandbox is new, so its only Codespace is the one just created. Parsing the create output is a fallback.
   CODESPACE=$(gh codespace list -R "$SANDBOX_REPO" --json name --jq '.[0].name // empty' 2>/dev/null)
   if [ -z "$CODESPACE" ]; then
@@ -124,13 +132,50 @@ setup() {
   finish_step
   [ "$STEP_CODE" -eq 0 ] || return 1
 
-  step infra-env infra "Send tester credentials to the Codespace (file mode 600)" translated 120 \
-    "printf 'export GH_TOKEN=%q\nexport COPILOT_GITHUB_TOKEN=%q\nexport SANDBOX_REPO=%q\n' \"\$GH_TOKEN\" \"\$COPILOT_GITHUB_TOKEN\" '$SANDBOX_REPO' | gh codespace ssh -c '$CODESPACE' -- 'umask 077; cat > ~/.workshop-tester.env && echo stored'"
+  # The Codespace receives the sandbox-scoped token as GH_TOKEN, never the tester token.
+  step infra-env infra "Send sandbox-scoped credentials to the Codespace (file mode 600)" translated 120 \
+    "printf 'export GH_TOKEN=%q\nexport COPILOT_GITHUB_TOKEN=%q\nexport SANDBOX_REPO=%q\n' \"\$SANDBOX_TOKEN\" \"\$COPILOT_GITHUB_TOKEN\" '$SANDBOX_REPO' | gh codespace ssh -c '$CODESPACE' -- 'umask 077; cat > ~/.workshop-tester.env && echo stored'"
   finish_step
+  [ "$STEP_CODE" -eq 0 ] || return 1
+
+  harden
 }
 
+# Egress guardrail. Always: start a logging proxy in the Codespace and record every host contacted (audit).
+# With EGRESS_LOCK=true: the proxy also refuses hosts outside the allowlist and iptables rejects any direct
+# outbound connection from the lab user, so traffic that ignores the proxy fails instead of leaving.
+# A requested lock that cannot be enforced stops the run before the lab starts.
+harden() {
+  local lock=${EGRESS_LOCK:-false}
+  save_state EGRESS_MODE audit
+  step infra-harden infra "Egress guardrail in the Codespace (audit$([ "$lock" = true ] && echo ', lock requested'))" translated 180 \
+    "gh codespace ssh -c '$CODESPACE' -- \"bash -lc 'EGRESS_LOCK=$lock bash /workspaces/$SANDBOX_NAME/tests/workshop/afternoon-2/egress.sh start'\""
+  if log_has '^EGRESS_AUDIT=on'; then check "Egress audit proxy running" true; else check "Egress audit proxy running" false; fi
+  if [ "$lock" = true ]; then
+    if log_has '^EGRESS_LOCK=enforced'; then
+      check "Egress lock enforced (example.com blocked, api.github.com reachable)" true
+      save_state EGRESS_MODE locked
+    else
+      check "Egress lock enforced (example.com blocked, api.github.com reachable)" false "$(grep -E '^EGRESS_' "$RESULTS_DIR/steps/$STEP_ID.log" | tail -n 5)"
+      save_state EGRESS_MODE not-enforceable
+      save_state HARDEN_FAILED 1
+    fi
+    finish_step
+  else
+    # Audit mode never fails the run.
+    finish_step any
+  fi
+  # shellcheck disable=SC1090
+  . "$STATE"
+}
 run() {
   [ -n "${CODESPACE-}" ] || { echo "no Codespace, skipping the lab run"; return 1; }
+  if [ "${HARDEN_FAILED-}" = 1 ]; then
+    STEP_ID=infra-lab-start STEP_LEVEL=infra STEP_TITLE="Start run-lab.sh in the Codespace" STEP_MODE=translated STEP_CMD="not started" STEP_DUR=0 STEP_CODE=1
+    note "egress lock requested but not enforced; the lab was not started"
+    finish_step
+    return 1
+  fi
   # gh codespace ssh can stay open after the detached runner starts, so the SSH exit code is not the gate:
   # the step passes when the remote shell printed "started" and the runner process is verified alive (or already done).
   step infra-lab-start infra "Start run-lab.sh in the Codespace" translated 90 \
