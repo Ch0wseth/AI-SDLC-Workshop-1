@@ -173,6 +173,8 @@ safe-outputs:
     labels: [workshop-tester, automation]
     max: 1
     close-older-issues: true
+  noop:
+    report-as-issue: false   # a clean run is visible on the Actions run summary; no "no-op" issue
   threat-detection:
     engine:
       id: copilot
