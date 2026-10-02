@@ -13,11 +13,10 @@ permissions:
 
 engine: copilot
 
-# Workshop pattern: HVE-Core Accessibility Reviewer (assessment) followed by Accessibility Planner (remediation plan),
-# both deployed into .github/agents by `apm install`.
+# Workshop pattern: import the HVE-Core Accessibility Reviewer for assessment;
+# the workflow prompt below specifies the bounded remediation plan.
 imports:
   - .github/agents/accessibility-reviewer.agent.md
-  - .github/agents/accessibility-planner.agent.md
 
 network:
   allowed:

@@ -102,8 +102,28 @@ changed_outside_tracking() {
   git status --porcelain | sed -E 's/^...//' | grep -v '^\.copilot-tracking/' || true
 }
 
+implementation_changes_since() {
+  local tracked untracked
+  tracked=$(git diff --name-only "$1" -- src/api tests/api src/front) || return
+  untracked=$(git ls-files --others --exclude-standard -- src/api tests/api src/front) || return
+  printf '%s\n%s\n' "$tracked" "$untracked" | sed '/^$/d' | sort -u
+}
+
+commit_checkpoint() {
+  local diff_code
+  git status || return
+  git add -A || return
+  if git diff --cached --quiet; then
+    echo "Nothing to commit; keeping the existing checkpoint."
+  else
+    diff_code=$?
+    [ "$diff_code" -eq 1 ] || return "$diff_code"
+    git commit -m "$1"
+  fi
+}
+
 tree_clean_check() {
-  # HVE-Core may intentionally write notes under .copilot-tracking/; the lab allows reviewed notes.
+  # HVE-Core writes working state under .copilot-tracking/: ignored working state, never committed.
   if [ -z "$(git status --porcelain)" ]; then
     check "working tree clean" true
   elif [ -z "$(changed_outside_tracking)" ]; then

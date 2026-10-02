@@ -101,7 +101,25 @@ log_has '409|conflict|reject|duplicate' && check "summary states duplicate add i
 log_has 'empty' && check "summary mentions the empty state" true || check "summary mentions the empty state" false
 finish_step
 
-step l2-git-status "Level 2" "Commit checkpoint: git status" literal 30 'git status'
+skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \
+  "extended track: multi-turn agent Q&A with human confirmation before /backlog-execute writes issues; Meeting Analyst needs Microsoft 365 and WorkIQ"
+
+step l2-curate-ignored "Level 2" "Curate: check that the tracking folder is ignored" translated 30 'git check-ignore -v .copilot-tracking/probe'
+git check-ignore -q .copilot-tracking/probe && check ".copilot-tracking/ is ignored" true || check ".copilot-tracking/ is ignored" false
+finish_step
+
+copilot_prompt l2-dt-record "Level 2" "Curate: write the Design Thinking record" dt-record 900 --continue
+rec=docs/project-planning/playlist-design-decisions.md
+[ -s "$rec" ] && check "decision record written" true || check "decision record written" false "missing $rec"
+[ -s "$rec" ] && ! grep -q '\.copilot-tracking' "$rec" && check "record has no tracking paths" true || check "record has no tracking paths" false
+finish_step
+
+step l2-curate-commit "Level 2" "Curate: commit the reviewed deliverables" translated 60 \
+  'git add docs/project-planning && git status && git commit -m "Add playlist slice design record, BRD and PRD"'
+[ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
+finish_step
+
+step l2-git-status "Level 2" "Commit checkpoint: git status" literal 30 'git status; git log --oneline -1'
 tree_clean_check
 finish_step
 
@@ -116,8 +134,8 @@ done
 tree_clean_check
 finish_step
 
-step l3-research-checkpoint "Level 3" "Research checkpoint (commit notes only if written)" translated 60 \
-  'git status; if [ -n "$(git status --porcelain)" ]; then git add -A && git commit -m "Record RPI research notes"; else echo "no changes, no commit needed"; fi'
+step l3-research-checkpoint "Level 3" "Research checkpoint: git status" literal 30 'git status'
+tree_clean_check
 finish_step
 
 copilot_prompt l3-plan "Level 3" "RPI plan (/rpi-plan)" rpi-plan 1800 --continue
@@ -126,13 +144,18 @@ log_has 'npm test' && check "plan includes npm test" true || check "plan include
 tree_clean_check
 finish_step
 
-step l3-plan-checkpoint "Level 3" "Plan checkpoint: git status" translated 60 \
-  'git status; if [ -n "$(git status --porcelain)" ]; then git add -A && git commit -m "Record RPI plan notes"; fi'
+step l3-plan-checkpoint "Level 3" "Plan checkpoint: git status" literal 30 'git status'
+tree_clean_check
 finish_step
 
+implementation_base=$(git rev-parse HEAD) || exit 1
 copilot_prompt l3-implement "Level 3" "RPI implement (/rpi-implement)" rpi-implement 3600 --continue
-[ -n "$(changed_outside_tracking)" ] && check "agent edited repository files" true "$(changed_outside_tracking | head -n 20)" \
-  || check "agent edited repository files" false "no change outside .copilot-tracking/"
+if implementation_changes=$(implementation_changes_since "$implementation_base"); then
+  [ -n "$implementation_changes" ] && check "agent edited implementation files" true "$(printf '%s\n' "$implementation_changes" | head -n 20)" \
+    || check "agent edited implementation files" false "no implementation change since $implementation_base"
+else
+  check "agent edited implementation files" false "could not compare implementation with $implementation_base"
+fi
 grep -rqs 'Your playlist is empty. Add a track to get started.' src/front/src \
   && check "exact empty-state text present in src/front/src" true || check "exact empty-state text present in src/front/src" false
 finish_step
@@ -171,8 +194,12 @@ note "browser checks (rendered list, empty state, duplicate message) are covered
 finish_step
 pkill -f 'dotnet run' 2>/dev/null; pkill -f 'vite' 2>/dev/null
 
+export -f commit_checkpoint
 step l3-implement-commit "Level 3" "Commit implementation checkpoint" translated 60 \
-  'git status; git add -A; git commit -m "Implement playlist slice with RPI"'
+  'commit_checkpoint "Implement playlist slice with RPI"'
+tree_clean_check
+[ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true \
+  || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
 finish_step
 
 copilot_prompt l3-review "Level 3" "RPI review (/rpi-review)" rpi-review 2400 --continue
@@ -289,6 +316,12 @@ finish_step
 
 step l5-copy-workflows "Level 5" "Copy the solution workflows" translated 30 \
   'cp solutions/afternoon-2/.github/workflows/daily-backlog.md .github/workflows/daily-backlog.md && cp solutions/afternoon-2/.github/workflows/a11y-review.md .github/workflows/a11y-review.md'
+agent_imports=$(grep -Ec '^[[:space:]]*-[[:space:]]+\.github/agents/[^[:space:]]+\.agent\.md[[:space:]]*$' .github/workflows/a11y-review.md || true)
+if [ "$agent_imports" -eq 1 ] && grep -Eq '^[[:space:]]*-[[:space:]]+\.github/agents/accessibility-reviewer\.agent\.md[[:space:]]*$' .github/workflows/a11y-review.md; then
+  check "a11y-review imports only the Accessibility Reviewer" true
+else
+  check "a11y-review imports only the Accessibility Reviewer" false "agent imports=$agent_imports"
+fi
 finish_step
 
 step l5-compile "Level 5" "Compile workflows (gh aw compile)" literal 600 'gh aw compile'
@@ -451,6 +484,9 @@ else
       "gh pr edit $PR -R $SANDBOX_REPO --add-reviewer @copilot"
     note "PR-NUMBER replaced by the Copilot PR; -R targets the sandbox"
     REVIEW_CODE=$STEP_CODE waited=0 reviews=0
+    if [ "$REVIEW_CODE" -ne 0 ] && log_has "requires one of the following scopes: \['read:org'\]"; then
+      note "tester credential limitation: Codespace sandbox token needs organization-read authorization (GitHub reported read:org) to request a Copilot review; this step remains failed"
+    fi
     if [ "$REVIEW_CODE" -eq 0 ]; then
       while [ "$waited" -lt "$CODE_REVIEW_WAIT_S" ]; do
         reviews=$(gh pr view "$PR" -R "$SANDBOX_REPO" --json reviews \

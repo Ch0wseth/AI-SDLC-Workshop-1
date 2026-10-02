@@ -12,6 +12,8 @@ flowchart LR
   B -->|collect, cleanup| D[(artifact<br/>workshop-tester-results)]
   D --> E[agent job<br/>read-only validator]
   E --> F[safe-outputs:<br/>create-issue or noop]
+  D --> G[report job<br/>Actions run summary]
+  E --> G
 ```
 
 | File | Runs on | Role |
@@ -30,6 +32,9 @@ Every step has a mode that the validator reports:
 - `skipped`: impossible headless (for example the VS Code fallback). It is reported, never counted as a pass.
 
 The validator agent compares the lab's steps against the result ids to detect coverage drift. It classifies each problem as a lab defect, a solution or code defect, a product or environment change, a tester limitation, or an infrastructure failure.
+It must use only the lab's guided steps, supplied links, and captured results. It does not browse for alternate instructions or infer undocumented procedures. The `report` job writes an Actions run summary with job status, per-level counts, and failed or warned steps, even when the validator cannot finish. Missing results or interrupted jobs are marked **Incomplete**, not passed; the downloadable artifact retains detailed logs.
+
+Level 3 captures `HEAD` before implementation and compares the approved source/test paths afterward, including untracked files. Implementation commits count as edits even when the working tree is clean. The checkpoint commits only a nonempty index; staging or commit errors still fail the step. Run the local regression fixtures with `bash tests/workshop/afternoon-2/git-checkpoint.test.sh`.
 
 ## Setup
 
@@ -40,7 +45,7 @@ The workflow is opt-in. It does nothing until the variable below is set, so fork
 | Variable | `WORKSHOP_TESTER_ENABLED` | `true` |
 | Variable (optional) | `WORKSHOP_TESTER_OWNER` | Account or organization that owns the sandbox repos. Defaults to this repository's owner. |
 | Variable (optional) | `WORKSHOP_TESTER_MACHINE` | Codespace machine type. Defaults to `standardLinux32gb`. |
-| Secret | `WORKSHOP_TESTER_TOKEN` | User token for a dedicated tester account with scopes `repo`, `workflow`, `delete_repo`, `codespace`. It creates and deletes the sandbox, pushes workflow files, runs `gh aw run` and assigns the issue to the Coding Agent (the assignment API requires a user token, not a GitHub App or `GITHUB_TOKEN`). |
+| Secret | `WORKSHOP_TESTER_TOKEN` | Runner-only classic PAT for a dedicated tester account with scopes `repo`, `workflow`, `delete_repo`, `codespace`. It creates and deletes the sandbox and Codespace and pushes the initial snapshot. It never enters the Codespace; the lab uses `WORKSHOP_TESTER_SANDBOX_TOKEN` for workflow runs and cloud-agent assignment. |
 | Secret | `WORKSHOP_TESTER_COPILOT_TOKEN` | Fine-grained PAT for the same account with the **Copilot Requests** permission, used by Copilot CLI and by the sandbox's gh-aw workflows. Falls back to `WORKSHOP_TESTER_TOKEN` if unset. |
 | Secret | `WORKSHOP_TESTER_SANDBOX_TOKEN` | Fine-grained PAT forwarded into the Codespace as `GH_TOKEN`. Required: the run fails closed without it. |
 | Variable (optional) | `WORKSHOP_TESTER_EGRESS_LOCK` | `true` blocks unlisted egress from the Codespace. Unset, egress is only audited. See [Security guardrails](#security-guardrails). |
@@ -50,12 +55,12 @@ The workflow is opt-in. It does nothing until the variable below is set, so fork
 | Secret | Token type | Exact permissions | Why |
 | --- | --- | --- | --- |
 | `WORKSHOP_TESTER_TOKEN` | Classic PAT | `repo`, `workflow`, `delete_repo`, `codespace` | Runner only: create and push the private sandbox, create and delete the Codespace, delete the sandbox. It never enters the Codespace. Fine-grained PATs cannot yet cover all of these for a user-owned sandbox created at run time. |
-| `WORKSHOP_TESTER_SANDBOX_TOKEN` | Fine-grained PAT | Resource owner: the sandbox owner. Repository access: **All repositories** (the sandbox is created at run time). Repository permissions: **Contents**, **Issues**, **Pull requests**, **Actions** and **Workflows** read and write; **Metadata** read. | Used inside the Codespace by the lab: push workflow files, run `gh aw run`, read runs, create the issue and assign it to the Copilot cloud agent. No `delete_repo`, no `codespace` scope, no account-wide access. |
+| `WORKSHOP_TESTER_SANDBOX_TOKEN` | Fine-grained PAT | Resource owner: the sandbox owner. Repository access: **All repositories** (the sandbox is created at run time). Repository permissions: **Contents**, **Issues**, **Pull requests**, **Actions** and **Workflows** read and write; **Metadata** read. | Used inside the Codespace by the lab: push workflow files, run `gh aw run`, read runs, create the issue and assign it to the Copilot cloud agent. The Copilot review request also needs organization-read authorization; if GitHub reports missing `read:org`, the step remains failed with a credential-limitation note. No `delete_repo`, no `codespace` scope, or infrastructure token is sent to the Codespace. |
 | `WORKSHOP_TESTER_COPILOT_TOKEN` | Fine-grained PAT | Account permission **Copilot Requests: Read** only, no repository access | Copilot CLI inference and the sandbox gh-aw engine. |
 
 Store **all three** tokens as **Actions** repository secrets (Settings > Secrets and variables > Actions). A Codespaces secret is not visible to the workflow; the orchestrator injects the sandbox and Copilot tokens into the sandbox Codespace itself.
 
-Hardening: issue the tokens from a dedicated bot account, not a personal account; use a short expiry and rotate; keep `WORKSHOP_TESTER_ENABLED` unset until the secrets exist. A dedicated sandbox organization narrows the sandbox token's **All repositories** access to throwaway repositories.
+Hardening: issue all three tokens from a dedicated bot account, not a personal account; use a short expiry and rotate; keep `WORKSHOP_TESTER_ENABLED` unset until all three secrets exist. A dedicated sandbox organization narrows the sandbox token's **All repositories** access to throwaway repositories. If the Codespace token used for the Copilot review request lacks organization-read authorization (the API may report the required classic scope as `read:org`), the tester records the step as failed with a credential-limitation note; it does not bypass the review or expose the runner's infrastructure token to the Codespace.
 
 The tester account also needs:
 

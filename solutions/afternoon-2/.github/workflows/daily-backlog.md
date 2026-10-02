@@ -31,6 +31,8 @@ safe-outputs:
     close-older-issues: true
   add-labels:
     allowed: [priority-high, priority-medium, priority-low, parallelizable, needs-triage]
+    target: "*"
+    create-if-missing: true
     max: 20
 ---
 
@@ -41,7 +43,7 @@ Do not ask questions. Do not assign issues to anyone, including Copilot: delegat
 
 1. List every **open** issue, excluding issues whose title starts with `[Daily backlog]`.
 2. For each issue, infer area (`api`, `front`, `both`), size (S, M, L) and dependencies on other open issues, using only issue content and the repository code.
-3. Apply at most one priority label (`priority-high`, `priority-medium`, `priority-low`) to issues that have none. Add `needs-triage` when the issue has no acceptance criteria. Add `parallelizable` to issues that touch disjoint files from every higher-priority issue.
+3. Apply at most one priority label (`priority-high`, `priority-medium`, `priority-low`) to issues that have none. Add `needs-triage` when the issue has no acceptance criteria. Add `parallelizable` to issues that touch disjoint files from every higher-priority issue. For each `add_labels` call, pass the open issue's actual number as `item_number`; scheduled and manually dispatched runs have no triggering issue. Never label a different issue or omit the target.
 4. Create **one** summary issue with this structure:
    - `## Recommended implementation order` — a numbered list with issue links and a one-line rationale each.
    - `## Can be developed in parallel` — groups of issues with no shared files or dependency, each group a candidate for separate Copilot coding agent sessions or `/fleet` sub-agents.
