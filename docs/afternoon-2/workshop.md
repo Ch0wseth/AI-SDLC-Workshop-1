@@ -1913,7 +1913,7 @@ git commit -m "Add CI for API and front-end tests"
 git push
 ```
 
-Open the **Actions** tab and wait for the **CI** run on `main` to pass. Then create a branch ruleset that requires its `test` job on the default branch:
+Open the **Actions** tab and wait for the **CI** run on `main` to pass. Then create a branch ruleset that requires its `test` job on the default branch. Creating a ruleset needs the admin role and your own login: in a Codespace, run `Remove-Item Env:GITHUB_TOKEN` (or `unset GITHUB_TOKEN` in bash) first, because the Codespace token cannot administer the repository.
 
 ```powershell
 gh api --method POST "repos/{owner}/{repo}/rulesets" --input solutions\afternoon-2\rulesets\main-tests-required.json
@@ -1926,7 +1926,7 @@ Expected result:
 
 <div class="warning" data-title="Workshop shortcut">
 
-> In a real team, keep the bypass list short and audited, and add required reviews. Rulesets on private repositories depend on your plan. If `gh api` reports that the feature is not available, watch the facilitator demo and continue: the CI run still reports on the pull request.
+> In a real team, keep the bypass list short and audited, and add required reviews. Rulesets on private repositories depend on your plan. If `gh api` returns 403 "Resource not accessible by integration", you are still using the Codespace token: clear it as shown above, or import the JSON file from **Settings > Rules > Rulesets > New ruleset > Import a ruleset**. If it reports that the feature is not available, watch the facilitator demo and continue: the CI run still reports on the pull request.
 
 </div>
 

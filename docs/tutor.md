@@ -116,7 +116,7 @@ Rules for the tracks:
 | gh-aw workflow cannot authenticate | Run fails at the agent step | Check `permissions: copilot-requests: write`, or configure the `COPILOT_GITHUB_TOKEN` secret |
 | Copilot cloud agent does not show the RPI Agent | Custom agent missing from the picker | Agents must be in `.github/agents` on the default branch; merge first |
 | Copilot cloud agent setup fails | `copilot-setup-steps` job red | The Actions log shows the failing restore or build; the firewall is on by default |
-| Ruleset creation fails | `gh api` returns 403 or 404 | The attendee needs the admin role on the repository; rulesets on private repositories need a supported plan. Create the ruleset from **Settings** > **Rules** > **Rulesets**, or demo it and continue |
+| Ruleset creation fails | `gh api` returns 403 or 404 | In a Codespace, clear `GITHUB_TOKEN` so `gh` uses the attendee's login. The attendee needs the admin role on the repository; rulesets on private repositories need a supported plan. Create the ruleset from **Settings** > **Rules** > **Rulesets**, or demo it and continue |
 | Delegated pull request shows no checks | Checks wait with **Approve and run workflows** | Expected: workflows on Copilot pull requests need a human approval. Approve them, then wait for the `test` check |
 | Delegated pull request not ready at Level 6 | Session still running | Review the session log live, then review the facilitator's prerecorded pull request |
 | Attendees chose different duplicate-add options | Debrief at the review gate | Expected: both options are valid. Compare them against the acceptance criteria and the accessibility notes, not against each other |
