@@ -8,7 +8,7 @@ Most engineers in the target audience use GitHub Copilot for chat and code compl
 
 - ground AI work in a shared methodology, such as HVE-Core Design Thinking and the RPI workflow;
 - package and govern that methodology across an organization with APM and a plugin marketplace;
-- carry it from local work in the IDE, Copilot CLI or the Copilot App into GitHub agentic workflows and Copilot cloud agent.
+- carry it from local work in the IDE or Copilot CLI into GitHub agentic workflows and Copilot cloud agent.
 
 They need a hands-on, end-to-end experience of the AI SDLC on one shared, deliberately small application.
 
@@ -17,11 +17,13 @@ They need a hands-on, end-to-end experience of the AI SDLC on one shared, delibe
 By the end of the two afternoons, attendees can:
 
 - explain Copilot primitives (agents, custom instructions, prompts, skills) and how they change agent mode;
-- compare Copilot Chat with the Copilot CLI harness and the Copilot App;
+- compare Copilot Chat with the Copilot CLI harness, and place each surface on the autonomy ladder;
+- layer instructions and limit what agents can do with hooks, MCP governance, branch rulesets and required checks;
 - apply HVE-Core Design Thinking and the RPI workflow to a feature;
 - share and consume methodology through a plugin marketplace and APM packages;
 - install HVE-Core in a repository with APM so Copilot cloud agent and agentic workflows can use it;
-- delegate a scoped issue to Copilot cloud agent and review the result.
+- delegate a scoped issue to Copilot cloud agent and review the result;
+- name the decisions needed to roll the method out across an organization: policies, metrics, existing code bases, method and model choice.
 
 ## In scope
 
@@ -29,14 +31,15 @@ By the end of the two afternoons, attendees can:
 - HVE-Core Design Thinking and RPI, with RPI as the main hands-on topic.
 - APM packaging, policy and lockfile, and plugin marketplace publication and consumption.
 - Agentic workflows for daily backlog management, accessibility review and security-review delegation.
-- Delegation of a generated issue to Copilot cloud agent.
+- Delegation of an issue from the generated backlog to Copilot cloud agent, behind a required CI check.
+- An agentic threat model and an architect capstone on organization rollout.
 - Governance framing across the whole chain.
 
 ## Out of scope
 
 - Installing and authenticating tools during the workshop. This happens before the day; see [prerequisites.md](../prerequisites.md).
 - Databases, persistence, users and authentication in the Music Catalog.
-- Prices, quotas and cost guarantees. Cost and model selection stay optional extension content.
+- Prices, quotas and cost guarantees. Cost and model selection appear only as a short decision guide in the architect capstone, without prices.
 
 ## Structural choices
 

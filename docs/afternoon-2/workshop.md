@@ -1893,7 +1893,7 @@ Before you delegate, two things must be true. The agent's work must be checked b
 
 ### Step 1: Choose the issue
 
-In the summary issue, look at **Can be developed in parallel**. The instructions in Step 6 are written for the **Remove a track from the playlist** issue.
+In the summary issue, look at **Can be developed in parallel**. The instructions in Step 5 are written for the **Remove a track from the playlist** issue.
 
 - If the summary lists it in a parallel group, choose it.
 - If the summary puts it under **Needs a human decision**, or after a dependency, read the reason. That is the workflow doing its job. If the reason is not a real blocker, delegate it anyway and tell your facilitator what the workflow said.
@@ -1974,6 +1974,8 @@ Check:
 ### Step 5: Assign the issue
 
 On the issue page, use **Assignees** or the Copilot task control to assign the issue to Copilot. If the UI lets you choose a custom agent, choose **RPI Agent**.
+
+![Assigning an issue to Copilot cloud agent](assets/l5-cloud-agent-assignment.png)
 
 Copy paste the following additional instructions:
 
@@ -2183,7 +2185,7 @@ You will review the pull request that Copilot cloud agent opened for the issue y
 
 **Why this level:** delegation only pays off when checking the work costs less than doing it. The contract you set in Level 5 (CI, the ruleset and the setup steps) and the reviewers in this level make that check fast and repeatable. A human still decides what merges.
 
-![Copilot cloud agent pull request under review](assets/l6-coding-agent-assignment.png)
+![Copilot cloud agent pull request under review](assets/l6-cloud-agent-pr-review.png)
 
 ## Review the pull request
 

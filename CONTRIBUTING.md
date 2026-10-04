@@ -15,7 +15,7 @@ The attendee guides (`docs/afternoon-*/workshop.md`) only contain what attendees
 | `docs/kick-off-call-checklist.md` | Step-by-step organization checklist for the kick-off call; keep consistent with `docs/prerequisites.md` section 7 |
 | `docs/tutor.md` | Timing, pre-flight, risks and messaging guardrails for tutors |
 | `docs/afternoon-*/assets/` | Screenshots and their placeholder lists |
-| `solutions/afternoon-2/` | Reference files for blocked attendees (`apm.yml`, policy, workflows) |
+| `solutions/afternoon-2/` | Reference files for blocked attendees (`apm.yml`, policy, workflows, CI workflow and branch ruleset) |
 | `src/`, `tests/api/` | Music Catalog starter application |
 | `tests/workshop/afternoon-2/` | Workshop tester scripts that replay the AI SDLC lab |
 | `.github/devcontainer-image/` | Prebuilt devcontainer image definition |

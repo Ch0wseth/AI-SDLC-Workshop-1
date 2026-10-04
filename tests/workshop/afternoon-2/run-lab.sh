@@ -9,7 +9,7 @@
 # Optional:
 #   RESULTS_DIR           default /tmp/workshop-tester
 #   WORKFLOW_WAIT_S       max wait for each gh-aw run (default 1800)
-#   CODING_AGENT_WAIT_S   max wait for the Coding Agent task and PR (default 3600)
+#   CODING_AGENT_WAIT_S   max wait for the Copilot cloud agent task and PR (default 3600)
 #   CODE_REVIEW_WAIT_S    max wait for the Copilot code review on that PR (default 900)
 set -u
 
@@ -346,11 +346,20 @@ step l5-push "Level 5" "Push your branch (Codespace credentials)" literal 300 'g
 push_fallback l5-push
 finish_step
 
-step l5-seed-issues "Level 5" "Seed the backlog" translated 120 \
+P=$RESULTS_DIR/prompts
+step l5-create-issue "Level 5" "File a follow-up feature request from the feature form" emulated 120 \
+  "printf '### Problem statement\n\n%s\n\n### Expected outcome\n\n%s\n\n### Acceptance criteria\n\n%s\n\n### Area\n\n%s\n\n### Out of scope\n\n%s\n' \"\$(cat $P/issue-problem.txt)\" \"\$(cat $P/issue-outcome.txt)\" \"\$(cat $P/issue-acceptance.txt)\" \"\$(cat $P/issue-area.txt)\" \"\$(cat $P/issue-out-of-scope.txt)\" > $RESULTS_DIR/issue-body.md && gh issue create -R $SANDBOX_REPO --title \"\$(cat $P/issue-title.txt)\" --label enhancement --body-file $RESULTS_DIR/issue-body.md"
+note "web issue form replaced by gh issue create with the lab's title and the same field labels"
+ISSUE_URL=$(grep -Eo 'https://github.com/[^ ]+/issues/[0-9]+' "$RESULTS_DIR/steps/l5-create-issue.log" | tail -n1)
+ISSUE_NUMBER=${ISSUE_URL##*/}
+[ -n "$ISSUE_NUMBER" ] && check "issue created" true "$ISSUE_URL" || check "issue created" false
+finish_step
+
+step l5-seed-issues "Level 5" "Turn deferred review findings into issues (fallback issues)" translated 120 \
   "gh issue create -R $SANDBOX_REPO --title 'Show track count in the playlist panel' --body 'Display the number of tracks currently in the in-memory playlist.' && gh issue create -R $SANDBOX_REPO --title 'Add an API test for an unknown track id' --body 'Cover adding an unknown track id to the playlist with an xUnit test.'"
-note "-R added so gh targets the sandbox repository explicitly"
+note "-R added so gh targets the sandbox repository explicitly; the tester uses the lab's fallback issues instead of parsing the Level 3 review for a deferred finding"
 seeded=$(gh issue list -R "$SANDBOX_REPO" --state open --json number --jq 'length' 2>/dev/null)
-[ "${seeded:-0}" -ge 2 ] && check "at least two open issues" true "open=$seeded" || check "at least two open issues" false "open=${seeded:-unknown}"
+[ "${seeded:-0}" -ge 3 ] && check "at least three open issues" true "open=$seeded" || check "at least three open issues" false "open=${seeded:-unknown}"
 finish_step
 
 # wait_aw_run <step-id> <workflow> <title>
@@ -396,12 +405,78 @@ if [ -n "$issue" ] && [ "$issue" != null ]; then
   echo "$issue" > "$RESULTS_DIR/daily-backlog-issue.json"
   echo "$issue" | grep -q 'Recommended implementation order' && check "summary has ## Recommended implementation order" true || check "summary has ## Recommended implementation order" false
   echo "$issue" | grep -q 'Can be developed in parallel' && check "summary has ## Can be developed in parallel" true || check "summary has ## Can be developed in parallel" false
+  if [ -n "${ISSUE_NUMBER:-}" ]; then
+    parallel=$(echo "$issue" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const b=JSON.parse(d).body||"";const m=b.split(/^##\s+/m).find(x=>/^Can be developed in parallel/.test(x))||"";console.log(m)}catch{}})')
+    if echo "$parallel" | grep -qE "#$ISSUE_NUMBER([^0-9]|$)|Remove a track"; then
+      note "the feature issue #$ISSUE_NUMBER is listed under Can be developed in parallel"
+    else
+      note "the feature issue #$ISSUE_NUMBER is not in the parallel group; the lab tells attendees to read the reason and delegate it anyway when it is not a real blocker"
+    fi
+  fi
 else
   open=$(grep -o '"number"' "$RESULTS_DIR/issues-before-daily-backlog.json" 2>/dev/null | wc -l)
   note "no [Daily backlog] issue created; open issues before the run: $open (the workflow is designed to noop when there are none)"
   [ "$open" -eq 0 ] && check "noop expected because the sandbox had no open issues" true || check "[Daily backlog] issue created" false
 fi
 finish_step
+
+step l5-ci "Level 5" "Make the tests the contract: add CI and push" translated 300 \
+  'mkdir -p .github/workflows && cp solutions/afternoon-2/.github/workflows/ci.yml .github/workflows/ci.yml && git add .github/workflows/ci.yml && git commit -m "Add CI for API and front-end tests" && git push'
+push_fallback l5-ci
+grep -qE '^  test:' .github/workflows/ci.yml && check "ci.yml defines the test job" true || check "ci.yml defines the test job" false
+since=$(date -u -d '-5 minutes' +%FT%TZ) ci_run="" ci_concl=""
+for _ in $(seq 1 30); do
+  ci_run=$(gh run list -R "$SANDBOX_REPO" --workflow ci.yml --branch main --limit 5 \
+    --json databaseId,createdAt --jq "[.[] | select(.createdAt >= \"$since\")][0].databaseId // empty" 2>/dev/null)
+  [ -n "$ci_run" ] && break; sleep 10
+done
+if [ -n "$ci_run" ]; then
+  gh run watch "$ci_run" -R "$SANDBOX_REPO" --exit-status > "$RESULTS_DIR/steps/l5-ci.run.log" 2>&1
+  ci_concl=$(gh run view "$ci_run" -R "$SANDBOX_REPO" --json conclusion --jq .conclusion 2>/dev/null)
+fi
+[ "$ci_concl" = success ] && check "CI run on main passed" true "run $ci_run" || check "CI run on main passed" false "run=${ci_run:-none} conclusion=${ci_concl:-none}"
+finish_step
+
+node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.exit(r.rules.some(x=>x.type==="required_status_checks"&&x.parameters.required_status_checks.some(c=>c.context==="test"))?0:1)' \
+  solutions/afternoon-2/rulesets/main-tests-required.json \
+  && note "the solution ruleset requires the test check" || note "the solution ruleset does not require the test check"
+skip_step l5-ruleset "Level 5" "Create the branch ruleset that requires the test check" \
+  "needs the Administration permission, which the sandbox-scoped tester token does not have; the solution JSON is checked statically"
+
+step l5-setup-steps "Level 5" "Add the API build to copilot-setup-steps.yml and push" translated 300 \
+  "awk '{print} /^[[:space:]]+run: npm ci[[:space:]]*\$/ && !done {print \"\"; print \"      - name: Build the API\"; print \"        run: dotnet build MusicCatalog.slnx --no-restore\"; done=1}' .github/workflows/copilot-setup-steps.yml > /tmp/setup-steps.yml && mv /tmp/setup-steps.yml .github/workflows/copilot-setup-steps.yml && git add .github/workflows/copilot-setup-steps.yml && git commit -m 'Build the API in Copilot setup steps' && git push"
+push_fallback l5-setup-steps
+grep -q 'dotnet build MusicCatalog.slnx --no-restore' .github/workflows/copilot-setup-steps.yml \
+  && check "setup steps build the API" true || check "setup steps build the API" false
+note "manual YAML edit replaced by an awk insertion after the npm ci step"
+finish_step
+
+step l5-prereqs "Level 5" "Confirm default-branch prerequisites" translated 120 \
+  "gh api repos/$SANDBOX_REPO/contents/.github/workflows/copilot-setup-steps.yml --jq .path; gh api repos/$SANDBOX_REPO/contents/.github/agents --jq '.[].name' || true"
+log_has 'copilot-setup-steps.yml' && check "copilot-setup-steps.yml on the default branch" true || check "copilot-setup-steps.yml on the default branch" false
+RPI_AGENT=""
+if log_has 'rpi-agent'; then RPI_AGENT=rpi-agent; check "RPI Agent file on the default branch" true; else
+  check "RPI Agent file on the default branch" false "HVE-Core agent files deployed by APM are not committed by the Level 4 git add list"
+fi
+OWNER=${SANDBOX_REPO%%/*}; NAME=${SANDBOX_REPO##*/}
+gh api graphql -f query="query{repository(owner:\"$OWNER\",name:\"$NAME\"){suggestedActors(capabilities:[CAN_BE_ASSIGNED],first:100){nodes{login}}}}" \
+  --jq '.data.repository.suggestedActors.nodes[].login' >> "$RESULTS_DIR/steps/l5-prereqs.log" 2>&1
+log_has 'copilot' && check "Copilot cloud agent assignable in the repository" true || check "Copilot cloud agent assignable in the repository" false
+finish_step
+
+if [ -z "${ISSUE_NUMBER:-}" ]; then
+  skip_step l5-assign "Level 5" "Assign the issue to Copilot cloud agent" "no issue was created"
+else
+  node -e '
+    const fs=require("fs");
+    const [repo, agent, file, out]=process.argv.slice(1);
+    fs.writeFileSync(out, JSON.stringify({assignees:["copilot-swe-agent[bot]"],agent_assignment:{target_repo:repo,base_branch:"main",custom_instructions:fs.readFileSync(file,"utf8").trim(),custom_agent:agent,model:""}}));
+  ' "$SANDBOX_REPO" "$RPI_AGENT" "$P/agent-instructions.txt" "$RESULTS_DIR/assign.json"
+  step l5-assign "Level 5" "Assign the issue to Copilot cloud agent with the RPI Agent" emulated 120 \
+    "gh api --method POST -H 'Accept: application/vnd.github+json' repos/$SANDBOX_REPO/issues/$ISSUE_NUMBER/assignees --input $RESULTS_DIR/assign.json --jq '.assignees[].login'"
+  note "UI assignment replaced by the documented REST call with agent_assignment (custom_agent='${RPI_AGENT:-none}')"
+  finish_step
+fi
 
 wait_aw_run l5-run-a11y a11y-review "Run the accessibility workflow (gh aw run a11y-review)"
 a11y=$(gh issue list -R "$SANDBOX_REPO" --state open --label accessibility --json number,title --jq 'length' 2>/dev/null)
@@ -416,43 +491,9 @@ skip_step l5-security-delegation "Level 5" "Extended track: delegate a security 
   "extended track: a second Copilot PR would collide with the Level 6 PR detection; the gh-aw variant needs a GH_AW_AGENT_TOKEN PAT"
 
 # ---------------------------------------------------------------- Level 6
-P=$RESULTS_DIR/prompts
-step l6-create-issue "Level 6" "Create the follow-up issue from the feature form" emulated 120 \
-  "printf '### Problem statement\n\n%s\n\n### Expected outcome\n\n%s\n\n### Acceptance criteria\n\n%s\n\n### Area\n\n%s\n\n### Out of scope\n\n%s\n' \"\$(cat $P/issue-problem.txt)\" \"\$(cat $P/issue-outcome.txt)\" \"\$(cat $P/issue-acceptance.txt)\" \"\$(cat $P/issue-area.txt)\" \"\$(cat $P/issue-out-of-scope.txt)\" > $RESULTS_DIR/issue-body.md && gh issue create -R $SANDBOX_REPO --title \"\$(cat $P/issue-title.txt)\" --label enhancement --body-file $RESULTS_DIR/issue-body.md"
-note "web issue form replaced by gh issue create with the lab's title and the same field labels"
-ISSUE_URL=$(grep -Eo 'https://github.com/[^ ]+/issues/[0-9]+' "$RESULTS_DIR/steps/l6-create-issue.log" | tail -n1)
-ISSUE_NUMBER=${ISSUE_URL##*/}
-[ -n "$ISSUE_NUMBER" ] && check "issue created" true "$ISSUE_URL" || check "issue created" false
-finish_step
-
-step l6-prereqs "Level 6" "Confirm default-branch prerequisites" translated 120 \
-  "gh api repos/$SANDBOX_REPO/contents/.github/workflows/copilot-setup-steps.yml --jq .path; gh api repos/$SANDBOX_REPO/contents/.github/agents --jq '.[].name' || true"
-log_has 'copilot-setup-steps.yml' && check "copilot-setup-steps.yml on the default branch" true || check "copilot-setup-steps.yml on the default branch" false
-RPI_AGENT=""
-if log_has 'rpi-agent'; then RPI_AGENT=rpi-agent; check "RPI Agent file on the default branch" true; else
-  check "RPI Agent file on the default branch" false "HVE-Core agent files deployed by APM are not committed by the Level 4 git add list"
-fi
-OWNER=${SANDBOX_REPO%%/*}; NAME=${SANDBOX_REPO##*/}
-gh api graphql -f query="query{repository(owner:\"$OWNER\",name:\"$NAME\"){suggestedActors(capabilities:[CAN_BE_ASSIGNED],first:100){nodes{login}}}}" \
-  --jq '.data.repository.suggestedActors.nodes[].login' >> "$RESULTS_DIR/steps/l6-prereqs.log" 2>&1
-log_has 'copilot' && check "Coding Agent assignable in the repository" true || check "Coding Agent assignable in the repository" false
-finish_step
-
-if [ -z "${ISSUE_NUMBER:-}" ]; then
-  skip_step l6-assign "Level 6" "Assign the issue to Coding Agent" "no issue was created"
-else
-  node -e '
-    const fs=require("fs");
-    const [repo, agent, file, out]=process.argv.slice(1);
-    fs.writeFileSync(out, JSON.stringify({assignees:["copilot-swe-agent[bot]"],agent_assignment:{target_repo:repo,base_branch:"main",custom_instructions:fs.readFileSync(file,"utf8").trim(),custom_agent:agent,model:""}}));
-  ' "$SANDBOX_REPO" "$RPI_AGENT" "$P/agent-instructions.txt" "$RESULTS_DIR/assign.json"
-  step l6-assign "Level 6" "Assign the issue to Coding Agent with the RPI Agent" emulated 120 \
-    "gh api --method POST -H 'Accept: application/vnd.github+json' repos/$SANDBOX_REPO/issues/$ISSUE_NUMBER/assignees --input $RESULTS_DIR/assign.json --jq '.assignees[].login'"
-  note "UI assignment replaced by the documented REST call with agent_assignment (custom_agent='${RPI_AGENT:-none}')"
-  finish_step
-
+if [ -n "${ISSUE_NUMBER:-}" ]; then
   # Wait for Copilot to open a PR that references the issue, then for the task to finish.
-  step l6-pr "Level 6" "Coding Agent opens a PR that references the issue" emulated 60 'true'
+  step l6-pr "Level 6" "Copilot cloud agent opens a PR that references the issue" emulated 60 'true'
   PR="" waited=0
   while [ "$waited" -lt "$CODING_AGENT_WAIT_S" ]; do
     # The sandbox is new, so any Copilot-authored PR is the one for this issue; avoids search-index lag.
@@ -471,11 +512,16 @@ else
     gh pr view "$PR" -R "$SANDBOX_REPO" --json number,title,body,isDraft,files,headRefName,url > "$RESULTS_DIR/coding-agent-pr.json" 2>&1
     gh pr checks "$PR" -R "$SANDBOX_REPO" > "$RESULTS_DIR/coding-agent-pr-checks.txt" 2>&1
     grep -q "#$ISSUE_NUMBER" "$RESULTS_DIR/coding-agent-pr.json" && check "PR references the issue" true || check "PR references the issue" false
-    case $title in \[WIP\]*) check "Coding Agent finished within the wait budget" false "still WIP after ${CODING_AGENT_WAIT_S}s";; *) check "Coding Agent finished within the wait budget" true;; esac
+    case $title in \[WIP\]*) check "Copilot cloud agent finished within the wait budget" false "still WIP after ${CODING_AGENT_WAIT_S}s";; *) check "Copilot cloud agent finished within the wait budget" true;; esac
     if grep -qE '"path":"(apm|\.copilot-tracking|README)' "$RESULTS_DIR/coding-agent-pr.json"; then note "PR touches files outside src/ and tests/; the validator should review scope"; fi
   fi
   STEP_DUR=$waited
   finish_step
+
+  skip_step l6-approve-checks "Level 6" "Approve and run workflows on the Copilot PR, then wait for the test check" \
+    "settings-UI approval by a human; the PR checks are saved to coding-agent-pr-checks.txt"
+  skip_step l6-test-writer "Level 6" "Ask the music-catalog-test-writer agent for missing tests on the PR branch" \
+    "interactive /agent selection in Copilot CLI; the plugin install is covered by l4-plugin-install"
 
   if [ -z "$PR" ]; then
     skip_step l6-code-review "Level 6" "Request a Copilot code review on the PR" "no Copilot PR to review"
