@@ -11,72 +11,88 @@ A two-afternoon, fully hands-on workshop (about 4 hours each). It starts with in
 | Goal | Become fluent with Copilot primitives in VS Code, Copilot CLI and on github.com | Run a governed, agentic SDLC on a real repository |
 | Repository | Your fork of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo) | Your private copy of this template |
 | Lab guide | [docs/afternoon-1/workshop.md](docs/afternoon-1/workshop.md) | [docs/afternoon-2/workshop.md](docs/afternoon-2/workshop.md) |
-| Audience | Developers new to Copilot or using only completions and chat | Developers, tech leads and platform engineers who completed Afternoon 1 or have equivalent experience |
+| Audience | Developers new to Copilot or using only completions and chat; advanced developers and architects take the fast track | Developers, tech leads and platform engineers who completed Afternoon 1 or have equivalent experience |
 
 ## Key concepts
 
 | Concept | In one sentence | Practised in |
 | --- | --- | --- |
-| **Copilot primitives** | Custom instructions, prompt files, custom agents, Agent Skills, MCP servers and hooks: the building blocks that shape what Copilot knows and can do | Afternoon 1, Levels 5–7 |
+| **Copilot primitives** | Custom instructions, prompt files, custom agents, Agent Skills, MCP servers and hooks: the building blocks that shape what Copilot knows and can do | Afternoon 1, Levels 5–7 and Deeper primitives |
 | **Copilot CLI** | Copilot as a terminal agent that plans, edits and runs commands, with the same primitives as VS Code | Afternoon 1, Level 8; Afternoon 2 throughout |
 | **Plugins and marketplaces** | A plugin bundles primitives into one installable unit; a marketplace is a Git repository that lists plugins for discovery | Afternoon 1, Level 9; Afternoon 2, Levels 1 and 4 |
 | **HVE-Core** | Microsoft's open-source library of Copilot agents, prompts, instructions and skills for hypervelocity engineering, including the Design Thinking coach and the RPI workflow | Afternoon 2, Levels 1–3 |
 | **Design Thinking coach** | An HVE-Core agent that guides a team from a vague request to a scoped, user-centred problem statement before any code is written | Afternoon 2, Level 2 |
 | **RPI (Research → Plan → Implement → Review)** | A structured agentic workflow that separates investigation, planning, implementation and review into explicit phases with durable artifacts | Afternoon 2, Level 3 |
+| **Context engineering** | Deciding what an agent sees: layered instructions, skills loaded on demand, and phase artifacts on disk instead of a long chat history | Afternoon 1, Deeper primitives; Afternoon 2, Level 3 |
+| **Verification as contract** | Tests, CI and branch rulesets define "done" for humans and agents alike, so delegated work is checked the same way as your own | Afternoon 2, Levels 5 and 6 |
+| **Agentic threat model** | Prompt injection, safe outputs, the agent firewall and token scope: what limits an agent that runs without you | Afternoon 2, Levels 5 and 6 |
 | **APM (Agent Package Manager)** | A package manager for agent primitives: declare dependencies in `apm.yml`, pin them in a lockfile, and enforce policy and audits in CI | Afternoon 2, Level 4 |
 | **GitHub Agentic Workflows (gh-aw)** | Markdown-defined workflows compiled to GitHub Actions, where a coding agent runs on a schedule or on events, with safe outputs such as issues and comments | Afternoon 2, Level 5 |
-| **Copilot cloud agent** (formerly coding agent) | Assign an issue to Copilot; it works in a GitHub Actions environment and opens a pull request for human review | Afternoon 1, Level 6; Afternoon 2, Level 6 |
-| **Model selection and usage** | Explicit model choice versus Auto model selection, and how usage is measured differently in each Copilot experience | Afternoon 2, throughout and Extra Credits |
+| **Copilot cloud agent** (formerly coding agent) | Assign an issue to Copilot; it works in a GitHub Actions environment and opens a pull request for human review | Afternoon 1, Level 6; Afternoon 2, Levels 5 and 6 |
+| **Model selection and usage** | Explicit model choice versus Auto model selection, and how usage is measured differently in each Copilot experience | Afternoon 2, Recap and Extra Credits |
 
 Each lab opens with a short refresher on these concepts. HydraFusion multi-model orchestration is a **Research Preview** and appears only as optional Extra Credit.
 
 ## Afternoon 1 — GitHub Copilot Zero to Hero
 
-Runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on a fork of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds three levels.
+Runs the official [GHCopilotHoL](https://moaw.dev/workshop/gh:Philess/GHCopilotHoL/main/docs/) lab on a fork of [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo), then adds its own levels. The levels climb an **autonomy ladder**: each one hands Copilot more autonomy, so each one needs a stronger review step.
 
-| Level | Topic | You will |
-| --- | --- | --- |
-| Setup | Environment | Fork the demo, open it in your chosen environment, install Copilot CLI |
-| 1 | Code completion | Use inline suggestions and next edit suggestions |
-| 2 | Copilot Chat | Ask, explain, fix and generate tests in chat |
-| 3 | Agent basics | Let agent mode edit several files and run commands |
-| 4 | Plan and implement | Plan a change, then implement it with the agent |
-| 5 | Advanced concepts | Custom instructions, prompt files, custom agents and MCP |
-| 6 | Agents on the platform | Assign an issue to the Copilot cloud agent and use your custom agents on github.com |
-| 7 | Agent Skills | Create and use an Agent Skill |
-| 8 | Copilot CLI | Drive the same repository from the terminal |
-| 9 | Plugins and marketplaces | Browse and install plugins from a marketplace in Copilot CLI and VS Code |
-| Recap | | What to take back to your team |
+| Level | Topic | You will | What it adds, and why the previous level was not enough |
+| --- | --- | --- | --- |
+| Setup | Environment | Fork the demo, open it in your chosen environment, install Copilot CLI | |
+| 1 | Code completion | Use inline suggestions and next edit suggestions | The baseline: Copilot suggests, you type |
+| 2 | Copilot Chat | Ask, explain, fix and generate tests in chat | Completions see one file; Chat reasons over the context you attach |
+| 3 | Agent basics | Let agent mode edit several files and run commands | Chat answers; an agent acts across files and tools |
+| 4 | Plan and implement | Plan a change, then implement it with the agent | An agent that acts without a plan drifts; a plan gives you a gate |
+| 5 | Advanced concepts | Custom instructions, prompt files, custom agents and MCP | Prompts are forgotten after the session; primitives make context durable and versioned |
+| 6 | Agents on the platform | Assign an issue to the Copilot cloud agent and use your custom agents on github.com | Local agents need you at the keyboard; the cloud agent works asynchronously |
+| 7 | Agent Skills | Create and use an Agent Skill | Instructions are always loaded; skills load procedures only when needed |
+| 8 | Copilot CLI | Drive the same repository from the terminal | The same primitives, in a harness you can script |
+| Advanced | Deeper primitives | Layer instructions, add a guardrail hook, review MCP governance | Primitives shape what the agent knows; hooks and MCP policy limit what it can do |
+| 9 | Plugins and marketplaces | Browse and install plugins from a marketplace in Copilot CLI and VS Code | Files in one repository do not travel; plugins share them across repositories |
+| Recap | | What to take back to your team | |
+
+For advanced developers and architects, the **fast track** turns upstream Levels 1 to 4 into self-paced pre-work or a short facilitator demo, and spends the time saved on the **Deeper primitives** page. See [docs/tutor.md](docs/tutor.md).
 
 ## Afternoon 2 — AI SDLC with GitHub and GitHub Copilot
 
 Attendees build one capability in a small music catalog app (**browse tracks and add them to an in-memory playlist**) while progressively adding governance and automation.
 
-| Level | Topic | You will |
-| --- | --- | --- |
-| 0 | Setup | Create your repository from the template and verify the environment |
-| 1 | HVE-Core CLI plugin | Install HVE-Core into Copilot CLI and explore its agents |
-| 2 | Design Thinking coach | Turn the playlist request into a scoped problem statement |
-| 3 | RPI loop | Research, plan, implement and review the playlist feature |
-| 4 | APM, policy and marketplace | Make HVE-Core a versioned, locked, policy-checked repository dependency |
-| 5 | Agentic workflows | Create a daily backlog workflow that recommends an implementation order and parallel work |
-| 6 | Cloud agent delegation | Delegate a selected issue to the Copilot cloud agent and review its pull request |
-| Recap | | Governance, cost awareness and next steps |
-| Extra Credits | | Model and harness comparison, HydraFusion (Research Preview), accessibility workflow |
+| Level | Topic | You will | What it adds, and why the previous level was not enough |
+| --- | --- | --- | --- |
+| 0 | Setup | Create your repository from the template and verify the environment | |
+| 1 | HVE-Core CLI plugin | Install HVE-Core into Copilot CLI and explore its agents | Afternoon 1 primitives were your own; HVE-Core brings a shared method |
+| 2 | Design Thinking coach | Turn the playlist request into a scoped problem statement | Agents build exactly what you ask; first decide what is worth asking |
+| 3 | RPI loop | Research, plan, implement and review the playlist feature, with context engineering and one real decision at the review gate | A single prompt mixes facts, decisions and edits; RPI separates them into reviewable artifacts |
+| 4 | APM, policy and marketplace | Make HVE-Core a versioned, locked, policy-checked repository dependency and share team conventions | Your personal plugin is invisible to the cloud agent and to agentic workflows; the method must live in the repository |
+| 5 | Agentic workflows and delegation | Rank a backlog seeded from your own artifacts, then delegate one parallelizable issue to the Copilot cloud agent behind a test contract | A human must start every local session; workflows run on events, and delegation runs while you keep working |
+| 6 | Review the delegated work | Review the agent's pull request with required checks, Copilot code review and your team's test-writer agent, and see push protection | Delegated work is only useful if it is verified; review closes the loop |
+| Recap | | Operating model, then an architect capstone: org rollout, measuring impact, brownfield adoption, method and model choice | |
+| Extra Credits | | Model and harness measurement, HydraFusion (Research Preview) | |
 
 ### The crescendo
 
+Afternoon 2 tells one story in three acts: build a feature, scale the method that built it, then close the loop.
+
 ```mermaid
 flowchart LR
-  A[Copilot primitives] --> B[Plugins and marketplaces]
-  B --> C[Versioned APM packages]
-  C --> D[Policy-controlled supply chain]
-  D --> E[Structured RPI execution]
-  E --> F[Automated backlog with gh-aw]
-  F --> G[Controlled delegation to the cloud agent]
+  subgraph Build["Act 1: build the feature"]
+    A[Design Thinking] --> B[RPI]
+  end
+  subgraph Scale["Act 2: scale the method"]
+    C[Repository-owned with APM] --> D[Governed by policy]
+    D --> E[Shared through a marketplace]
+    E --> F[Automated with gh-aw]
+  end
+  subgraph Close["Act 3: close the loop"]
+    G[Delegate to the cloud agent] --> H[Verify and review]
+  end
+  B --> C
+  F --> G
+  H -. findings feed the backlog .-> F
 ```
 
-Each step reuses what the previous one introduced, and adds one layer of sharing, governance or automation.
+Each step reuses what the previous one produced: the Design Thinking decisions scope RPI, the RPI review findings seed the backlog, the backlog chooses what to delegate, and the team conventions from the marketplace guide the delegated work.
 
 ## Delivery options
 
