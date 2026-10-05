@@ -1400,36 +1400,11 @@ Requirements:
 Expected result:
 - The agent edits the API and front end.
 - Tests are added.
-- Validation commands run or are provided for you to run.
+- The RPI flow runs the API and front-end tests to validate the implementation, then checks validation evidence during review and reruns relevant tests after fixes. Check the reported results; a skipped or blocked test run is not a pass.
 
 ![Playlist feature implemented locally](assets/l3-playlist-implemented.png)
 
-### Step 2: Validate API tests
-
-Run from the repository root:
-
-```powershell
-dotnet test
-```
-
-Expected result:
-- Existing `/api/hello` tests still pass.
-- New tests cover tracks, playlist, add, not found, and duplicate conflict.
-
-### Step 3: Validate front-end tests
-
-Run:
-
-```powershell
-cd src\front
-npm test
-```
-
-Expected result:
-- Tests pass.
-- Testing Library queries use roles or labels for user interactions.
-
-### Step 4: Run the app
+### Step 2: Run the app
 
 In one terminal:
 
@@ -1451,7 +1426,7 @@ Expected result:
 - Adding a track moves or copies it into the playlist panel.
 - A duplicate add is prevented or reported, as you decided at the plan gate.
 
-### Step 5: Commit implementation checkpoint
+### Step 3: Commit implementation checkpoint
 
 Run from the repository root. Check `git status` first: pending changes should be limited to the approved source, tests and necessary test setup files, never `.copilot-tracking\`. If the implementation was already committed and the working tree is clean, inspect those commits with `git log -3 --stat` and continue without creating an empty commit.
 
@@ -1513,23 +1488,7 @@ Compare your duplicate-add choice with your neighbours, or with the room if your
 Expected result:
 - You see that the same fixed prompts produced different, valid designs, because a human made a different call at the gate. That is where your judgement adds value.
 
-### Step 3: Validate after review
-
-Run both commands again:
-
-```powershell
-dotnet test
-```
-
-```powershell
-cd src\front
-npm test
-```
-
-Expected result:
-- Both suites pass after review fixes.
-
-### Step 4: Commit review checkpoint
+### Step 3: Commit review checkpoint
 
 Run from the repository root. Check `git status` first: review notes stay in the ignored `.copilot-tracking\` folder.
 
