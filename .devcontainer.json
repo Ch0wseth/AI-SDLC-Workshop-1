@@ -3,6 +3,14 @@
   "image": "ghcr.io/justrebl/ai-sdlc-workshop/devcontainer:latest",
   "customizations": {
     "vscode": {
+      "mcp": {
+        "servers": {
+          "github": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/"
+          }
+        }
+      },
       "extensions": [
         "GitHub.copilot",
         "GitHub.copilot-chat",

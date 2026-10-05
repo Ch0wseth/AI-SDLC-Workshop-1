@@ -187,6 +187,8 @@ You are running unattended in GitHub Actions for `${{ github.repository }}` afte
 Do not ask questions. Do not modify files. Your only possible outputs are one issue or a `noop`.
 Follow `docs/afternoon-2/workshop.md` literally: use only its guided steps, expected results and links it explicitly provides, together with the supplied tester results and logs. Do not browse or search the internet, consult unrelated documentation, invent missing instructions, or infer how to accomplish an undocumented step. If the guide or captured evidence does not establish an outcome, report the evidence gap in the notes rather than guessing a defect category; never turn an assumption into a pass.
 
+Treat the published **Toggle solution / Toggle example** blocks as the canonical example path for tester conversations. Compare the extracted `prompts/curated-solutions.txt` and individual DT/BRD example messages with the session transcripts. The tester must use these supplied answers in order, not improvise a different persona, feature, stakeholder, success measure, or approval. Report deviations as tester limitations or replay defects, not as evidence that the published example failed. The DT example samples methods without completing their evidence gates. BRD example approval and handoff steps depend on human review and are intentionally skipped; never infer approval, waived findings, or full PM-track completion from a saved draft.
+
 A previous deterministic job already did this:
 
 1. Created a throwaway private sandbox repository from a snapshot of this commit.
@@ -205,6 +207,7 @@ All inputs are under `/tmp/gh-aw/agent/lab-run/`:
   - `status` is one of `pass`, `fail`, `warn` or `skip`.
 - `lab/workshop-tester/steps/<id>.log`: full output of each step. `*.run.log` holds the gh-aw workflow run logs.
 - `lab/workshop-tester/sessions/*.md`: the Copilot CLI session transcripts.
+- `lab/workshop-tester/prompts/`: extracted published messages, curated solution reference, and replay policy.
 - `lab/workshop-tester/usage/*.json`: Copilot CLI usage statistics for each prompt step.
 - `lab/workshop-tester/daily-backlog-issue.json`, `coding-agent-pr.json` and `coding-agent-pr-checks.txt`, when they were produced.
 - `lab/workshop-tester/egress/`: Codespace network evidence. `mode` is `audit`, `locked` or `lock-failed`. `hosts.txt` has one tab-separated line per distinct destination: time, method, `host:port`, `listed` or `unlisted`, and `forwarded` or `refused`. `allowlist.txt` is the effective allowlist.

@@ -138,7 +138,7 @@ tree_clean_check() {
 # Replays a lab prompt verbatim (extracted from workshop.md) through Copilot CLI non-interactive mode.
 copilot_prompt() {
   local id=$1 level=$2 title=$3 file="$RESULTS_DIR/prompts/$4.txt" to=$5 extra=${6-}
-  if [ ! -s "$file" ]; then
+  if [ ! -s "$file" ] || [ ! -s "$RESULTS_DIR/prompts/replay-policy.txt" ]; then
     CURRENT_CHECKS="" ; check "prompt '$4' extracted from workshop.md" false "missing $file"
     STEP_ID=$id STEP_LEVEL=$level STEP_TITLE=$title STEP_MODE=emulated STEP_CMD="" STEP_CODE=1 STEP_DUR=0
     return
@@ -147,11 +147,11 @@ copilot_prompt() {
   # cannot call obvious network or credential commands, and its URL tools only reach GitHub. Shell commands can
   # still open connections; only the optional egress lock (infra-harden) blocks those.
   step "$id" "$level" "$title" emulated "$to" \
-    "env -u GH_TOKEN -u GITHUB_TOKEN copilot -p \"\$(cat '$file')\" --allow-all-tools \
+    "env -u GH_TOKEN -u GITHUB_TOKEN copilot -p \"\$(cat '$RESULTS_DIR/prompts/replay-policy.txt'; printf '\\nCurrent workshop message:\\n'; cat '$file')\" --allow-all-tools \
       --deny-tool='shell(curl)' --deny-tool='shell(wget)' --deny-tool='shell(gh auth)' --deny-tool='shell(git push)' --deny-tool='shell(ssh)' \
       --allow-url=github.com --allow-url=api.github.com --add-dir '$RESULTS_DIR' \
       --no-ask-user --no-color --log-dir '$RESULTS_DIR/copilot-logs' --usage-output-file '$RESULTS_DIR/usage/$id.json' --share '$RESULTS_DIR/sessions/$id.md' $extra"
-  note "interactive prompt replayed with copilot -p --allow-all-tools (curl, wget, gh auth, git push and ssh denied; URLs limited to GitHub; GH_TOKEN unset) ${extra}"
+  note "published prompt with curated-solution replay policy; copilot -p --allow-all-tools (curl, wget, gh auth, git push and ssh denied; URLs limited to GitHub; GH_TOKEN unset) ${extra}"
   redact "$RESULTS_DIR/sessions/$id.md"
 }
 

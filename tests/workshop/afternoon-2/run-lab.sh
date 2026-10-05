@@ -46,6 +46,7 @@ finish_step
 step pre-prompts preflight "Extract copy-paste prompts from workshop.md" translated 30 \
   "node '$SCRIPT_DIR/extract-prompts.mjs' docs/afternoon-2/workshop.md '$RESULTS_DIR/prompts'"
 finish_step
+[ "$STEP_CODE" -eq 0 ] || exit 1
 
 # ---------------------------------------------------------------- Starter readiness (prerequisite)
 step pre-starter-layout preflight "Starter readiness: hello-only app and synthetic tracks" translated 30 \
@@ -90,31 +91,67 @@ tree_clean_check
 finish_step
 
 # ---------------------------------------------------------------- Level 2
-skip_step l2-dt-start "Level 2" "Start the learner-led nine-method sampler (/dt-start-project)" \
-  "interactive 10–15 minute learner-led exploration; non-interactive replay cannot supply authentic choices, peer feedback, or method completion"
+copilot_prompt l2-dt-start "Level 2" "Start the curated DT example (/dt-start-project)" dt-start 900 "--agent hve-core:dt-coach"
+finish_step
+dt_replay_ok=$STEP_CODE
+if [ "$dt_replay_ok" -eq 0 ]; then
+  copilot_prompt l2-dt-brief "Level 2" "Send the published DT project brief" dt-brief 900 "--continue --agent hve-core:dt-coach"
+  finish_step
+  dt_replay_ok=$STEP_CODE
+else
+  skip_step l2-dt-brief "Level 2" "Send the published DT project brief" "DT startup failed"
+fi
+for number in $(seq -w 1 9); do
+  number=$(printf '%02d' "$((10#$number))")
+  if [ "$dt_replay_ok" -eq 0 ]; then
+    copilot_prompt "l2-dt-example-$number" "Level 2" "Replay curated DT method $number contribution" "dt-example-$number" 900 "--continue --agent hve-core:dt-coach"
+    finish_step
+    dt_replay_ok=$STEP_CODE
+  else
+    skip_step "l2-dt-example-$number" "Level 2" "Replay curated DT method $number contribution" "earlier curated DT turn failed; do not fabricate missing conversation"
+  fi
+done
 
-copilot_prompt l2-dt-summary "Level 2" "Separate exploration from the six-bullet implementation handoff" dt-summary 900
-note "shared contract replay only; no learner exploration occurred, so its recap must report missing session history"
+copilot_prompt l2-dt-summary "Level 2" "Separate exploration from the six-bullet implementation handoff" dt-summary 900 "--continue --agent hve-core:dt-coach"
+note "curated example replay, not authentic learner research, peer feedback, or full method completion; report missing evidence honestly"
 log_has 'playlist' && check "summary mentions the playlist capability" true || check "summary mentions the playlist capability" false
 log_has '409|conflict|reject|duplicate' && check "summary states duplicate add is rejected" true || check "summary states duplicate add is rejected" false
 log_has 'empty' && check "summary mentions the empty state" true || check "summary mentions the empty state" false
 finish_step
 
-copilot_prompt l2-dt-notes "Level 2" "Save and inspect the local coaching notes" dt-notes 900 --continue
-tracking_files=$(find .copilot-tracking -type f -size +0c 2>/dev/null | head -n 20)
-[ -n "$tracking_files" ] && check "nonempty local working-state files exist" true "$tracking_files" || check "nonempty local working-state files exist" false
+step l2-dt-notes "Level 2" "Explore the local coaching notes" translated 30 \
+  'find .copilot-tracking/dt/music-catalog-listening-experience -type f -size +0c -print; git status --short'
+[ -s .copilot-tracking/dt/music-catalog-listening-experience/coaching-state.md ] \
+  && check "curated DT replay produced coaching state" true || check "curated DT replay produced coaching state" false
 tree_clean_check
-note "file existence checked; learner inspection of method coverage and personal insights is not replayed"
+note "file existence checked headlessly; human inspection and authentic research remain unverified"
 finish_step
 
-skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \
-  "extended track: multi-turn agent Q&A with human confirmation before /backlog-execute writes issues; Meeting Analyst needs Microsoft 365 and WorkIQ"
+copilot_prompt l2-brd-start "Level 2" "Start the BRD from the supplied workshop facts" brd-start 900 "--agent hve-core:brd-builder"
+finish_step
+brd_replay_ok=$STEP_CODE
+for number in $(seq 2 11); do
+  number=$(printf '%02d' "$number")
+  if [ "$brd_replay_ok" -eq 0 ]; then
+    copilot_prompt "l2-brd-example-$number" "Level 2" "Replay curated BRD contribution $number" "brd-example-$number" 900 "--continue --agent hve-core:brd-builder"
+    finish_step
+    brd_replay_ok=$STEP_CODE
+  else
+    skip_step "l2-brd-example-$number" "Level 2" "Replay curated BRD contribution $number" "earlier BRD turn failed; do not invent missing answers"
+  fi
+done
+step l2-brd-file "Level 2" "Check the saved BRD result" translated 30 \
+  'test -s docs/project-planning/music-catalog-playlist-slice-brd.md'
+note "saved draft checked; quality findings and human sign-off must not be inferred from file existence"
+finish_step
+skip_step l2-brd-signoff "Level 2" "BRD example steps 12-13: approval and handoff evidence" \
+  "human review, explicit approval and possible waivers are not authorized by an unattended example replay"
 
 step l2-curate-ignored "Level 2" "Curate: check that the tracking folder is ignored" translated 30 'git check-ignore -v .copilot-tracking/probe'
 git check-ignore -q .copilot-tracking/probe && check ".copilot-tracking/ is ignored" true || check ".copilot-tracking/ is ignored" false
 finish_step
 
-copilot_prompt l2-dt-record "Level 2" "Curate: write the Design Thinking record" dt-record 900 --continue
+copilot_prompt l2-dt-record "Level 2" "Curate: write the Design Thinking record" dt-record 900 "--continue --agent hve-core:dt-coach"
 rec=docs/project-planning/playlist-design-decisions.md
 [ -s "$rec" ] && check "decision record written" true || check "decision record written" false "missing $rec"
 [ -s "$rec" ] && ! grep -q '\.copilot-tracking' "$rec" && check "record has no tracking paths" true || check "record has no tracking paths" false
@@ -130,7 +167,7 @@ tree_clean_check
 finish_step
 
 skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \
-  "extended track: multi-turn agent Q&A with human confirmation before /backlog-execute writes issues; Meeting Analyst needs Microsoft 365 and WorkIQ"
+  "BRD draft example replayed separately; PRD and backlog execution wait for human BRD sign-off; Meeting Analyst needs Microsoft 365 and WorkIQ"
 
 # ---------------------------------------------------------------- Level 3
 copilot_prompt l3-research "Level 3" "RPI research (/rpi-research)" rpi-research 1800

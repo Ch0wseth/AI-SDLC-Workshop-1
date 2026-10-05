@@ -10,14 +10,20 @@ mkdirSync(outDir, { recursive: true });
 
 // Collect every ```text block with the nearest non-empty line above it.
 const blocks = [];
+let section = '';
+let toggle = '';
 for (let i = 0; i < lines.length; i++) {
+  if (lines[i].startsWith('#')) section = lines[i].trim();
+  const summary = lines[i].match(/<summary>(.*?)<\/summary>/);
+  if (summary) toggle = summary[1];
+  if (lines[i].trim() === '</details>') toggle = '';
   if (lines[i].trim() !== '```text') continue;
   let lead = i - 1;
   while (lead >= 0 && lines[lead].trim() === '') lead--;
   const body = [];
   let j = i + 1;
   for (; j < lines.length && lines[j].trim() !== '```'; j++) body.push(lines[j]);
-  blocks.push({ lead: lead >= 0 ? lines[lead].trim() : '', body: body.join('\n').trim() });
+  blocks.push({ section, toggle, lead: lead >= 0 ? lines[lead].trim() : '', body: body.join('\n').trim() });
   i = j;
 }
 
@@ -28,8 +34,8 @@ const wanted = {
   'dt-start': byFirstLine('/dt-start-project'),
   'dt-brief': byFirstLine('Project name: Music Catalog listening experience'),
   'dt-summary': byFirstLine('Summarize the final decisions'),
-  'dt-notes': byFirstLine('Save or update the local working notes'),
   'dt-record': byFirstLine('Write a curated Design Thinking decision record'),
+  'brd-start': byFirstLine('Create a business requirements document for the Music Catalog playlist slice.'),
   'rpi-research': byFirstLine('/rpi-research'),
   'rpi-plan': byFirstLine('/rpi-plan'),
   'rpi-implement': byFirstLine('/rpi-implement'),
@@ -53,3 +59,34 @@ if (missing.length) {
   console.error(`missing prompts: ${missing.join(', ')}`);
   process.exit(1);
 }
+
+const examples = [
+  { name: 'dt-example', summary: 'Toggle solution: example prompts for the nine methods', count: 9 },
+  { name: 'brd-example', summary: 'Toggle example: a step-by-step BRD conversation', count: 13 },
+];
+for (const { name, summary, count } of examples) {
+  const prompts = blocks.filter((block) => block.toggle === summary);
+  if (prompts.length !== count) {
+    console.error(`expected ${count} text blocks in "${summary}", found ${prompts.length}`);
+    process.exit(1);
+  }
+  // The BRD toggle starts with step 2; its last block is a conditional clarification-limit response.
+  prompts.forEach((block, index) => {
+    const number = name === 'brd-example' ? index + 2 : index + 1;
+    writeFileSync(join(outDir, `${name}-${String(number).padStart(2, '0')}.txt`), block.body + '\n');
+  });
+}
+
+const solutions = blocks.filter((block) => /Toggle (solution|example)/i.test(block.toggle));
+writeFileSync(join(outDir, 'curated-solutions.txt'), solutions.map((block) =>
+  `${block.section}\n${block.toggle}\n${block.lead}\n${block.body}`).join('\n\n') + '\n');
+writeFileSync(join(outDir, 'replay-policy.txt'), [
+  'You are replaying a published workshop example, not choosing your own learner scenario.',
+  'Follow the current message and the relevant curated solution in the reference file below.',
+  'Do not invent learner answers, stakeholders, research, test results, metrics, approvals, or waivers.',
+  'Wait for the next supplied message instead of autonomously progressing through later conversation steps.',
+  'If a required answer is absent, record the gap and stop that action; do not bypass evidence or approval gates.',
+  'DT examples are sampled or planned, not evidence that full methods are complete. Keep DT writes under .copilot-tracking/ only.',
+  'BRD drafting may write its documented file in docs/project-planning/. Do not sign off, approve waivers, or execute a backlog handoff.',
+  `Curated reference file: ${join(outDir, 'curated-solutions.txt')}`,
+].join('\n') + '\n');
