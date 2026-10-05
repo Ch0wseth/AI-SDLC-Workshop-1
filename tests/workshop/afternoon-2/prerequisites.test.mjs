@@ -65,7 +65,8 @@ test('Level 2 names native DT handoffs without treating the sampler as completed
     'dt-handoff-problem-space.prompt', 'dt-handoff-solution-space.prompt',
     'dt-handoff-implementation-space.prompt', 'dt-canonical-deck.prompt', 'dt-figma-export.prompt',
   ]) assert.ok(handoff.includes(prompt), prompt);
-  assert.match(handoff, /\/hve-core:dt-handoff-implementation-space\.prompt project-slug=music-catalog-listening-experience/);
+  assert.match(handoff, /```text\r?\n\/hve-core:dt-handoff-implementation-space\.prompt\r?\n```/);
+  assert.match(handoff, /Use project slug music-catalog-listening-experience/);
   assert.match(handoff, /if no Implementation Space method is complete/);
   assert.match(handoff, /workshop-only recap/);
   assert.match(handoff, /it does not start implementation/);
@@ -103,6 +104,11 @@ test('tester extracts the exploration and implementation handoff separately', ()
     const brief = readFileSync(join(output, 'dt-brief.txt'), 'utf8');
     const summary = readFileSync(join(output, 'dt-summary.txt'), 'utf8');
     assert.equal(start.trim(), '/dt-start-project');
+    for (const phase of ['research', 'plan', 'implement', 'review']) {
+      assert.equal(readFileSync(join(output, `rpi-${phase}-command.txt`), 'utf8').trim(), `/rpi-${phase}`);
+      assert.doesNotMatch(readFileSync(join(output, `rpi-${phase}.txt`), 'utf8'), /^\//);
+      assert.match(runner, new RegExp(`rpi-${phase}-command 900`));
+    }
     assert.equal(brief.trim().split('\n').length, 3);
     assert.match(brief, /10–15 minute learning exercise/);
     assert.doesNotMatch(start, /POST \/api\/playlist\/tracks/);
@@ -118,6 +124,17 @@ test('tester extracts the exploration and implementation handoff separately', ()
     assert.match(readFileSync(join(output, 'replay-policy.txt'), 'utf8'), /Do not sign off, approve waivers/);
   } finally {
     rmSync(output, { recursive: true });
+  }
+});
+
+test('published skill commands are standalone blocks without arguments or task prose', () => {
+  const handbook = readFileSync(new URL('../../../docs/maintainer-handbook.md', import.meta.url), 'utf8');
+  for (const document of [workshop, handbook]) {
+    const blocks = [...document.matchAll(/```text\r?\n([\s\S]*?)\r?\n```/g)];
+    for (const [, body] of blocks) {
+      if (!/^\/(?:hve-core:|rpi\b|rpi-|dt-|backlog-|git-commit\b|pull-request\b)/.test(body)) continue;
+      assert.match(body, /^\/\S+$/, `skill command must be standalone: ${body}`);
+    }
   }
 });
 
@@ -195,10 +212,28 @@ test('PM backlog checks use the reviewed plan rather than a prescribed reference
   assert.match(backlog, /requirement coverage, acceptance criteria, dependencies/);
   assert.match(backlog, /explicitly switch to Backlog Manager/);
   assert.match(backlog, /\/agent hve-core:backlog-manager/);
-  assert.match(backlog, /Create the GitHub issues in <owner>\/<repo>/);
-  assert.match(backlog, /wait for my confirmation before the first create/);
+  assert.match(backlog, /Execute the plan in the reviewed PRD handoff at <reviewed-handoff-path> and create the corresponding issues in GitHub repository <owner>\/<repo>\./);
+  assert.doesNotMatch(backlog, /List the operations first|Follow the reviewed plan's operation order/);
   assert.match(backlog, /reports their URLs/);
+  assert.match(backlog, /exit the current Copilot CLI session/);
+  assert.match(backlog, /start a \*\*fresh session\*\*/);
+  assert.match(backlog, /copilot --enable-all-github-mcp-tools/);
+  assert.match(backlog, /use the default agent rather than switching back/);
+  assert.match(backlog, /```text\r?\n\/backlog-execute\r?\n```/);
+  assert.match(backlog, /Then send a separate prompt/);
+  assert.doesNotMatch(backlog, /gh issue create/);
   assert.doesNotMatch(backlog, /four sub-issues|five issues|Five open issues|hand-written sample/);
+});
+
+test('sprint planning activates the skill separately from its task prompt', () => {
+  const sprint = workshop.slice(workshop.indexOf('### Step 8: Get a sprint order'),
+    workshop.indexOf('### Step 9: Hand off to curation'));
+  assert.match(sprint, /```text\r?\n\/backlog-plan\r?\n```/);
+  assert.match(sprint, /separate message/);
+  assert.match(sprint, /hve-core:backlog-plan/);
+  assert.match(sprint, /Use sprint mode to plan the next iteration/);
+  assert.match(sprint, /changing the prompt does not grant tool access/);
+  assert.doesNotMatch(sprint, /\/backlog-plan sprint/);
 });
 
 test('dev container provisions remote GitHub MCP while the lab retains authorization steps', () => {
@@ -208,21 +243,12 @@ test('dev container provisions remote GitHub MCP while the lab retains authoriza
   });
   const setup = workshop.slice(workshop.indexOf('### Step 1: Prepare your Copilot surface'),
     workshop.indexOf('### Step 2 (facilitator demo, optional): Meeting Analyst'));
-  assert.match(setup, /GitHub MCP is built in, so do not add a duplicate server/);
-  assert.match(setup, /MCP: Add Server/);
+  assert.match(setup, /GitHub HTTP MCP server/);
+  assert.match(setup, /Do not add another server/);
+  assert.match(setup, /Local VS Code setup without a dev container is deferred/);
+  assert.match(setup, /Configure Tools/);
   assert.match(setup, /complete GitHub sign-in/);
   assert.match(setup, /without changing anything/);
-  assert.match(setup, /cannot pre-authorize your account/);
-  assert.match(setup, /export COPILOT_GITHUB_TOKEN="\$GITHUB_TOKEN"/);
-  assert.match(setup, /same Bash terminal/);
-  assert.match(setup, /GitHub App user-to-server token/);
-  assert.match(setup, /Use the GitHub MCP tools to identify my signed-in GitHub account/);
-  assert.match(setup, /does \*\*not\*\* authenticate a separately configured VS Code HTTP MCP server/);
-  assert.match(setup, /MCP: List Servers > github > Start Server/);
-  assert.match(setup, /complete the browser authorization/);
-  assert.match(setup, /Not automatically with this HTTP configuration/);
-  assert.match(setup, /gh auth login/);
-  assert.match(setup, /Codespace's `GITHUB_TOKEN`/);
-  assert.match(setup, /prefer VS Code's GitHub OAuth sign-in rather than copying a token/);
-  assert.match(setup, /password-masked VS Code input variable/);
+  assert.match(setup, /Organization policies still apply/);
+  assert.doesNotMatch(setup, /MCP: Add Server|COPILOT_GITHUB_TOKEN|GITHUB_TOKEN|PAT configuration|--enable-all-github-mcp-tools/);
 });

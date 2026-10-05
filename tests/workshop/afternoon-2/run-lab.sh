@@ -170,7 +170,10 @@ skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Func
   "BRD draft example replayed separately; PRD and backlog execution wait for human BRD sign-off; Meeting Analyst needs Microsoft 365 and WorkIQ"
 
 # ---------------------------------------------------------------- Level 3
-copilot_prompt l3-research "Level 3" "RPI research (/rpi-research)" rpi-research 1800
+copilot_prompt l3-research-command "Level 3" "Activate RPI research" rpi-research-command 900
+finish_step
+[ "$STEP_CODE" -eq 0 ] || exit 1
+copilot_prompt l3-research "Level 3" "Send RPI research task" rpi-research 1800 --continue
 for f in Program.cs tracks.json App.tsx; do
   log_has "$f" && check "research mentions $f" true || check "research mentions $f" false
 done
@@ -181,7 +184,10 @@ step l3-research-checkpoint "Level 3" "Research checkpoint: git status" literal 
 tree_clean_check
 finish_step
 
-copilot_prompt l3-plan "Level 3" "RPI plan (/rpi-plan)" rpi-plan 1800 --continue
+copilot_prompt l3-plan-command "Level 3" "Activate RPI plan" rpi-plan-command 900 --continue
+finish_step
+[ "$STEP_CODE" -eq 0 ] || exit 1
+copilot_prompt l3-plan "Level 3" "Send RPI plan task" rpi-plan 1800 --continue
 log_has 'dotnet test' && check "plan includes dotnet test" true || check "plan includes dotnet test" false
 log_has 'npm test' && check "plan includes npm test" true || check "plan includes npm test" false
 tree_clean_check
@@ -192,7 +198,10 @@ tree_clean_check
 finish_step
 
 implementation_base=$(git rev-parse HEAD) || exit 1
-copilot_prompt l3-implement "Level 3" "RPI implement (/rpi-implement)" rpi-implement 3600 --continue
+copilot_prompt l3-implement-command "Level 3" "Activate RPI implementation" rpi-implement-command 900 --continue
+finish_step
+[ "$STEP_CODE" -eq 0 ] || exit 1
+copilot_prompt l3-implement "Level 3" "Send RPI implementation task" rpi-implement 3600 --continue
 if implementation_changes=$(implementation_changes_since "$implementation_base"); then
   [ -n "$implementation_changes" ] && check "agent edited implementation files" true "$(printf '%s\n' "$implementation_changes" | head -n 20)" \
     || check "agent edited implementation files" false "no implementation change since $implementation_base"
@@ -245,7 +254,10 @@ tree_clean_check
   || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
 finish_step
 
-copilot_prompt l3-review "Level 3" "RPI review (/rpi-review)" rpi-review 2400 --continue
+copilot_prompt l3-review-command "Level 3" "Activate RPI review" rpi-review-command 900 --continue
+finish_step
+[ "$STEP_CODE" -eq 0 ] || exit 1
+copilot_prompt l3-review "Level 3" "Send RPI review task" rpi-review 2400 --continue
 log_has 'pass|fail' && check "review returns a pass/fail summary" true || check "review returns a pass/fail summary" false
 finish_step
 

@@ -136,10 +136,16 @@ Use one branch and one pull request per feature. Run `git switch -c feature/<top
 
 ### Step 2: Run the change through RPI
 
-Describe the change and its acceptance criteria to `/rpi`, or run the phases yourself. For example:
+Send `/rpi` on its own, then describe the change and its acceptance criteria in a separate message, or run the phases yourself. For example:
 
 ```text
-/rpi task="Re-verify Level 4 against the latest APM release and update the guide and solutions"
+/rpi
+```
+
+Then send:
+
+```text
+Re-verify Level 4 against the latest APM release and update the guide and solutions.
 ```
 
 During Research, give the agent this handbook, the [design documentation](design/README.md), [CONTRIBUTING.md](../CONTRIBUTING.md) and [tutor.md](tutor.md#messaging-guardrails) so it inherits the decisions, writing rules and guardrails. Expect the agent to verify commands against official documentation before it changes a guide.

@@ -359,6 +359,8 @@ Expected result:
 - You can see installed plugins or plugin help for your CLI version.
 - `/rpi`, `/rpi-research`, `/rpi-plan`, `/rpi-implement`, `/rpi-review`, and Design Thinking prompts may be discoverable depending on your version.
 
+**For every skill or prompt command in this workshop:** send the slash command on its own, then send the task or options as a separate message. If the short name is not recognized, select the matching HVE-Core entry from the slash-command menu. Built-in CLI commands such as `/agent <name>`, `/model auto intelligence`, and `/settings experimental on` retain their command arguments, but are still sent separately from task prompts.
+
 ### Step 4: VS Code alternative
 
 <div class="warning" data-title="Prefer the direct plugin">
@@ -662,10 +664,16 @@ HVE includes prompts for extending the coaching work beyond this sampler. Type `
 - **`dt-canonical-deck.prompt`** creates or refreshes a canonical snapshot and can optionally build a presentation from available artifacts.
 - **`dt-figma-export.prompt`** exports suitable artifacts to FigJam or Figma for collaborative review; it requires the Figma MCP server and permission to create the external file.
 
-For an Implementation Space handoff, select **`dt-handoff-implementation-space.prompt`** from the prompt picker and supply your actual project slug, for example:
+For an Implementation Space handoff, select **`dt-handoff-implementation-space.prompt`** from the prompt picker. Send the command on its own:
 
 ```text
-/hve-core:dt-handoff-implementation-space.prompt project-slug=music-catalog-listening-experience
+/hve-core:dt-handoff-implementation-space.prompt
+```
+
+Then supply your actual project slug in a separate message, for example:
+
+```text
+Use project slug music-catalog-listening-experience for the Implementation Space handoff.
 ```
 
 The prompt checks coaching state and readiness before producing a research-ready handoff. **Sampling a method is not completing it:** if no Implementation Space method is complete, resume coaching for a real handoff, or continue with the workshop-only recap below. Do not mark simulated tests or planned prototypes as completed evidence. An eligible handoff produces `handoff-summary-implementation-space.md` in your DT project folder and a research topic under `.copilot-tracking/research/`; it does not start implementation.
@@ -750,8 +758,8 @@ Use the agents in this order:
 | 3 | Product definition | **BRD Builder** | A business requirements document (BRD) in `docs\project-planning` | No |
 | 4 | Product definition | **PRD Builder** | A product requirements document (PRD) in `docs\project-planning` | No |
 | 5 | Decomposition | **Functional Planner** | A GitHub issue hierarchy plan and a handoff file you can review | No, read-only |
-| 6 | Execution | **Backlog Manager** with `/backlog-execute run` | GitHub issues and sub-issues | **Yes**, after you confirm |
-| 7 | Sprint planning | **Backlog Manager** with `/backlog-plan sprint` | A recommended order and dependencies | No, read-only |
+| 6 | Execution | **Backlog Manager** or `/backlog-execute` | GitHub issues and sub-issues | **Yes**, after you confirm |
+| 7 | Sprint planning | **Backlog Manager** with `/backlog-plan` | A recommended order and dependencies | No, read-only |
 
 Why this order:
 
@@ -767,73 +775,20 @@ Why this order:
 
 ### Step 1: Prepare your Copilot surface
 
-Use VS Code Copilot Chat or Copilot CLI with the HVE-Core plugin from Level 1.
+For this PM track, use **VS Code Copilot Chat in the workshop Codespace or dev container**, with HVE-Core from Level 1. Local VS Code setup without a dev container is deferred.
 
 **Before using the backlog agents, connect the GitHub MCP server and verify its tools are available.** HVE-Core supplies the agents, not your GitHub authorization. This connection is needed for the optional PM track's GitHub operations, not for the core DT brainstorming exercise.
 
-**Copilot CLI:** GitHub MCP is built in, so do not add a duplicate server. By default, the CLI enables only a subset of its tools. Creating issues and sub-issues needs the full set, so start Copilot CLI from the repository root with:
+The repository's `.devcontainer.json` adds the **GitHub HTTP MCP server** automatically when the container is created. Do not add another server. If your container predates this configuration, rebuild it.
 
-```powershell
-copilot --enable-all-github-mcp-tools --model auto --auto-tier intelligence
-```
+1. Run **MCP: List Servers**, select `github`, and choose **Start Server** if it is not running.
+2. Review any trust prompt and complete GitHub sign-in if requested, using the account that can access your workshop repository.
+3. In Copilot Chat, open **Configure Tools** and enable the GitHub tools needed for the backlog exercise.
+4. Ask the agent to read your repository's open issues **without changing anything**. An empty list is fine; resolve any connection or permission error before continuing.
 
-Run `/mcp` to check the GitHub server is enabled and connected. Complete Copilot sign-in if prompted. Enabling tools does not grant repository permissions: use the account that owns your workshop copy and confirm each proposed write.
-
-**Copilot CLI in a Codespace: reuse an existing terminal credential.** If `GITHUB_TOKEN` is already available in your terminal, you can explicitly pass it to Copilot without printing it or creating a token file. Run this from the repository root in **that same Bash terminal** (not PowerShell or a separate agent terminal):
-
-```bash
-(
-  : "${GITHUB_TOKEN:?GITHUB_TOKEN is not available in this terminal; use Copilot sign-in instead}"
-  export COPILOT_GITHUB_TOKEN="$GITHUB_TOKEN"
-  copilot --enable-all-github-mcp-tools --model auto --auto-tier intelligence
-)
-```
-
-The parentheses limit the exported override to this launch and its child processes. Terminals and already-running processes do not necessarily share environment changes. A `ghu_` prefix identifies a **GitHub App user-to-server token**, not proof that all required permissions are granted; there is no need to create a PAT merely to try this supported token type.
-
-In the new Copilot session, run:
-
-```text
-/mcp
-```
-
-Check that **`github-mcp-server`** (or the GitHub server name shown by your version) is enabled and connected. Then send:
-
-```text
-Use the GitHub MCP tools to identify my signed-in GitHub account.
-```
-
-Confirm that it reports the account that owns or can access your workshop repository, then perform the read-only open-issues check below. The built-in server remains available across conversation turns in this CLI session; for later launches, repeat the command from a terminal where `GITHUB_TOKEN` is available. This does **not** authenticate a separately configured VS Code HTTP MCP server.
-
-If startup, `/mcp`, or the account query fails, the connection is not verified. Share only the error message with credentials redacted—**never paste the token into chat**. A token may be expired, restricted, or unsuitable for the requested operation despite its supported type. Explicit `COPILOT_GITHUB_TOKEN` overrides stored sign-in; exit this launch and use the regular Copilot `/login` flow if that credential cannot authorize access. See [Copilot CLI authentication](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/authenticate-copilot-cli) for supported tokens and precedence.
-
-**VS Code in a Codespace or dev container:** this repository's `.devcontainer.json` declares the remote GitHub MCP server under `customizations.vscode.mcp`. VS Code provisions its configuration when the container is created; it is a remote service, not an executable installed in the container image. If your existing container predates this configuration, rebuild it or use the manual setup below.
-
-**VS Code with local tools, or if the server is missing:**
-
-1. Open the Command Palette and run **MCP: Add Server**.
-2. Choose **HTTP**, enter `https://api.githubcopilot.com/mcp/`, and name the server `github`.
-3. Choose a configuration location offered by VS Code, such as your user profile or workspace.
-4. Run **MCP: List Servers**, select `github`, and start it. Review any trust prompt and complete GitHub sign-in with the account that can access your workshop repository. Do not put a token in the configuration file.
-5. In Chat, open **Configure Tools** and enable the GitHub tools needed by the backlog agents. Your organization may restrict server access or individual tools.
-
-**Connecting after adding the HTTP server:** adding the workspace configuration is not the same as signing in. Run **MCP: List Servers > github > Start Server** (or right-click GitHub under **MCP SERVERS - INSTALLED** in Extensions and choose **Start Server**). Accept the GitHub authentication request if prompted, complete the browser authorization with your workshop account, then return to VS Code. An existing VS Code GitHub session may be reused, but approve any requested access explicitly. If connection fails, choose **Show Output** from the server menu to inspect the error; do not share logs containing credentials.
-
-**Can it reuse `gh` or Codespaces tokens?** Not automatically with this HTTP configuration. `gh auth login` authenticates GitHub CLI; it does not print a token as its normal login result or configure VS Code MCP authentication. A token obtained through `gh auth token`, or a Codespace's `GITHUB_TOKEN`, would need explicit bearer-header wiring, acceptance by the remote service, and sufficient permissions for the requested operation. The Codespaces token is scoped to authorized repositories and permissions; successful Git access does not establish that MCP issue writes are authorized. Do not assume it is interchangeable with a personal access token.
-
-For this lab, **prefer VS Code's GitHub OAuth sign-in rather than copying a token**. If OAuth is unavailable and your policy permits it, use the [GitHub MCP PAT configuration](https://github.com/github/github-mcp-server#install-in-vs-code) with a password-masked VS Code input variable and a minimally scoped PAT for your workshop repository. Never paste a token into chat, screenshots, `.devcontainer.json`, or a committed MCP configuration. The shared container configuration intentionally contains no credentials.
-
-For either VS Code route, confirm **MCP: List Servers** shows the server running. Ask the agent to use GitHub MCP to read your workshop repository's open issues **without changing anything**. An empty issue list is fine; a permission or connection error must be resolved before backlog execution. If you already configured GitHub MCP, reuse it instead of adding a second instance.
-
-The dev container can supply the server configuration, but **cannot pre-authorize your account, bypass trust, or enable tools blocked by policy**. See [Use MCP servers in VS Code](https://code.visualstudio.com/docs/copilot/customization/mcp-servers) for configuration and troubleshooting.
+The container configures the server, not your permissions. Organization policies still apply, and you must review proposed writes before confirming them. Never paste credentials into chat or repository files. If the server fails to connect, use **Show Output** and share only the redacted error with the facilitator.
 
 To switch agents in Copilot CLI, enter `/agent <agent-name>` using the command shown at each step below. If your plugin exposes a namespaced identifier or the direct name is not recognized, run `/agent` and choose the matching agent from the list. In VS Code, use the agent picker instead.
-
-<div class="info" data-title="Configuration option">
-
-> `--enable-all-github-mcp-tools` is a Copilot CLI option. It lets the session use write tools on GitHub with your identity. Use it only for this track, and review every operation before you confirm it.
-
-</div>
 
 ### Step 2 (facilitator demo, optional): Meeting Analyst
 
@@ -1036,11 +991,7 @@ After reviewing Functional Planner's handoff, **explicitly switch to Backlog Man
 Confirm that **Backlog Manager** is active. If your installation uses an unprefixed name, run `/agent backlog-manager` or choose it from `/agent`; in VS Code, select **Backlog Manager** in the agent picker. Then send the following prompt, replacing `<owner>/<repo>` with your workshop repository and `<reviewed-handoff-path>` with the path Functional Planner reported:
 
 ```text
-Create the GitHub issues in <owner>/<repo> from Functional Planner's reviewed handoff at <reviewed-handoff-path>.
-Read the handoff, confirm the target repository, and use the approved issue content and hierarchy.
-List the operations first and wait for my confirmation before the first create.
-Follow the reviewed plan's operation order and create any parent-child links after both issues exist.
-Do not add labels, milestones, or assignees, including Copilot. Report the created issue URLs and any operation that failed or remains blocked.
+Execute the plan in the reviewed PRD handoff at <reviewed-handoff-path> and create the corresponding issues in GitHub repository <owner>/<repo>.
 ```
 
 Expected result:
@@ -1050,7 +1001,25 @@ Expected result:
 
 <div class="tip" data-title="Write tools missing">
 
-> If the executor reports that it cannot create issues, restart Copilot CLI with `copilot --enable-all-github-mcp-tools`, or check that the GitHub MCP server is signed in within VS Code. As a fallback, create the approved issues yourself with `gh issue create`, using the reviewed handoff, and verify any planned sub-issue links separately.
+If GitHub write tools are missing, exit the current Copilot CLI session. From a terminal in your workshop repository, start a **fresh session**:
+
+```sh
+copilot --enable-all-github-mcp-tools
+```
+
+In that new session, use the default agent rather than switching back to the read-only Backlog Manager. Send this command **on its own**:
+
+```text
+/backlog-execute
+```
+
+Then send a separate prompt, replacing the handoff path and repository:
+
+```text
+Run the reviewed plan at <reviewed-handoff-path> and create the corresponding issues in GitHub repository <owner>/<repo>.
+```
+
+Review the proposed operations before approving writes. If authentication or write tools are still unavailable, stop and ask the facilitator for help.
 
 </div>
 
@@ -1070,19 +1039,29 @@ Expected result:
 
 ### Step 8: Get a sprint order (read-only)
 
-Run `/agent backlog-manager` in Copilot CLI, or select **Backlog Manager** in VS Code. Copy paste the following prompt, replacing `<owner>/<repo>`:
+Run `/agent backlog-manager` in Copilot CLI, or select **Backlog Manager** in VS Code. Send the following command **on its own**, without a mode or task prompt:
 
 ```text
-/backlog-plan sprint
+/backlog-plan
+```
 
-Plan the next iteration for <owner>/<repo> from the open playlist slice issues.
+If the short command is not recognized, select **hve-core:backlog-plan** from the slash-command menu. Then send this as a **separate message**, replacing `<owner>/<repo>`:
+
+```text
+Use sprint mode to plan the next iteration for <owner>/<repo> from the open playlist slice issues.
 Read-only: recommend an implementation order with dependencies and say which issues can be developed in parallel. Do not change any issue.
 ```
+
+If the agent still reports missing GitHub MCP tools, stop and check the server connection and tool enablement from Step 1; changing the prompt does not grant tool access.
 
 Expected result:
 - An order such as the tracks API, then the playlist API, then the front end, with tests alongside each step.
 - Nothing changes on GitHub.
 - In Level 5, the daily backlog workflow automates this same triage every weekday.
+
+![Sprint planner output showing issue dependencies, recommended implementation order, and parallel work waves](assets/l2-sprint-planner.png)
+
+Example captured during a workshop run. Your issue numbers and ordering will differ. The dependencies shown here come from issue text; they are not enforced by GitHub's structured dependency feature.
 
 ### Step 9: Hand off to curation
 
@@ -1117,38 +1096,7 @@ The rule is simple: never commit the tracking folder. Curate what matters out of
 
 </div>
 
-### Step 1: Check that the tracking folder is ignored
-
-Run from the repository root:
-
-```powershell
-git check-ignore -v .copilot-tracking
-```
-
-Expected result:
-- Git prints the `.gitignore` rule that ignores `.copilot-tracking/`.
-- If it prints nothing, add `.copilot-tracking/` to `.gitignore` and commit that change first.
-
-### Step 2: Sort the working state
-
-Run:
-
-```powershell
-Get-ChildItem .copilot-tracking -Recurse -File | Select-Object -ExpandProperty FullName
-git status
-```
-
-For each file, decide:
-
-- **Keep locally.** Agent working state you may reuse later, such as DT Coach state or the backlog handoff. It stays ignored.
-- **Curate.** Content that should become part of a deliverable, such as the Design Thinking decisions. You copy the outcome, not the file.
-- **Delete.** Raw meeting or transcript notes, once their content has been anonymized into the PRD.
-
-Expected result:
-- `git status` shows no `.copilot-tracking` entries.
-- If you ran the extended track, it shows the BRD and PRD under `docs\project-planning` as new files.
-
-### Step 3: Write the Design Thinking record
+### Step 1: Write the Design Thinking record
 
 Run `/agent dt-coach` in Copilot CLI, or select **DT Coach** in VS Code. Copy paste the following prompt:
 
@@ -1172,34 +1120,26 @@ Expected result:
 - One new file, `docs\project-planning\playlist-design-decisions.md`, with the problem, the six decisions and the success criteria.
 - No other file changes.
 
-### Step 4: Review before you commit
+### Step 2: Review and commit the deliverables
 
-Open each file you plan to commit and check:
-
-- [ ] No names, email addresses, quotes or customer details. Use roles such as "workshop participant" instead.
-- [ ] No paths or links into `.copilot-tracking\`. HVE-Core instructions forbid referencing tracking files from committed content, because they are not in the repository.
-- [ ] Out-of-scope items are still listed as out of scope.
-- [ ] The Markdown is valid. Run:
-
-```powershell
-npx markdownlint-cli2 "docs/project-planning/*.md"
-```
-
-- [ ] You read every file yourself. Agent output is a draft until a human approves it.
-
-### Step 5: Commit the reviewed deliverables
+Read the curated documents before committing: keep the agreed scope, remove personal or raw notes, and do not link to local tracking files. Agent output remains a draft until you approve it.
 
 Stage the reviewed folder by path, not with `git add -A`:
 
 ```powershell
 git add docs\project-planning
 git status
-git commit -m "Add playlist slice design record, BRD and PRD"
 ```
 
-Expected result:
-- The commit contains only files under `docs\project-planning`.
-- `.copilot-tracking\` still exists on your machine but is not part of the commit.
+In VS Code's Source Control file tree, **Staged Changes should contain only the reviewed files under `docs/project-planning/`**. No `.copilot-tracking/` file should be included. If other files are staged, leave them out of this commit.
+
+The tracking folder stays local and ignored because it contains agent session state, draft reasoning, and potentially sensitive raw notes, not reviewed deliverables. Commit the curated outcomes instead; other readers cannot rely on links to your local working state.
+
+Once the staged tree is correct, commit:
+
+```powershell
+git commit -m "Add playlist slice design record, BRD and PRD"
+```
 
 HVE-Core references:
 
@@ -1210,20 +1150,6 @@ HVE-Core references:
 - [Product definition](https://microsoft.github.io/hve-core/docs/hve-guide/lifecycle/product-definition), [TPM guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tpm) and [Business Program Manager guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/business-program-manager): where the BRD and PRD live and who reviews them.
 - [Design Thinking](https://microsoft.github.io/hve-core/docs/design-thinking/) and the [agents catalog](https://microsoft.github.io/hve-core/docs/agents/).
 - [HVE-Core custom agents](https://github.com/microsoft/hve-core/blob/main/.github/CUSTOM-AGENTS.md) and the [HVE-Core planning documents](https://github.com/microsoft/hve-core/tree/main/docs/planning), as examples of committed, curated planning content.
-
-## Commit checkpoint
-
-Run:
-
-```powershell
-git status
-git log --oneline -1
-```
-
-Expected result:
-- Your working tree is clean, and `.copilot-tracking\` does not appear.
-- The last commit holds your curated files under `docs\project-planning`.
-- You have a shared feature scope for RPI.
 
 ---
 
@@ -1276,9 +1202,9 @@ You can drive it in two ways:
 | Mode | How you start it | When to use it |
 | --- | --- | --- |
 | Phase by phase (this level) | Run `/agent rpi-agent` in Copilot CLI (select **RPI Agent** in VS Code), then run one `/rpi-*` command at a time | Learning RPI, or when you want to check each phase before the next one |
-| Full loop | `/rpi task="..."` | A well-scoped task you trust the agent to carry through |
+| Full loop | Send `/rpi` alone, then describe the task in a separate message | A well-scoped task you trust the agent to carry through |
 
-With `/rpi`, RPI Agent asks how much control you want, unless your request already says (for example, "use automatic mode"). It offers four choices: run end to end, keep going but check with you on unclear decisions, research and plan with you then stop before implementation, or work through each phase with you. In VS Code, the agent's **Full Auto** button starts the end-to-end choice. It still stops for safety confirmations and blockers. Use `/rpi continue=...` to resume a saved task, and `/rpi followUp=...` to start a new task from a review finding.
+With `/rpi`, RPI Agent asks how much control you want, unless your separate task message already says (for example, "use automatic mode"). It offers four choices: run end to end, keep going but check with you on unclear decisions, research and plan with you then stop before implementation, or work through each phase with you. In VS Code, the agent's **Full Auto** button starts the end-to-end choice. It still stops for safety confirmations and blockers. To resume a saved task or start a follow-up from a review finding, send `/rpi` alone, then identify the saved task or finding and your requested action in a separate message.
 
 This level drives the phases one at a time so you see each output. Level 5 hands the full loop to RPI Agent on Copilot cloud agent.
 
@@ -1306,11 +1232,15 @@ See [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-
 
 ### Step 1: Ask RPI to research only
 
-Run `/agent rpi-agent` in Copilot CLI, or select **RPI Agent** in the VS Code agent picker. Copy paste the following prompt:
+Run `/agent rpi-agent` in Copilot CLI, or select **RPI Agent** in the VS Code agent picker. Send the skill command on its own:
 
 ```text
 /rpi-research
+```
 
+Then send the task prompt as a separate message:
+
+```text
 Task: Implement the Music Catalog playlist slice.
 
 Research only. Do not edit files.
@@ -1370,11 +1300,15 @@ Expected result:
 
 ### Step 1: Ask for an implementation plan
 
-Copy paste the following prompt:
+Send the skill command on its own:
 
 ```text
 /rpi-plan
+```
 
+Then send the task prompt as a separate message:
+
+```text
 Create an implementation plan for the Music Catalog playlist slice using the research result.
 
 Do not edit files.
@@ -1433,11 +1367,15 @@ Expected result:
 
 ### Step 1: Ask RPI to implement
 
-Copy paste the following prompt:
+Send the skill command on its own:
 
 ```text
 /rpi-implement
+```
 
+Then send the task prompt as a separate message:
+
+```text
 Implement the approved Music Catalog playlist slice.
 
 Requirements:
@@ -1532,11 +1470,15 @@ Expected result:
 
 ### Step 1: Ask RPI to review the implementation
 
-Copy paste the following prompt:
+Send the skill command on its own:
 
 ```text
 /rpi-review
+```
 
+Then send the task prompt as a separate message:
+
+```text
 Review the Music Catalog playlist implementation against the fixed requirements.
 
 Do not implement broad refactors.
@@ -1674,15 +1616,21 @@ Expected result:
 
 ### Step 4: Draft the pull request with `/pull-request`
 
-Type:
+Send the skill command on its own:
 
 ```text
-/pull-request action=prepare
+/pull-request
+```
+
+Then send the preparation request as a separate message:
+
+```text
+Prepare a pull request title and description for the committed changes. Do not publish a pull request or push the branch.
 ```
 
 Expected result:
 - The agent reads the committed diff of your branch, runs quick checks on the changed areas, and shows you a pull request title and description.
-- With `action=prepare`, nothing is written to GitHub. You do not push until Level 4, so keep the draft as the description for a pull request you open later.
+- This is preparation only: nothing is written to GitHub. You do not push until Level 4, so keep the draft as the description for a pull request you open later.
 ---
 
 # Break

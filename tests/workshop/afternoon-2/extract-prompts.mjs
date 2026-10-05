@@ -29,6 +29,11 @@ for (let i = 0; i < lines.length; i++) {
 
 const byFirstLine = (prefix) => blocks.find((b) => b.body.startsWith(prefix));
 const byLead = (lead) => blocks.find((b) => b.lead === lead);
+const taskAfterCommand = (command) => {
+  const index = blocks.findIndex((block) => block.body === command);
+  const task = blocks[index + 1];
+  return index >= 0 && task?.section === blocks[index].section && !task.body.startsWith('/') ? task : undefined;
+};
 
 const wanted = {
   'dt-start': byFirstLine('/dt-start-project'),
@@ -36,10 +41,14 @@ const wanted = {
   'dt-summary': byFirstLine('Summarize the final decisions'),
   'dt-record': byFirstLine('Write a curated Design Thinking decision record'),
   'brd-start': byFirstLine('Create a business requirements document for the Music Catalog playlist slice.'),
-  'rpi-research': byFirstLine('/rpi-research'),
-  'rpi-plan': byFirstLine('/rpi-plan'),
-  'rpi-implement': byFirstLine('/rpi-implement'),
-  'rpi-review': byFirstLine('/rpi-review'),
+  'rpi-research-command': byFirstLine('/rpi-research'),
+  'rpi-research': taskAfterCommand('/rpi-research'),
+  'rpi-plan-command': byFirstLine('/rpi-plan'),
+  'rpi-plan': taskAfterCommand('/rpi-plan'),
+  'rpi-implement-command': byFirstLine('/rpi-implement'),
+  'rpi-implement': taskAfterCommand('/rpi-implement'),
+  'rpi-review-command': byFirstLine('/rpi-review'),
+  'rpi-review': taskAfterCommand('/rpi-review'),
   'issue-title': byLead('Title:'),
   'issue-problem': byLead('Problem statement:'),
   'issue-outcome': byLead('Expected outcome:'),

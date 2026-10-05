@@ -9,6 +9,7 @@ This folder intentionally contains placeholders referenced by `docs\afternoon-2\
 - Level 1 Step 4 uses the supplied `docs\assets\vscode-hve-core.png` — VS Code Marketplace page for the `ise-hve-essentials.hve-core` extension alternative; no separate placeholder remains.
 - `l2-dt-coach-framing.png` — DT Coach asking a focused question during the learner-led nine-method listening-experience sampler, with an actual learner contribution visible.
 - `l2-dt-decisions.png` — Exploration recap and clearly separated shared playlist implementation handoff, including duplicate rejection and empty-state decisions.
+- `l2-sprint-planner.png` — Supplied workshop-run screenshot of sprint planning output: text-derived dependencies, implementation order, and parallel work waves. This is a captured example, not a placeholder or a required issue hierarchy.
 - `l3-rpi-agent-walkthrough.png` — RPI Agent output showing Research, Plan, Implement, and Review phases.
 - `l3-playlist-implemented.png` — Browser view of the implemented track list and playlist panel.
 - `l4-apm-marketplace.png` — Terminal output for APM install or audit plus repository marketplace files.

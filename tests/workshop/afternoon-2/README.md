@@ -21,7 +21,7 @@ flowchart LR
 | [`.github/workflows/workshop-tester.md`](../../../.github/workflows/workshop-tester.md) | gh-aw source | Trigger, `lab_run` custom job, validator prompt, safe outputs. Compile with `gh aw compile workshop-tester`. |
 | [`orchestrate.sh`](orchestrate.sh) | Actions runner | `setup` (snapshot of the tested commit into a private sandbox repo, Codespace creation), `run` (starts the lab and polls), `collect`, `cleanup` (always deletes the Codespace and sandbox and sweeps orphans). |
 | [`run-lab.sh`](run-lab.sh) | Codespace | Checks introductory starter prerequisites, then executes Levels 1 to 6 and records one JSON line per check or step in `results.jsonl`. |
-| [`extract-prompts.mjs`](extract-prompts.mjs) | Codespace | Reads the copy-paste prompts and L6 form values directly from `workshop.md`, so the tester uses the published text. |
+| [`extract-prompts.mjs`](extract-prompts.mjs) | Codespace | Reads the copy-paste prompts and L6 form values directly from `workshop.md`, keeping RPI skill commands separate from their task messages. |
 | [`lib.sh`](lib.sh) | Codespace | Step and check recording, token redaction, Copilot CLI prompt replay. |
 
 Every step has a mode that the validator reports:
