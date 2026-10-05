@@ -404,6 +404,15 @@ The exercise is a **10–15 minute sampler**, not completion of nine full method
 
 An extended Product Manager track then turns these decisions into a BRD, a PRD, and GitHub issues with the HVE-Core planning agents.
 
+| Artifact | What it explains | What it is used for |
+| --- | --- | --- |
+| **BRD — Business Requirements Document** | Why the business needs a capability, who benefits, and which outcomes matter. | Align stakeholders on the need, value, and investment before defining a solution. |
+| **PRD — Product Requirements Document** | What the product must do, its boundaries, and what counts as acceptable. | Give engineers, designers, and testers shared behaviour and acceptance criteria. |
+| **GitHub issues** | The bounded work items that deliver the agreed requirements. | Track ownership, dependencies, and progress, with links back to the BRD and PRD. |
+
+<details>
+<summary>How a Product Manager uses HVE Principles</summary>
+
 ### BRD: why the business needs the capability
 
 A **Business Requirements Document (BRD)** explains the problem worth solving, who benefits, and what a successful outcome would mean. It gives stakeholders a shared basis for deciding whether to invest in the work before the team commits to a solution.
@@ -424,12 +433,6 @@ For the playlist slice, the PRD specifies browsing tracks, adding a track to the
 
 Use the PRD to review proposed designs, plan delivery, derive test cases, and assess changes. It is not proof that a feature works: implementation, testing, and human review still provide that evidence. Architecture choices and the coding sequence belong in the subsequent technical plan or an architecture decision record when needed.
 
-| Artifact | Main question | How the PM uses it |
-| --- | --- | --- |
-| BRD | Why do this, for whom, and toward which outcome? | Align the need, value, constraints, and investment decision with stakeholders. |
-| PRD | What must the product do, and what counts as acceptable? | Agree behaviour and scope with delivery teams and reviewers. |
-| GitHub issues | Which bounded pieces of work will deliver those requirements? | Track ownership, dependencies, acceptance criteria, and progress, with links back to the requirements. |
-
 The chain is **framed need → BRD → PRD → reviewed backlog → implementation and validation**. Keep the documents proportional to the decision: this workshop uses short artifacts for a small slice, not paperwork for its own sake. If the scope changes, update the affected requirements and work items together rather than letting the backlog silently diverge from the agreed intent.
 
 ### How a Product Manager uses HVE principles
@@ -446,6 +449,8 @@ HVE-Core's principle is **"AI carries the rules, humans keep the judgment."** Fo
 The PM's role therefore shifts from repeatedly formatting documents and tickets to checking evidence, resolving ambiguity, aligning stakeholders, and owning prioritization. HVE provides a repeatable path between those decisions and engineering work; it does not make the decisions authoritative merely because an agent produced them.
 
 The [extended Product Manager track](#extended-track-product-manager-with-hve-core) demonstrates this handoff with BRD Builder, PRD Builder, Functional Planner, and Backlog Manager. It is optional: the core workshop proceeds with a reviewed implementation handoff after the open exploration.
+
+</details>
 
 ![DT Coach framing the playlist capability](assets/l2-dt-coach-framing.png)
 
