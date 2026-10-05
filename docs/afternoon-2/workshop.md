@@ -199,6 +199,7 @@ Sign in to GitHub CLI, and then to Copilot CLI. Copilot CLI asks you to run `/lo
 ```bash
 gh auth login
 copilot
+> `From Copilot` : exit
 ```
 
 Check that every tool answers:
