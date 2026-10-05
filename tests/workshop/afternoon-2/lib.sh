@@ -134,12 +134,71 @@ tree_clean_check() {
   fi
 }
 
+resolve_rpi_artifact() {
+  local kind=$1 response=$2 slug=${3-} root suffix name
+  local matches=()
+  case "$kind" in
+    research) root=research; suffix=research ;;
+    plan) root=plans; suffix=plan ;;
+    changes) root=changes; suffix=changes ;;
+    review) root=reviews/logs; suffix=review ;;
+    *) printf 'Unsupported RPI artifact kind: %s\n' "$kind" >&2; return 1 ;;
+  esac
+  if [ ! -r "$response" ]; then
+    printf 'RPI response is unavailable: %s\n' "$response" >&2
+    return 1
+  fi
+  if [ -n "$slug" ] && [[ ! "$slug" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+    printf 'Invalid RPI task slug: %s\n' "$slug" >&2
+    return 1
+  fi
+  name=${slug:-'[a-z0-9]+(-[a-z0-9]+)*'}
+  if [ "$kind" = review ]; then name="$name-$suffix(-[0-9]+)?"; else name="$name-$suffix"; fi
+  mapfile -t matches < <(grep -oE "\\.copilot-tracking/$root/[0-9]{4}-[0-9]{2}-[0-9]{2}/$name\\.md([^[:alnum:]_./-]|$)" "$response" \
+    | sed -E 's/\.md[^[:alnum:]_./-]$/\.md/' | sort -u)
+  if [ "${#matches[@]}" -ne 1 ]; then
+    printf 'Expected one returned %s artifact for this task, found %s; do not choose by recency.\n' "$kind" "${#matches[@]}" >&2
+    return 1
+  fi
+  if [ ! -f "${matches[0]}" ] || [ ! -r "${matches[0]}" ]; then
+    printf 'Returned RPI artifact is missing or unreadable: %s\n' "${matches[0]}" >&2
+    return 1
+  fi
+  printf '%s\n' "${matches[0]}"
+}
+
+render_workshop_prompt() {
+  local text kind placeholder path
+  text=$(cat "$1") || return
+  for kind in research plan changes; do
+    placeholder="<$kind-path>"
+    [[ "$text" == *"$placeholder"* ]] || continue
+    case "$kind" in
+      research) path=${RPI_RESEARCH_PATH-} ;;
+      plan) path=${RPI_PLAN_PATH-} ;;
+      changes) path=${RPI_CHANGES_PATH-} ;;
+    esac
+    if [ -z "$path" ] || [ ! -f "$path" ] || [ ! -r "$path" ]; then
+      printf 'Cannot resolve %s: this task has no readable returned artifact.\n' "$placeholder" >&2
+      return 1
+    fi
+    text=${text//"$placeholder"/"$path"}
+  done
+  printf '%s\n' "$text"
+}
+
 # copilot_prompt <id> <level> <title> <prompt_name> <timeout_s> [extra copilot args]
 # Replays a lab prompt verbatim (extracted from workshop.md) through Copilot CLI non-interactive mode.
 copilot_prompt() {
   local id=$1 level=$2 title=$3 file="$RESULTS_DIR/prompts/$4.txt" to=$5 extra=${6-}
+  local resolved="$RESULTS_DIR/prompts/$id-resolved.txt"
   if [ ! -s "$file" ] || [ ! -s "$RESULTS_DIR/prompts/replay-policy.txt" ]; then
     CURRENT_CHECKS="" ; check "prompt '$4' extracted from workshop.md" false "missing $file"
+    STEP_ID=$id STEP_LEVEL=$level STEP_TITLE=$title STEP_MODE=emulated STEP_CMD="" STEP_CODE=1 STEP_DUR=0
+    return
+  fi
+  if ! render_workshop_prompt "$file" > "$resolved"; then
+    CURRENT_CHECKS="" ; check "prompt '$4' uses this task's artifacts" false "missing or unreadable RPI artifact; invocation blocked"
     STEP_ID=$id STEP_LEVEL=$level STEP_TITLE=$title STEP_MODE=emulated STEP_CMD="" STEP_CODE=1 STEP_DUR=0
     return
   fi
@@ -147,7 +206,7 @@ copilot_prompt() {
   # cannot call obvious network or credential commands, and its URL tools only reach GitHub. Shell commands can
   # still open connections; only the optional egress lock (infra-harden) blocks those.
   step "$id" "$level" "$title" emulated "$to" \
-    "env -u GH_TOKEN -u GITHUB_TOKEN copilot -p \"\$(cat '$RESULTS_DIR/prompts/replay-policy.txt'; printf '\\nCurrent workshop message:\\n'; cat '$file')\" --allow-all-tools \
+    "env -u GH_TOKEN -u GITHUB_TOKEN copilot -p \"\$(cat '$RESULTS_DIR/prompts/replay-policy.txt'; printf '\\nCurrent workshop message:\\n'; cat '$resolved')\" --allow-all-tools \
       --deny-tool='shell(curl)' --deny-tool='shell(wget)' --deny-tool='shell(gh auth)' --deny-tool='shell(git push)' --deny-tool='shell(ssh)' \
       --allow-url=github.com --allow-url=api.github.com --add-dir '$RESULTS_DIR' \
       --no-ask-user --no-color --log-dir '$RESULTS_DIR/copilot-logs' --usage-output-file '$RESULTS_DIR/usage/$id.json' --share '$RESULTS_DIR/sessions/$id.md' $extra"
@@ -166,6 +225,11 @@ wait_http() {
 }
 
 http_status() {
-  # http_status <method> <url> -> prints status code, body saved to $RESULTS_DIR/http-last.json
+  # http_status <method> <url> [json_body] -> prints status code, saves the response body.
+  if [ "$#" -ge 3 ]; then
+    curl -sS -o "$RESULTS_DIR/http-last.json" -w '%{http_code}' -X "$1" \
+      -H 'Content-Type: application/json' --data "$3" "$2"
+    return
+  fi
   curl -sS -o "$RESULTS_DIR/http-last.json" -w '%{http_code}' -X "$1" "$2"
 }

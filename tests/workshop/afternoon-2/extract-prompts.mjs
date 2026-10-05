@@ -37,6 +37,7 @@ const taskAfterCommand = (command) => {
 
 const wanted = {
   'dt-start': byFirstLine('/dt-start-project'),
+  'dt-method-next-command': byFirstLine('/hve-core:dt-method-next.prompt'),
   'dt-brief': byFirstLine('Project name: Music Catalog listening experience'),
   'dt-summary': byFirstLine('Summarize the final decisions'),
   'dt-record': byFirstLine('Write a curated Design Thinking decision record'),
@@ -95,7 +96,8 @@ writeFileSync(join(outDir, 'replay-policy.txt'), [
   'Do not invent learner answers, stakeholders, research, test results, metrics, approvals, or waivers.',
   'Wait for the next supplied message instead of autonomously progressing through later conversation steps.',
   'If a required answer is absent, record the gap and stop that action; do not bypass evidence or approval gates.',
-  'DT examples are sampled or planned, not evidence that full methods are complete. Keep DT writes under .copilot-tracking/ only.',
+  'DT examples are sampled or planned, not evidence that full methods are complete. Keep DT coaching writes under .copilot-tracking/ only.',
+  'The separate Documentation authoring turn may curate the published delivery brief in docs/project-planning/playlist-design-decisions.md. This is not human approval or proof of completed DT methods.',
   'BRD drafting may write its documented file in docs/project-planning/. Do not sign off, approve waivers, or execute a backlog handoff.',
   `Curated reference file: ${join(outDir, 'curated-solutions.txt')}`,
 ].join('\n') + '\n');

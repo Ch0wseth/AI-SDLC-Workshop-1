@@ -406,6 +406,19 @@ The exercise is a **10–15 minute sampler**, not completion of nine full method
 
 An extended Product Manager track then turns these decisions into a BRD, a PRD, and GitHub issues with the HVE-Core planning agents.
 
+### Let HVE carry the procedure
+
+Give each specialist the goal, known facts, constraints, and relevant artifact. Let its HVE instructions, skills, templates, and quality gates do the structuring. Do not supply a document outline, grading rubric, or coding recipe just to make the output look right.
+
+| Stage | Capability to notice | Your contribution |
+| --- | --- | --- |
+| **DT Coach** | Questions and challenges assumptions, maintains coaching state, and checks method readiness. | Share observations, explore ideas, and decide what needs real evidence. |
+| **BRD Builder** | Links business needs to requirements and runs its own quality-review and handoff process. | Supply business facts, resolve questions, and review findings before approval. |
+| **PRD Builder** | Derives testable product requirements from the reviewed inputs and checks coverage and quality. | Confirm the scope and judge unresolved questions or waivers. |
+| **RPI** | Carries evidence through the plan, critique, implementation, validation, and acceptance review. | Make material decisions and inspect the returned artifacts. |
+
+The copyable examples below are optional responses to actual questions, not a checklist of answers to force into the conversation. A missing-evidence warning or blocked handoff also demonstrates the framework's value; do not bypass it to match an example.
+
 | Artifact | What it explains | What it is used for |
 | --- | --- | --- |
 | **BRD — Business Requirements Document** | Why the business needs a capability, who benefits, and which outcomes matter. | Align stakeholders on the need, value, and investment before defining a solution. |
@@ -564,6 +577,8 @@ This example explores a mood-based listening experience for hi-fi enthusiasts at
 
 These nine prompts group and rephrase the conversation shown in the example. They are **illustrative learner contributions**, not nine official method commands or proof that the methods are complete. Start the project and send the short brief above first. Then use a prompt when the coach reaches the relevant method, adapting it to your own idea rather than pasting the whole sequence.
 
+Let DT Coach choose its questions and activities. The example supplies a listener's context and choices; it does not replace the coach's method instructions or require a particular artifact shape.
+
 **1. Scope Conversations — choose the listener and context**
 
 ```text
@@ -609,7 +624,7 @@ Do not build a functional prototype yet. Help me plan what one would need to pro
 **8. User Testing — prepare a test, not invented results**
 
 ```text
-Write a short test plan for the mood selector. Include a neutral listening task, what to observe, and questions to ask after about ten minutes of use. Distinguish observed behaviour from direct feedback, and do not invent test results.
+I have no functional prototype or real test results yet. I would like to learn how to test the mood selector without leading the listener. How should we prepare?
 ```
 
 **9. Iteration at Scale — choose signals and recap**
@@ -638,7 +653,15 @@ Use the table as a route map, not nine prompts to paste at once. Spend more of y
 | 8. User Testing | Ask a peer to walk through the sketch, or plan a neutral task and observation. | Full Method 8 testing of a functional prototype. |
 | 9. Iteration at Scale | Choose a next experiment, success signal, and reason to revisit an earlier method. | Scaled rollout or measured impact. |
 
-Try saying **"Challenge my assumption"**, **"Give me a contrasting idea"**, **"Let's revisit research"**, or **"Next method"**. Before moving on, contribute an answer, decision, sketch, or question of your own. The nine methods are not a one-way checklist: discovering a weak assumption is a reason to revisit an earlier method.
+To assess where to go next, use DT Coach's **Method Next** handoff or send this native prompt on its own:
+
+```text
+/hve-core:dt-method-next.prompt
+```
+
+Let it read the current project's coaching state and explain its recommendation. If it asks which project to use, provide `music-catalog-listening-experience` in a separate reply. It may recommend more work or a return to an earlier method; missing exit evidence is not permission to mark a method complete. In this sampler, ask for a preview of the remaining work when full progression is not justified.
+
+Try saying **"Challenge my assumption"**, **"Give me a contrasting idea"**, or **"Let's revisit research"**. Before moving on, contribute an answer, decision, sketch, or question of your own. The nine methods are not a one-way checklist: discovering a weak assumption is a reason to revisit an earlier method.
 
 When your timer ends, say **"Timebox: recap what we actually tried and preview what remains."** Do not rush through fabricated research or pretend you completed prototyping just to tick every method. If latency prevents nine interactive stops, keep the recap explicit about guided previews.
 
@@ -681,33 +704,27 @@ The prompt checks coaching state and readiness before producing a research-ready
 For the workshop, keep the following six bullets as the reviewed Level 3 delivery contract, separate from any richer DT handoff:
 
 - **User-visible capability:** browse tracks and add them to one in-memory playlist.
-- **API endpoints:** `GET /api/tracks`, `GET /api/playlist`, and `POST /api/playlist/tracks`.
-- **Front-end states:** visible catalog, playlist, and empty playlist state.
-- **Duplicate handling:** reject duplicate adds with HTTP 409; leave the feedback UX open for the RPI plan gate.
+- **API endpoints:** `GET /api/tracks`, `GET /api/playlist`, and `POST /api/playlist/tracks` with a JSON body containing `trackId`.
+- **Front-end states:** visible catalog and playlist, with the empty-state text "Your playlist is empty. Add a track to get started."
+- **Duplicate handling:** reject unknown track ids with HTTP 404 and duplicate adds with HTTP 409; make duplicate feedback visible and accessible, while leaving the UI approach open for the RPI plan gate.
 - **Accessibility:** accessible, labelled controls and perceivable status feedback.
 - **Out of scope:** users, authentication, persistence, reorder, remove, search, and playlist creation.
 
 Ask the coach to recap the mapping, whether or not the formal handoff was eligible:
 
 ```text
-Summarize the final decisions for the Music Catalog playlist slice in exactly six bullets:
-This is the shared implementation handoff, not a claim that my explored concept was validated.
-Use this facilitator-owned contract: browse tracks and add to one in-memory playlist; GET /api/tracks, GET /api/playlist, POST /api/playlist/tracks; reject duplicate adds with HTTP 409; show the empty state; use accessible labelled controls; exclude users, authentication, persistence, reorder, remove, search, and playlist creation.
-Leave the duplicate-feedback UX choice open for the RPI plan gate.
-Cover capability, endpoints, front-end states, duplicate handling, accessibility, and out-of-scope items.
-After those six bullets, add a separate exploration recap: my chosen context/concept, one idea I changed my mind about, deferred ideas, and the nine methods marked sampled, simulated, planned, or not reached. Do not invent any missing session history.
-You may create or update local working notes only under .copilot-tracking/. Do not create or modify files elsewhere.
+Summarize the final decisions from our Music Catalog listening-experience exploration, distinguishing evidence, assumptions, and planned work.
+Map what fits to the shared playlist delivery contract in docs/afternoon-2/workshop.md under "Debrief and hand off to the shared implementation slice". Keep exploratory ideas separate and leave the duplicate-feedback UX choice open.
+Do not claim that sampling validated the concept or completed a method. Keep working notes under .copilot-tracking/ only.
 ```
 
 Expected result:
-- The summary includes browse tracks and add-to-playlist.
-- It states duplicate add returns a rejection, not a silent success.
-- It states the empty playlist state is visible.
-- The separate recap preserves your exploration without treating it as validated research or silently changing the implementation scope.
+- The recap preserves your exploration and its evidence limits.
+- The delivery mapping respects the shared contract without silently widening it.
 
 ### Step 2: Review the mapping, not the creativity
 
-Check that the six implementation bullets respect the shared contract. Keep broader ideas in the exploration recap rather than deleting them. Tell the coach where you disagree with its framing and ask it to revise the recap. Name one assumption that would need real research and one next experiment; do not commit invented evidence.
+Check the delivery mapping against the shared contract. Keep broader ideas in the exploration recap rather than deleting them. Tell the coach where you disagree with its framing and ask it to revise the recap. Name one assumption that would need real research and one next experiment; do not commit invented evidence.
 
 ### Step 3: Explore the local coaching notes
 
@@ -733,7 +750,25 @@ Expected result:
 
 If no files exist, check whether a write permission is still awaiting approval and let the coach finish. Do not create placeholder notes yourself. Do not treat an empty folder or a chat-only answer as persisted state; ask the facilitator if the coach produced no artifacts. If tracking files appear in Git status, resolve the ignore rule in [Curate what you commit](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/afternoon-2/workshop.md#curate-what-you-commit) before staging anything.
 
-These are **local working notes**, not the deliverable. Later in this level, you will curate a short, reviewed decision record for the repository instead of committing the tracking folder.
+These are **local working notes**, not the deliverable. The next step curates a short, reviewed decision record for the repository instead of committing the tracking folder.
+
+### Step 4: Save the reviewed delivery brief
+
+The coaching exercise ends here. Use HVE's **Documentation** agent to curate the shared delivery brief, rather than turning DT working notes into a committed artifact. In Copilot CLI, switch with:
+
+```text
+/agent hve-core:documentation
+```
+
+If the identifier is not recognized, use `/agent documentation` or choose **Documentation** from `/agent`. In VS Code, select **Documentation** in the agent picker. Then send:
+
+```text
+Write a curated Design Thinking decision record for the Music Catalog playlist slice to docs/project-planning/playlist-design-decisions.md.
+Use author mode to create a short reference from the reviewed shared playlist delivery contract in docs/afternoon-2/workshop.md and the coach's recap. Do not present the exploration as validated research.
+Keep private coaching notes and personal details out of the document. Limit published changes to this file.
+```
+
+Open the saved file and compare it with the reviewed contract. Correct differences before sharing it. This brief is the input for PRD Builder and Level 3, not a required reproduction of the coach's headings or filenames. Keep it uncommitted until [Curate what you commit](#curate-what-you-commit), where you review it with any BRD and PRD.
 
 ![DT decisions summary](assets/l2-dt-decisions.png)
 
@@ -800,7 +835,13 @@ The playlist slice has no real meetings, so attendees skip this step. The stakeh
 
 ### Step 3: Write the BRD
 
-In Copilot CLI, run `/agent brd-builder`; in VS Code, select **BRD Builder** in the agent picker. Then copy paste the following prompt:
+In Copilot CLI, switch to BRD Builder with this separate command; in VS Code, select **BRD Builder** in the agent picker:
+
+```text
+/agent brd-builder
+```
+
+Then send the business context below. The facts are inputs, not an outline the builder must reproduce:
 
 ```text
 Create a business requirements document for the Music Catalog playlist slice.
@@ -811,13 +852,13 @@ Use only these facts. Do not invent stakeholders, metrics, or dates:
 - Business objective: a listener can browse the catalog and collect tracks in a single playlist during a session.
 - Success criteria: every participant ships the slice with passing tests during the workshop; a duplicate add is rejected with a visible message; the empty playlist state is visible; controls are accessible by role and label.
 - Constraints: one playlist, in-memory state only, no users, authentication, persistence, reorder, remove, search, or playlist creation.
-- Source: the locked Design Thinking decisions for this slice.
+- Source: the locked Design Thinking decisions for this slice, captured in docs/project-planning/playlist-design-decisions.md.
 
 Ask at most three clarifying questions, then write the BRD. Record anything you cannot confirm as an open question instead of guessing.
 Save the BRD in docs/project-planning/music-catalog-playlist-slice-brd.md and confirm the saved file path.
 ```
 
-Follow the conversation to work through each BRD section. Use the shared playlist scope as the delivery boundary; mark unknown business facts as assumptions or open questions rather than inventing answers.
+Let BRD Builder guide its own Discover, Define, and Govern process. Answer its actual questions rather than requesting each section yourself. Notice how it links the supplied business facts to requirements, identifies gaps, and uses its quality reviewer before handoff. The three-question limit keeps the workshop bounded; it does not waive missing evidence or approval gates.
 
 <details>
 <summary>Toggle example: a step-by-step BRD conversation</summary>
@@ -874,16 +915,16 @@ Constraints: One playlist, in-memory state only, and no users, authentication, p
 Risks: No additional risk facts were supplied. Mark any proposed risks as assumptions to review, and record unresolved questions without inventing owners, metrics, or dates.
 ```
 
-**10. Request the reviewed draft as a repository document.**
+**10. Inspect the draft produced by the builder.**
 
 ```text
-Draft the BRD from our reviewed answers in docs/project-planning/music-catalog-playlist-slice-brd.md. Separate evidence, assumptions, and open questions, and confirm the saved file path.
+Show the saved BRD draft and anything still preventing handoff.
 ```
 
 **11. Review the summary and unresolved items.**
 
 ```text
-Summarize the BRD in five bullets and list each open question with its target phase. Explain any quality-review findings that prevent a clean sign-off.
+Explain the quality-review findings and open questions so I can review the handoff.
 ```
 
 **12. Approve the handoff only after inspecting the document.** Send this only if you accept the actual review findings:
@@ -918,7 +959,7 @@ Expected result:
 
 ### Step 4: Turn the BRD into a PRD
 
-After reviewing the saved BRD, **explicitly switch to PRD Builder** before sending the next prompt. In Copilot CLI, enter this command as a separate message:
+After approving the BRD and resolving its handoff gates, **explicitly switch to PRD Builder** before sending the next prompt. Share the actual native handoff path BRD Builder returned, when available; do not claim a blocked handoff is approved. In Copilot CLI, enter this command as a separate message:
 
 ```text
 /agent hve-core:prd-builder
@@ -927,22 +968,11 @@ After reviewing the saved BRD, **explicitly switch to PRD Builder** before sendi
 Confirm that **PRD Builder** is active. If your installation uses an unprefixed name, run `/agent prd-builder` or choose it from `/agent`; in VS Code, select **PRD Builder** in the agent picker. Then send the following prompt to move from the BRD work into product requirements:
 
 ```text
-Move from the BRD work to a PRD for the Music Catalog playlist slice. Read the reviewed BRD at docs/project-planning/music-catalog-playlist-slice-brd.md, carry forward its constraints and open questions, and save the PRD in docs/project-planning.
-
-Product requirements:
-- GET /api/tracks returns the 12 tracks from src/api/Data/tracks.json.
-- GET /api/playlist returns the single in-memory playlist.
-- POST /api/playlist/tracks adds a track, returns 404 for an unknown id, and returns 409 for a duplicate.
-- The front end shows the track list with accessible Add buttons, a playlist panel, the empty-state text "Your playlist is empty. Add a track to get started.", and a visible duplicate message.
-- xUnit tests cover the API. Vitest and Testing Library tests cover the UI.
-
-Non-functional requirements: in-memory state only, no new libraries or external services, accessible markup.
-
-Write each requirement with testable acceptance criteria. Ask at most 3 clarifying questions, one at a time.
-Before sign-off, show the saved draft path, summarize the scope you derived from the BRD, and highlight any differences or unresolved questions. Wait for my scope confirmation before running validation and requesting final approval.
+Move from the BRD work to a PRD for the Music Catalog playlist slice using the reviewed BRD at docs/project-planning/music-catalog-playlist-slice-brd.md and delivery brief at docs/project-planning/playlist-design-decisions.md.
+Carry forward its constraints and open questions. Ask at most 3 clarifying questions, one at a time, and save the PRD in docs/project-planning.
 ```
 
-**Validate the scope PRD Builder actually presents.** When the agent shares its draft path and asks you to confirm the scope or proceed with validation and sign-off, open that file first. Compare it with the reviewed BRD and the shared implementation contract: catalog browsing, one in-memory playlist, the three API endpoints, unknown-track and duplicate rejection, visible empty and duplicate states, accessible controls, and API/UI tests. Confirm that users, authentication, persistence, reorder, remove, search, and playlist creation remain excluded. Keep deferred DT ideas out of the delivery scope.
+Let PRD Builder run its own discovery, authoring, traceability, and quality checks; do not paste a ready-made functional-requirement list. **Validate the scope PRD Builder actually presents.** When it shares its draft and asks to proceed, open that file and compare it with the reviewed BRD and delivery brief. Confirm or correct the scope before proceeding to validation and sign-off. Keep deferred DT ideas out of delivery.
 
 Do not select **Yes** merely because the agent says "scope is unchanged." If the draft matches, send:
 
@@ -1096,33 +1126,9 @@ The rule is simple: never commit the tracking folder. Curate what matters out of
 
 </div>
 
-### Step 1: Write the Design Thinking record
+### Step 1: Review and commit the deliverables
 
-Run `/agent dt-coach` in Copilot CLI, or select **DT Coach** in VS Code. Copy paste the following prompt:
-
-```text
-Write a curated Design Thinking decision record for the Music Catalog playlist slice to docs/project-planning/playlist-design-decisions.md.
-
-Use only the six locked decisions from this session:
-1. user-visible capability
-2. API endpoints
-3. front-end states
-4. duplicate handling
-5. accessibility expectation
-6. out-of-scope items
-
-Add a short problem statement and the success criteria.
-Do not include coaching notes, session state, file paths under .copilot-tracking, names, quotes, or raw notes.
-Edit only that one file.
-```
-
-Expected result:
-- One new file, `docs\project-planning\playlist-design-decisions.md`, with the problem, the six decisions and the success criteria.
-- No other file changes.
-
-### Step 2: Review and commit the deliverables
-
-Read the curated documents before committing: keep the agreed scope, remove personal or raw notes, and do not link to local tracking files. Agent output remains a draft until you approve it.
+The delivery brief was saved before the optional Product Manager track. Review it together with any BRD and PRD now; do not ask an agent to create another copy. Keep the agreed scope, remove personal or raw notes, and do not link to local tracking files. Agent output remains a draft until you approve it.
 
 Stage the reviewed folder by path, not with `git add -A`:
 
@@ -1159,18 +1165,11 @@ RPI means **Research, Plan, Implement, Review**. HVE-Core also documents a follo
 
 ## Topic
 
-You will use the RPI Agent to implement the playlist slice. The target behavior is fixed:
+Use RPI Agent to implement the playlist slice from the reviewed Level 2 record at `docs/project-planning/playlist-design-decisions.md`. That file carries the shared scope and acceptance criteria; do not redefine them in each phase prompt. If you completed the Product Manager track, also provide the actual reviewed PRD path and parent issue link. Resolve any disagreement between those sources before approving a plan.
 
-- API: `GET /api/tracks` returns the 12 tracks from `src\api\Data\tracks.json`.
-- API: `GET /api/playlist` returns the current in-memory playlist.
-- API: `POST /api/playlist/{trackId}` adds a track and returns `409 Conflict` for duplicates.
-- Front end: renders a track list and a playlist panel with an empty state.
-- Front end: add buttons are accessible by role and name.
-- Tests: xUnit for API behavior and Vitest + Testing Library for UI behavior.
+One decision remains yours: **how the user interface handles a duplicate add**. Ask the planner to explain reasonable approaches and their trade-offs, then choose one. The agreed duplicate rejection and accessible feedback remain requirements.
 
-One decision is deliberately left open: **how the user interface handles a duplicate add**. The API contract is fixed (`409 Conflict`), but whether the UI reports the conflict or prevents it is yours to decide at the plan gate. You compare choices with your neighbours at the review gate.
-
-**Why this level:** a single "build this" prompt mixes finding facts, making decisions and editing code, so you cannot tell where it went wrong. RPI separates them into phases that each leave an artifact you can review, and puts you at the gate between them.
+**Why this level:** practise moving from verified evidence to an approved plan, implementation, and acceptance review. The skills carry the procedure; you check the evidence and own the decisions. A small, well-understood change may need only a direct coding request. This workshop deliberately uses the full loop to teach its handoffs, not because every feature requires all four phases.
 
 ![RPI Agent phase walkthrough](assets/l3-rpi-agent-walkthrough.png)
 
@@ -1188,7 +1187,7 @@ This level follows the HVE-Core [Engineer guide](https://microsoft.github.io/hve
 
 Apply these practices from the guides:
 
-- **Start from the work item.** If you ran the Product Manager track in Level 2, open the parent issue. Its acceptance criteria match the fixed requirements in the prompts below. If you skipped the track, the prompts are your work item.
+- **Start from reviewed requirements.** Open the Level 2 decision record and, when available, the reviewed PRD and parent issue. Those are the inputs; the phase prompts do not replace them.
 - **You are the gate between phases.** Read each phase output before you start the next one. Reject anything outside scope.
 - **Clear context between phases when it fills up.** The Engineer guide recommends `/clear` between RPI phases: each phase saves its output to files, and the next phase reads those files instead of the chat history. This workshop keeps one session for simplicity. Use `/clear` when the agent drifts or the context is full.
 - **Let the Tech Lead tools add judgement.** The Tech Lead guide adds architecture decision records (ADR Creator), multi-perspective review (Code Review) and coding standards that activate by file type. You try them in the optional Tech Lead extension after the Review phase.
@@ -1204,6 +1203,8 @@ You can drive it in two ways:
 | Phase by phase (this level) | Run `/agent rpi-agent` in Copilot CLI (select **RPI Agent** in VS Code), then run one `/rpi-*` command at a time | Learning RPI, or when you want to check each phase before the next one |
 | Full loop | Send `/rpi` alone, then describe the task in a separate message | A well-scoped task you trust the agent to carry through |
 
+If RPI Agent asks how to proceed, choose **Work through each phase with me** for this exercise.
+
 With `/rpi`, RPI Agent asks how much control you want, unless your separate task message already says (for example, "use automatic mode"). It offers four choices: run end to end, keep going but check with you on unclear decisions, research and plan with you then stop before implementation, or work through each phase with you. In VS Code, the agent's **Full Auto** button starts the end-to-end choice. It still stops for safety confirmations and blockers. To resume a saved task or start a follow-up from a review finding, send `/rpi` alone, then identify the saved task or finding and your requested action in a separate message.
 
 This level drives the phases one at a time so you see each output. Level 5 hands the full loop to RPI Agent on Copilot cloud agent.
@@ -1216,7 +1217,7 @@ An agent only knows what is in its **context window**: the instructions loaded f
 | --- | --- |
 | Each phase writes its output to a file under `.copilot-tracking\` | The research and the plan become durable memory that you can read, correct and hand to the next phase, or to another session, without replaying the chat |
 | `/clear` between phases | The next phase starts from the files, not from a long history full of dead ends. Use it when the agent drifts or the context is full |
-| Phases with a narrow job | Research does not edit, plan does not edit, review does not refactor. A narrow job needs less context and is easier to check |
+| Phases with a narrow job | Research and Plan write working artifacts, not application code. Review assesses evidence and routes findings without changing the implementation |
 | Instructions in layers | Copilot combines several instruction sources: personal instructions, repository-wide `.github\copilot-instructions.md`, path-specific `*.instructions.md` files that apply by file pattern, and organization instructions. Personal instructions take precedence over repository instructions, which take precedence over organization instructions. HVE-Core adds coding standards that activate by file type in the same way |
 | Skills and agents load on demand | A skill's full content enters the context only when the task matches its description, so the window holds what the current phase needs |
 
@@ -1224,7 +1225,7 @@ See [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-
 
 <div class="tip" data-title="Check it yourself">
 
-> After the research phase, open the newest research file under `.copilot-tracking\`. Ask yourself: could a colleague, or a fresh session after `/clear`, start the plan from this file alone? If not, the research is not done.
+> Open the research artifact returned for this task, not whichever file is newest. Could a colleague or a fresh session start planning from its evidence and unresolved decisions? Keep the returned artifact paths for the next phase.
 
 </div>
 
@@ -1241,60 +1242,17 @@ Run `/agent rpi-agent` in Copilot CLI, or select **RPI Agent** in the VS Code ag
 Then send the task prompt as a separate message:
 
 ```text
-Task: Implement the Music Catalog playlist slice.
-
-Research only. Do not edit files.
-
-Known repository facts:
-- src/api is a .NET 10 minimal API.
-- src/api/Program.cs currently exposes GET /api/hello.
-- src/api/Data/tracks.json contains 12 synthetic tracks with id, title, artist, album, and durationSeconds.
-- tests/api uses xUnit with WebApplicationFactory<Program>.
-- src/front is React + TypeScript + Vite.
-- src/front/src/App.tsx currently fetches /api/hello.
-- src/front tests use Vitest and Testing Library.
-
-Feature requirements:
-- GET /api/tracks returns all tracks from tracks.json.
-- GET /api/playlist returns the single in-memory playlist.
-- POST /api/playlist/{trackId} adds one track to the playlist.
-- POST returns 404 when the track id does not exist.
-- POST returns 409 when the track is already in the playlist.
-- The front end shows a track list, add buttons, and a playlist panel.
-- The playlist panel shows an empty state before anything is added.
-- Buttons must have accessible names.
-- No persistence, users, remove, reorder, search, or styling library.
-
-Expected research output: relevant files, implementation risks, tests to add, and open questions. Resolve open questions using the requirements above rather than asking me, except the duplicate-add user experience in the front end: list it as an open decision for the plan.
+Research the Music Catalog playlist slice described in docs/project-planning/playlist-design-decisions.md against the current repository.
+Identify the evidence, risks, and decisions needed before planning. Do not change application files.
 ```
 
 Expected result:
-- RPI identifies `Program.cs`, `tracks.json`, API tests, `App.tsx`, and front-end tests.
-- It notes in-memory state and duplicate handling.
-- It does not edit files.
+- Research grounds the feature in repository evidence and exposes material gaps instead of guessing.
+- It returns a saved research artifact. Application files remain unchanged.
 
-### Step 2: Research validation
+### Step 2: Inspect the research
 
-Run:
-
-```powershell
-git status
-```
-
-Expected result:
-- The working tree is clean.
-- If files changed, review and undo them before continuing because this phase is research only.
-
-### Step 3: Research checkpoint
-
-HVE-Core writes research notes under `.copilot-tracking\`, which is ignored. No commit is needed. Run:
-
-```powershell
-git status
-```
-
-Expected result:
-- The working tree is clean, and `.copilot-tracking\` does not appear.
+Open the returned file. Check what supports its key conclusions and which questions remain unresolved; ask for corrections if necessary. Keep its path for Plan. The working artifact stays ignored under `.copilot-tracking\`; no commit is needed.
 
 ## Plan phase
 
@@ -1306,62 +1264,27 @@ Send the skill command on its own:
 /rpi-plan
 ```
 
-Then send the task prompt as a separate message:
+Replace `<research-path>` with the artifact path returned for this task, then send a separate message:
 
 ```text
-Create an implementation plan for the Music Catalog playlist slice using the research result.
-
-Do not edit files.
-
-The plan must include:
-- API model shape for Track and playlist items.
-- How Program.cs reads src/api/Data/tracks.json.
-- The in-memory playlist service or collection.
-- Endpoint behavior and status codes for GET /api/tracks, GET /api/playlist, POST /api/playlist/{trackId}.
-- xUnit test cases, including duplicate add returning 409.
-- React component state and rendering plan.
-- Two options for the duplicate-add user experience, with one trade-off each and your recommendation:
-  A. Keep every Add button enabled and show an accessible message when the API returns 409.
-  B. Show tracks already in the playlist with a disabled, labelled control, and still show an accessible message if the API returns 409.
-  Mark the choice as a decision for me to confirm.
-- Vitest test cases for loading tracks, empty playlist, adding a track, and duplicate feedback.
-- Validation commands.
-- A rollback strategy using git commits.
-Keep the plan small enough for a workshop.
+Plan the playlist slice from the reviewed requirements and research at <research-path>.
+Keep the scope workshop-sized. Explain the duplicate-feedback options and their trade-offs so I can decide.
 ```
 
 Expected result:
-- The plan is sequenced and testable.
-- It does not add out-of-scope features.
-- It includes `dotnet test` and `npm test` from `src\front`.
+- A saved plan connects the requirements to implementation work and validation.
+- The default plan critique identifies any readiness issues; the planner addresses them before implementation.
+- Material choices are explained for your decision, not silently settled.
 
-### Step 2: Plan validation
+### Step 2: Review the plan and decide
 
-Review the plan manually. Reject any plan that adds persistence, creates multiple playlists, changes ports, adds libraries, or stores playlist state in `tracks.json`.
-
-### Step 3: Decide the duplicate-add experience
-
-Read the two options and the agent's recommendation. Pick one, and write down why in one sentence: for example, discoverability, fewer error states, or how a screen reader user learns that a track is already in the playlist. If you pick the option the agent did not recommend, tell it:
+Open the plan and critique at the returned paths. Check that the scope still matches the reviewed requirements and that blocking findings are resolved. Read the duplicate-feedback alternatives, choose an approach, and explain why. For example:
 
 ```text
-Use option B for the duplicate-add user experience. Update the plan accordingly. Do not edit source files.
+Use <chosen approach> for duplicate feedback because <reason>. Update the plan with this decision.
 ```
 
-Replace `B` with your choice.
-
-Expected result:
-- The plan states one option, and you know why you chose it.
-
-### Step 4: Plan checkpoint
-
-Run:
-
-```powershell
-git status
-```
-
-Expected result:
-- The working tree is clean. Plan notes stay in the ignored `.copilot-tracking\` folder.
+Replace the placeholders with your actual choice and reasoning. Once the plan reflects your decision and is implementation-ready, approve it before moving on. Keep its path for Implement; application files remain unchanged during planning.
 
 ## Implement phase
 
@@ -1373,34 +1296,16 @@ Send the skill command on its own:
 /rpi-implement
 ```
 
-Then send the task prompt as a separate message:
+Replace `<plan-path>` with the approved plan's path, then send a separate message:
 
 ```text
-Implement the approved Music Catalog playlist slice.
-
-Requirements:
-- Keep changes scoped to src/api, tests/api, and src/front unless a test setup file must be updated.
-- In the API, read the synthetic track catalog from src/api/Data/tracks.json.
-- Add GET /api/tracks returning all tracks.
-- Add GET /api/playlist returning the current in-memory playlist.
-- Add POST /api/playlist/{trackId} that adds the matching track.
-- Return 404 with a JSON error body when trackId is unknown.
-- Return 409 with a JSON error body when the track is already in the playlist.
-- Keep playlist state in memory only.
-- In the front end, render the catalog as a list with accessible Add buttons.
-- Render a playlist panel with the empty-state text: "Your playlist is empty. Add a track to get started."
-- Implement the duplicate-add user experience approved in the plan. Whatever the option, a 409 from the API must show a user-visible, accessible message.
-- Add or update xUnit tests for the API endpoints.
-- Add or update Vitest + Testing Library tests for loading tracks, empty playlist, adding a track, and duplicate feedback.
-- Run dotnet test.
-- Run npm test from src/front.
-- Fix only issues caused by this feature.
+Implement the approved plan at <plan-path>.
 ```
 
 Expected result:
-- The agent edits the API and front end.
-- Tests are added.
-- The RPI flow runs the API and front-end tests to validate the implementation, then checks validation evidence during review and reruns relevant tests after fixes. Check the reported results; a skipped or blocked test run is not a pass.
+- Implementation follows the approved plan, including the tests. Material departures are raised for a decision.
+- The changes record reports completed work and validation evidence. The RPI flow runs the API and front-end tests; check the reported results rather than repeating them manually. A skipped or blocked run is not a pass.
+- Keep the returned changes-record path for Review.
 
 ![Playlist feature implemented locally](assets/l3-playlist-implemented.png)
 
@@ -1451,31 +1356,18 @@ Send the skill command on its own:
 /rpi-review
 ```
 
-Then send the task prompt as a separate message:
+Replace the placeholders with this task's approved plan and changes-record paths, then send a separate message:
 
 ```text
-Review the Music Catalog playlist implementation against the fixed requirements.
-
-Do not implement broad refactors.
-
-Check:
-- GET /api/tracks reads the 12 synthetic tracks from src/api/Data/tracks.json.
-- GET /api/playlist returns the current in-memory playlist.
-- POST /api/playlist/{trackId} returns 404 for unknown ids and 409 for duplicates.
-- No persistence, users, remove, reorder, search, or new external services were added.
-- Front-end Add buttons have accessible names.
-- Empty playlist state is visible with the exact text required.
-- Tests cover happy path, duplicate add, empty state, and visible feedback.
-- The duplicate-add user experience matches the option approved in the plan, and its message and controls are accessible.
-- dotnet test and npm test pass.
-
-Return a review with: pass/fail summary, findings, smallest fixes, and validation evidence. If you make fixes, keep them minimal and rerun the relevant tests. List any finding you did not fix as a deferred finding.
+Review the completed implementation against the approved plan at <plan-path> and changes record at <changes-path>.
 ```
 
 Expected result:
-- The review is tied to the fixed requirements.
-- Any fixes are small and directly related to the feature.
-- Deferred findings are listed separately. Keep one: in Level 5 it becomes an issue in your backlog.
+- Review compares the implementation and validation evidence with the approved requirements and plan.
+- It reports an acceptance outcome and routes genuine findings. Review is read-only: implementation defects go to a later Implement pass, not fixes inside Review.
+- A clean review is valid. Carry genuine residual work into Level 5 if any remains; do not invent a finding or defer a required fix to populate the backlog.
+
+Read the returned review and resolve accepted blockers before treating the slice as complete. Review notes stay in the ignored tracking folder, so a clean review needs no additional commit.
 
 ### Step 2: Debrief the decision
 
@@ -1486,20 +1378,11 @@ Compare your duplicate-add choice with your neighbours, or with the room if your
 - Which option is easier to verify with Testing Library queries by role and name?
 
 Expected result:
-- You see that the same fixed prompts produced different, valid designs, because a human made a different call at the gate. That is where your judgement adds value.
-
-### Step 3: Commit review checkpoint
-
-Run from the repository root. Check `git status` first: review notes stay in the ignored `.copilot-tracking\` folder.
-
-```powershell
-git status
-git add -A; git commit -m "Review playlist slice"
-```
+- You see how the same reviewed requirements can produce different valid designs because a human made a different call at the plan gate.
 
 <div class="tip" data-title="Reference fallback">
 
-> If your agent drifts too far, reset to the last checkpoint and ask it to implement only the API first, then the front end. The fixed prompts are designed to keep the room homogeneous, but generated output can still vary.
+> If the agent drifts outside scope, pause and return to the reviewed requirements and approved plan. Ask for a correction to the affected work rather than replacing the plan with another long implementation prompt.
 
 </div>
 
@@ -2098,14 +1981,14 @@ Expected result:
 
 ### Step 4: Turn a deferred review finding into an issue
 
-Open the Level 3 review output: the newest review file under `.copilot-tracking\`, or the review in your chat history. Pick the deferred finding you kept. Create an issue for it, replacing the title and body with the finding:
+Open the review artifact returned for your Level 3 task. If it contains genuine residual work that you agreed to defer, create an issue for that finding, replacing the title and body below. If the review was clean, skip this step; do not invent a finding.
 
 ```powershell
 gh issue create --title "Review finding: SHORT-TITLE" --body "Deferred from the Level 3 RPI review. Finding: WHAT-AND-WHERE. Smallest fix: SMALLEST-FIX."
 ```
 
 Expected result:
-- `gh issue list` shows at least two open issues, all traced to a decision or a review you made.
+- `gh issue list` shows the follow-up feature request and any genuine deferred findings, all traced to a decision or review you made. A clean review needs no extra issue.
 - If you ran the Level 2 Product Manager track, its issues are in the backlog too. Any issues you closed from a commit are no longer open.
 
 ### Step 5: Run daily backlog

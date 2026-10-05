@@ -8,6 +8,10 @@ import assert from 'node:assert/strict';
 
 const workshop = readFileSync(new URL('../../../docs/afternoon-2/workshop.md', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 const runner = readFileSync(new URL('./run-lab.sh', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const level3 = workshop.slice(workshop.indexOf('# Level 3:'), workshop.indexOf('# Break'));
+const phasePrompt = (phase) => level3.match(new RegExp(
+  '```text\\n/' + phase + '\\n```[\\s\\S]*?```text\\n([\\s\\S]*?)\\n```',
+))?.[1];
 
 test('starter readiness belongs to the introduction, not a separate level', () => {
   const introduction = workshop.indexOf('# AI SDLC with GitHub and GitHub Copilot');
@@ -36,10 +40,10 @@ test('DT prompts allow local tracking notes but preserve the implementation boun
   assert.match(start, /sample all nine HVE Design Thinking methods within a 10–15 minute/);
   assert.match(start, /Now follow the chat for the next 10 minutes/);
   assert.match(start, /the conversation is the exercise/);
-  assert.match(start, /working notes only under \.copilot-tracking\//);
+  assert.match(start, /Keep working notes under \.copilot-tracking\/ only/);
   assert.match(start, /application code, tests, and published documentation stay unchanged/);
   assert.doesNotMatch(start, /Do not edit files\./);
-  assert.match(start, /exclude users, authentication, persistence, reorder, remove, search, and playlist creation/);
+  assert.match(start, /Out of scope:\*\* users, authentication, persistence, reorder, remove, search, and playlist creation/);
 });
 
 test('DT sampler permits exploration and keeps its shortcuts distinct from implementation', () => {
@@ -52,8 +56,8 @@ test('DT sampler permits exploration and keeps its shortcuts distinct from imple
   assert.match(dt, /These shortcuts do not satisfy the full methods' evidence gates/);
   assert.match(dt, /not the conclusion of your user research/);
   assert.match(dt, /HTTP 409/);
-  assert.match(dt, /Leave the duplicate-feedback UX choice open/);
-  assert.match(dt, /Do not invent any missing session history/);
+  assert.match(dt, /leave the duplicate-feedback UX choice open/i);
+  assert.match(dt, /Do not claim that sampling validated the concept or completed a method/);
   assert.match(runner, /copilot_prompt l2-dt-start/);
   assert.match(runner, /step l2-dt-notes/);
 });
@@ -104,16 +108,20 @@ test('tester extracts the exploration and implementation handoff separately', ()
     const brief = readFileSync(join(output, 'dt-brief.txt'), 'utf8');
     const summary = readFileSync(join(output, 'dt-summary.txt'), 'utf8');
     assert.equal(start.trim(), '/dt-start-project');
+    assert.equal(readFileSync(join(output, 'dt-method-next-command.txt'), 'utf8').trim(), '/hve-core:dt-method-next.prompt');
     for (const phase of ['research', 'plan', 'implement', 'review']) {
       assert.equal(readFileSync(join(output, `rpi-${phase}-command.txt`), 'utf8').trim(), `/rpi-${phase}`);
-      assert.doesNotMatch(readFileSync(join(output, `rpi-${phase}.txt`), 'utf8'), /^\//);
+      const prompt = readFileSync(join(output, `rpi-${phase}.txt`), 'utf8').trim();
+      assert.equal(prompt, phasePrompt(`rpi-${phase}`));
+      assert.doesNotMatch(prompt, /^\//);
       assert.match(runner, new RegExp(`rpi-${phase}-command 900`));
     }
     assert.equal(brief.trim().split('\n').length, 3);
     assert.match(brief, /10–15 minute learning exercise/);
     assert.doesNotMatch(start, /POST \/api\/playlist\/tracks/);
-    assert.match(summary, /Use this facilitator-owned contract/);
-    assert.match(summary, /POST \/api\/playlist\/tracks/);
+    assert.match(summary, /shared playlist delivery contract in docs\/afternoon-2\/workshop\.md/);
+    assert.doesNotMatch(summary, /exactly six bullets|POST \/api\/playlist/);
+    assert.match(readFileSync(join(output, 'dt-record.txt'), 'utf8'), /Use author mode/);
     const dtExample = readFileSync(join(output, 'dt-example-01.txt'), 'utf8');
     const brdExample = readFileSync(join(output, 'brd-example-06.txt'), 'utf8');
     assert.match(dtExample, /tech-savvy hi-fi enthusiasts/);
@@ -125,6 +133,105 @@ test('tester extracts the exploration and implementation handoff separately', ()
   } finally {
     rmSync(output, { recursive: true });
   }
+});
+
+test('HVE capabilities are exposed without supplying the agents document outlines or native procedures', () => {
+  assert.match(workshop, /Let HVE carry the procedure/);
+  assert.match(workshop, /Do not supply a document outline, grading rubric, or coding recipe/);
+  const dt = workshop.slice(workshop.indexOf('# Level 2:'), workshop.indexOf('## Extended track: Product Manager'));
+  assert.match(dt, /```text\n\/hve-core:dt-method-next\.prompt\n```/);
+  assert.match(dt, /missing exit evidence is not permission to mark a method complete/);
+  assert.match(dt, /Let DT Coach choose its questions and activities/);
+  assert.match(workshop, /Let BRD Builder guide its own Discover, Define, and Govern process/);
+  assert.match(workshop, /Let PRD Builder run its own discovery, authoring, traceability, and quality checks/);
+});
+
+test('the reviewed delivery brief is curated before the builders consume it', () => {
+  const record = workshop.indexOf('Write a curated Design Thinking decision record');
+  const brd = workshop.indexOf('### Step 3: Write the BRD');
+  const prd = workshop.indexOf('### Step 4: Turn the BRD into a PRD');
+  assert.ok(record >= 0 && record < brd && brd < prd);
+  assert.equal(workshop.match(/Write a curated Design Thinking decision record/g).length, 1);
+  assert.match(workshop, /\/agent hve-core:documentation/);
+  assert.match(runner, /copilot_prompt l2-dt-record.*--agent hve-core:documentation/);
+  assert.ok(runner.indexOf('copilot_prompt l2-dt-record') < runner.indexOf('copilot_prompt l2-brd-start'));
+  assert.match(runner, /skip_step l2-method-next/);
+  const curator = workshop.slice(workshop.indexOf('## Curate what you commit'), workshop.indexOf('# Level 3:'));
+  assert.doesNotMatch(curator, /Write a curated Design Thinking decision record/);
+});
+
+test('RPI prompts consume the reviewed requirements and preceding artifacts instead of scripting the work', () => {
+  const research = phasePrompt('rpi-research');
+  const plan = phasePrompt('rpi-plan');
+  const implement = phasePrompt('rpi-implement');
+  const review = phasePrompt('rpi-review');
+  for (const prompt of [research, plan, implement, review]) {
+    assert.ok(prompt);
+    assert.doesNotMatch(prompt, /Known repository facts:|The plan must include:|Requirements:|Check:|Do not edit files/);
+  }
+  assert.match(research, /docs\/project-planning\/playlist-design-decisions\.md/);
+  assert.match(research, /Do not change application files/);
+  assert.match(plan, /<research-path>/);
+  assert.match(plan, /options and their trade-offs so I can decide/);
+  assert.equal(implement, 'Implement the approved plan at <plan-path>.');
+  assert.match(review, /<plan-path>.*<changes-path>/);
+  assert.doesNotMatch(review, /make fixes|deferred finding|dotnet test|npm test/);
+  assert.match(level3, /small, well-understood change may need only a direct coding request/i);
+  assert.match(level3, /default plan critique/);
+  assert.match(level3, /Review is read-only/);
+  assert.match(level3, /A clean review is valid/);
+  assert.doesNotMatch(level3, /Keep one:|newest research file|Commit review checkpoint|option B/);
+});
+
+test('the shared brief specifies the API and empty state before RPI implementation', () => {
+  const handoff = workshop.slice(workshop.indexOf('## Debrief and hand off to the shared implementation slice'),
+    workshop.indexOf('### Step 2: Review the mapping, not the creativity'));
+  assert.match(handoff, /POST \/api\/playlist\/tracks.*JSON body containing `trackId`/);
+  assert.match(handoff, /HTTP 404.*HTTP 409/);
+  assert.match(handoff, /Your playlist is empty\. Add a track to get started\./);
+  assert.doesNotMatch(workshop, /POST \/api\/playlist\/\{trackId\}/);
+  assert.match(runner, /http_status POST http:\/\/localhost:5080\/api\/playlist\/tracks "\$unknown_payload"/);
+  assert.match(runner, /JSON\.stringify\(\{trackId:tracks\[0\]\.id\}\)/);
+  assert.doesNotMatch(runner, /api\/playlist\/\$first/);
+});
+
+test('playlist POST fixtures preserve the catalog id type and use an unknown numeric id', () => {
+  const knownExpression = runner.match(/payload=\$\(node -e '([^']+)'/)[1];
+  const unknownExpression = runner.match(/unknown_payload=\$\(node -e '([^']+)'/)[1];
+  const output = mkdtempSync(join(tmpdir(), 'playlist-payload-'));
+  const catalog = join(output, 'tracks.json');
+  try {
+    for (const id of [1, 't1']) {
+      writeFileSync(catalog, JSON.stringify([{ id }]));
+      const result = spawnSync(process.execPath, ['-e', knownExpression, catalog], { encoding: 'utf8' });
+      assert.equal(result.status, 0, result.stderr);
+      assert.deepEqual(JSON.parse(result.stdout), { trackId: id });
+    }
+    writeFileSync(catalog, JSON.stringify([{ id: 1 }, { id: 12 }]));
+    const result = spawnSync(process.execPath, ['-e', unknownExpression, catalog], { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+    assert.deepEqual(JSON.parse(result.stdout), { trackId: 13 });
+  } finally {
+    rmSync(output, { recursive: true });
+  }
+});
+
+test('the RPI tester uses returned same-task artifacts and keeps Review read-only', () => {
+  const rpi = runner.slice(runner.indexOf('# ---------------------------------------------------------------- Level 3'),
+    runner.indexOf('# ---------------------------------------------------------------- Level 4'));
+  assert.match(rpi, /resolve_rpi_artifact research/);
+  assert.match(rpi, /resolve_rpi_artifact plan.*"\$RPI_TASK_SLUG"/);
+  assert.match(rpi, /resolve_rpi_artifact changes.*"\$RPI_TASK_SLUG"/);
+  assert.match(rpi, /resolve_rpi_artifact review.*"\$RPI_TASK_SLUG"/);
+  assert.match(rpi, /grep -qi 'dotnet test' "\$RPI_PLAN_PATH"/);
+  assert.doesNotMatch(rpi, /research mentions|review returns a pass\/fail summary|Review playlist slice/);
+  assert.match(rpi, /review does not create source commits/);
+  const backlogFinding = workshop.slice(workshop.indexOf('### Step 4: Turn a deferred review finding into an issue'),
+    workshop.indexOf('### Step 5: Run daily backlog'));
+  assert.match(backlogFinding, /If the review was clean, skip this step/);
+  assert.doesNotMatch(backlogFinding, /newest review file|at least two open issues/);
+  assert.match(runner, /skip_step l5-seed-issues/);
+  assert.doesNotMatch(runner, /two synthetic review-finding issues|at least three open issues/);
 });
 
 test('published skill commands are standalone blocks without arguments or task prose', () => {
@@ -165,7 +272,7 @@ test('tester fails extraction when a curated solution message disappears', () =>
 
 test('interactive agent changes provide direct CLI commands alongside VS Code selection', () => {
   for (const name of [
-    'dt-coach', 'meeting-analyst', 'brd-builder', 'prd-builder', 'functional-planner',
+    'dt-coach', 'documentation', 'meeting-analyst', 'brd-builder', 'prd-builder', 'functional-planner',
     'backlog-manager', 'rpi-agent', 'adr-creation', 'code-review', 'music-catalog-test-writer',
   ]) assert.ok(workshop.includes(`/agent ${name}`), name);
   assert.match(workshop, /direct name is not recognized/);
@@ -182,7 +289,7 @@ test('BRD starter and example preserve the supplied workshop facts and review bo
   assert.match(brd, /Sponsor: the workshop facilitator/);
   assert.match(brd, /every participant ships the slice with passing tests/);
   assert.match(brd, /These are acceptance targets, not observed results/);
-  assert.match(brd, /shared playlist scope as the delivery boundary/);
+  assert.match(brd, /Source: the locked Design Thinking decisions for this slice, captured in docs\/project-planning\/playlist-design-decisions\.md/);
   assert.match(brd, /<summary>Toggle example: a step-by-step BRD conversation<\/summary>/);
   assert.match(brd, /Send each message separately/);
   assert.match(brd, /docs\/project-planning\/music-catalog-playlist-slice-brd\.md/);
@@ -196,13 +303,15 @@ test('BRD starter and example preserve the supplied workshop facts and review bo
   assert.match(prd, /\/agent hve-core:prd-builder/);
   assert.match(prd, /command as a separate message/);
   assert.match(prd, /Move from the BRD work to a PRD/);
-  assert.match(prd, /carry forward its constraints and open questions/);
+  assert.match(prd, /Carry forward its constraints and open questions/);
   assert.match(prd, /Ask at most 3 clarifying questions, one at a time/);
-  assert.match(prd, /Wait for my scope confirmation/);
+  assert.match(prd, /Confirm or correct the scope before proceeding to validation and sign-off/);
   assert.match(prd, /Do not select \*\*Yes\*\* merely/);
   assert.match(prd, /ask for my final approval before recording sign-off/);
-  assert.match(prd, /POST \/api\/playlist\/tracks/);
-  assert.doesNotMatch(prd, /POST \/api\/playlist\/\{trackId\}/);
+  const starter = prd.match(/```text\n(Move from the BRD work[\s\S]*?)\n```/)[1];
+  assert.match(starter, /docs\/project-planning\/playlist-design-decisions\.md/);
+  assert.doesNotMatch(starter, /Product requirements:|Non-functional requirements:|POST \/api|Write each requirement/);
+  assert.match(prd, /native handoff path BRD Builder returned/);
 });
 
 test('PM backlog checks use the reviewed plan rather than a prescribed reference hierarchy', () => {

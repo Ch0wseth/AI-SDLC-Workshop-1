@@ -57,7 +57,7 @@ In the recap, walk the autonomy ladder explicitly and point out that the upstrea
 | 0:00 | Introduction and prerequisite readiness | 10 | Prerequisites already complete; unblock attendees if needed | Skip checks already completed before the workshop |
 | 0:10 | Level 1 HVE-Core plugin | 10 | `copilot plugin list` shows hve-core | Use the VS Code extension |
 | 0:20 | Level 2 Design Thinking | 20 | Learner-led sampler, honest nine-method recap, shared implementation handoff | Preview remaining methods without claiming completion; hand out only the implementation contract |
-| 0:40 | Level 2 Curate what you commit | 10 | Design record committed, `.copilot-tracking` ignored | Show `git check-ignore` and commit the provided record |
+| 0:40 | Level 2 Curate what you commit | 10 | Reviewed delivery brief saved, curated files committed, `.copilot-tracking` ignored | Inspect the staged file tree; commit only reviewed planning documents |
 | 0:50 | Level 3 RPI, with context engineering and the duplicate-add decision | 65 | Playlist feature merged, tests green, decision debriefed | Share your finished branch; keep the 5-minute decision debrief |
 | 1:55 | Break | 10 | Implementation committed, tests pass | |
 | 2:05 | Level 4 APM, policy and marketplace | 30 | Lockfile committed and policy audited | Start `apm install` first, explain the lockfile and policy while it runs; demo the audit from recordings |
@@ -66,9 +66,11 @@ In the recap, walk the autonomy ladder explicitly and point out that the upstrea
 | 3:45 | Recap and architect capstone | 15 | | Keep the recap to 5 minutes and run the capstone as a discussion |
 | 4:00 | End | | | |
 
-Level 3 and the break together form a 75-minute block. In Level 3, stop the room at the plan gate for the duplicate-add decision (option A or B), and run a 5-minute debrief after the review: ask one attendee per option to explain the trade-off. In Level 5, make sure every attendee assigns the issue to Copilot cloud agent as soon as the ruleset step is done: the agent works for 10 to 20 minutes while attendees run the accessibility workflow, and the pull request is ready for Level 6. The Extra Credits page is optional: use it only for early finishers or as a facilitator-led discussion.
+Level 3 and the break together form a 75-minute block. Stop the room at the plan gate for the duplicate-feedback decision, then run a 5-minute debrief after Review: ask attendees with contrasting choices to explain the trade-off. Do not prescribe two options before the planner explores them. In Level 5, make sure every attendee assigns the issue to Copilot cloud agent as soon as the ruleset step is done: the agent works for 10 to 20 minutes while attendees run the accessibility workflow, and the pull request is ready for Level 6. The Extra Credits page is optional: use it only for early finishers or as a facilitator-led discussion.
 
-For Level 2, allocate 10–15 minutes to the learner-led nine-method sampler and the remaining time to the debrief, shared implementation handoff, and saved-note inspection. Encourage different listening contexts and concepts; do not distribute the six playlist decisions as the brainstorming answer. Use short turns, prioritize learner contributions in Methods 1–6, and preview Methods 7–9 as prototype/test/iteration plans if time runs short. Tell attendees when the timebox ends; model latency makes this a pacing target, not a guaranteed duration. Never mark simulated research or planned testing as completed evidence. The separate 10-minute curation block remains unchanged.
+For Level 2, allocate 10–15 minutes to the learner-led nine-method sampler and the remaining time to the debrief, shared implementation handoff, and saved-note inspection. Encourage different listening contexts and concepts; do not distribute the six playlist decisions as the brainstorming answer. Use the native Method Next prompt to show state-based recommendations, not to force progress past missing evidence. Prioritize learner contributions in Methods 1–6 and preview Methods 7–9 if time runs short. Tell attendees when the timebox ends; model latency makes this a pacing target, not a guaranteed duration. Never mark simulated research or planned testing as completed evidence.
+
+Use the existing 10-minute curation allocation to save the shared brief with Documentation before the optional PM track, then review and commit the planning files afterwards. Do not add a second writing exercise. In the PM track, retain the supplied business facts and three-question limits, but let the builders choose their questions, templates, traceability, and quality checks. Point out a useful question, an evidence gap, and a native quality-review or handoff decision; these show more HVE value than matching a reference document.
 
 ### Extended tracks (outside the 240 minutes)
 
@@ -87,7 +89,7 @@ Rules for the tracks:
 - Only `/backlog-execute` writes to GitHub. Make attendees read the Functional Planner handoff before they confirm.
 - Present the HVE-Core security agents as assistive only. They never replace SAST, DAST, SCA, or qualified human review.
 - The gh-aw label-gated delegation (`security-review-delegation.md`) needs a fine-grained PAT stored as `GH_AW_AGENT_TOKEN`. Use your own sandbox and delete the PAT afterwards. Do not ask attendees to create one.
-- Hand-written reference outputs for all three tracks (BRD, PRD, backlog handoff, ADR, security report) are in [solutions/afternoon-2/docs](../solutions/afternoon-2/docs/README.md). Use them for demos, or as a fallback when an agent run fails.
+- Hand-written reference outputs for all three tracks (BRD, PRD, backlog handoff, ADR, security report) are in [solutions/afternoon-2/docs](../solutions/afternoon-2/docs/README.md). Use them as labelled facilitator fallbacks, not output shapes or exact wording attendees must reproduce.
 
 ## Pre-flight (day before)
 
@@ -121,7 +123,7 @@ Rules for the tracks:
 | Ruleset creation fails | `gh api` returns 403 or 404 | In a Codespace, clear `GITHUB_TOKEN` so `gh` uses the attendee's login. The attendee needs the admin role on the repository; rulesets on private repositories need a supported plan. Create the ruleset from **Settings** > **Rules** > **Rulesets**, or demo it and continue |
 | Delegated pull request shows no checks | Checks wait with **Approve and run workflows** | Expected: workflows on Copilot pull requests need a human approval. Approve them, then wait for the `test` check |
 | Delegated pull request not ready at Level 6 | Session still running | Review the session log live, then review the facilitator's prerecorded pull request |
-| Attendees chose different duplicate-add options | Debrief at the review gate | Expected: both options are valid. Compare them against the acceptance criteria and the accessibility notes, not against each other |
+| Attendees chose different duplicate-add approaches | Debrief at the review gate | Compare each approach with the shared acceptance criteria and accessibility needs; differing conformant designs are valid |
 | Copilot is missing from **Reviewers** | Copilot code review policy disabled, or the attendee has no licence that includes it | Enable the **Copilot code review** policy, or demo the review yourself |
 | **Advanced Security** shows no Secret Protection or custom patterns | No GitHub Secret Protection licence for private repositories | Demo push protection from a licensed repository |
 | Backlog Executor cannot create issues | The PM track stops at `/backlog-execute` | Restart Copilot CLI with `--enable-all-github-mcp-tools`, or sign in to the GitHub MCP server in VS Code; fallback: `gh issue create` from `handoff.md` |

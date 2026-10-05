@@ -36,11 +36,17 @@ It must use only the lab's guided steps, supplied links, and captured results. I
 
 The published **Toggle solution / Toggle example** blocks are the tester's curated conversation reference, not optional inspiration for inventing its own answers. The extractor saves their text plus ordered DT and BRD messages. Each Copilot invocation receives a replay policy pointing to that reference. Level 2 sends the nine DT contributions and BRD example steps 2–11 one message at a time, waiting for each invocation to finish and retaining conversation context with `--continue`. It selects the matching HVE agent explicitly and stops the sequence after a failed invocation. Changes to the number of example blocks fail extraction rather than silently changing the script.
 
+The examples supply a learner's facts and choices, not a document outline or substitute for HVE's native procedures. After the DT recap and note checks, the tester switches to Documentation to save the delivery brief before starting BRD Builder. It does not ask DT Coach to publish its private working artifacts or resume the BRD conversation to manufacture a DT record.
+
 This is **example replay**, not authentic user research or proof of method completion. The tester checks that coaching state and the BRD draft exist, but does not infer evidence quality, human review, or sign-off from those files. BRD steps 12–13 remain skipped because they depend on actual human inspection and approval; PRD/backlog execution remains skipped until that gate is satisfied. Missing answers and readiness gaps must be reported, not improvised or waived by the tester.
+
+Level 3 replays each skill command separately from its short task message. It resolves the artifact paths returned by each invocation and substitutes the published placeholders for the same task. Missing, unreadable, or ambiguous paths stop the sequence; it does not select artifacts by recency. Review must leave source files and commits unchanged. The independent API checks use the shared `POST /api/playlist/tracks` contract with a JSON `trackId` body; these tester checks are not additional manual learner steps.
 
 Level 3 captures `HEAD` before implementation and compares the approved source/test paths afterward, including untracked files. Implementation commits count as edits even when the working tree is clean. The checkpoint commits only a nonempty index; staging or commit errors still fail the step. Run the local regression fixtures with `bash tests/workshop/afternoon-2/git-checkpoint.test.sh`.
 
 Run the starter-prerequisite structure and report regression checks with `node --test tests/workshop/afternoon-2/prerequisites.test.mjs tests/workshop/afternoon-2/report.test.mjs`.
+
+Run the local artifact-binding and HTTP request fixtures with `bash tests/workshop/afternoon-2/rpi-flow.test.sh`. They use temporary files and a mock `curl`; no Copilot invocation or network request runs.
 
 After this Actions workflow completes on `main`, the separate [Workshop Pedagogy Reviewer](../../../.github/agents/workshop-pedagogy-reviewer.agent.md) reviews the tested revision's teaching content with Auto intelligence routing. It publishes an Actions summary and one `pedagogy-review` issue even for a clean tester run. It does not replay commands or change workshop files. See the [maintainer setup and boundaries](../../../docs/maintainer-handbook.md#pedagogy-review-after-the-tester) and run its local checks with `node --test tests/workshop/pedagogy/review.test.mjs`.
 
@@ -127,7 +133,7 @@ See the official GitHub billing documentation for current rates; this repository
 - The introduction's **Dev Environment Setup** offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
 - Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Copilot cloud agent PR JSON, the Copilot code review JSON).
 - Level 5 delegation differs from the attendee path in three places:
-  - The feature request is created with `gh issue create` and the lab's field labels, and the deferred review finding is replaced by two synthetic review-finding issues.
+  - The feature request is created with `gh issue create` and the lab's field labels. Publishing a deferred review finding is skipped because it needs a genuine finding and a human decision to defer it; the tester does not invent replacement findings.
   - The branch ruleset (`l5-ruleset`) is always recorded as skipped, because the sandbox-scoped token has no Administration permission. The solution JSON is checked statically, and the CI run on `main` is checked live.
   - The issue is assigned whether or not the backlog summary lists it under **Can be developed in parallel**. The tester records where the summary placed it as a note.
 - In Level 6, approving the workflows on the Copilot pull request (`l6-approve-checks`) and the test-writer pass (`l6-test-writer`) are always recorded as skipped: both are interactive.

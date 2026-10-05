@@ -112,7 +112,10 @@ for number in $(seq -w 1 9); do
   fi
 done
 
-copilot_prompt l2-dt-summary "Level 2" "Separate exploration from the six-bullet implementation handoff" dt-summary 900 "--continue --agent hve-core:dt-coach"
+skip_step l2-method-next "Level 2" "DT Method Next: inspect native sequencing advice" \
+  "requires a human choice from actual coaching state; sampler contributions do not establish method completion"
+
+copilot_prompt l2-dt-summary "Level 2" "Map exploration to the shared delivery contract" dt-summary 900 "--continue --agent hve-core:dt-coach"
 note "curated example replay, not authentic learner research, peer feedback, or full method completion; report missing evidence honestly"
 log_has 'playlist' && check "summary mentions the playlist capability" true || check "summary mentions the playlist capability" false
 log_has '409|conflict|reject|duplicate' && check "summary states duplicate add is rejected" true || check "summary states duplicate add is rejected" false
@@ -125,6 +128,13 @@ step l2-dt-notes "Level 2" "Explore the local coaching notes" translated 30 \
   && check "curated DT replay produced coaching state" true || check "curated DT replay produced coaching state" false
 tree_clean_check
 note "file existence checked headlessly; human inspection and authentic research remain unverified"
+finish_step
+
+copilot_prompt l2-dt-record "Level 2" "Documentation: curate the shared delivery brief" dt-record 900 "--continue --agent hve-core:documentation"
+rec=docs/project-planning/playlist-design-decisions.md
+[ -s "$rec" ] && check "decision record written" true || check "decision record written" false "missing $rec"
+[ -s "$rec" ] && ! grep -q '\.copilot-tracking' "$rec" && check "record has no tracking paths" true || check "record has no tracking paths" false
+note "sandbox fixture from the published contract; no human review or completed DT methods inferred"
 finish_step
 
 copilot_prompt l2-brd-start "Level 2" "Start the BRD from the supplied workshop facts" brd-start 900 "--agent hve-core:brd-builder"
@@ -151,12 +161,6 @@ step l2-curate-ignored "Level 2" "Curate: check that the tracking folder is igno
 git check-ignore -q .copilot-tracking/probe && check ".copilot-tracking/ is ignored" true || check ".copilot-tracking/ is ignored" false
 finish_step
 
-copilot_prompt l2-dt-record "Level 2" "Curate: write the Design Thinking record" dt-record 900 "--continue --agent hve-core:dt-coach"
-rec=docs/project-planning/playlist-design-decisions.md
-[ -s "$rec" ] && check "decision record written" true || check "decision record written" false "missing $rec"
-[ -s "$rec" ] && ! grep -q '\.copilot-tracking' "$rec" && check "record has no tracking paths" true || check "record has no tracking paths" false
-finish_step
-
 step l2-curate-commit "Level 2" "Curate: commit the reviewed deliverables" translated 60 \
   'git add docs/project-planning && git status && git commit -m "Add playlist slice design record, BRD and PRD"'
 [ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
@@ -174,34 +178,44 @@ copilot_prompt l3-research-command "Level 3" "Activate RPI research" rpi-researc
 finish_step
 [ "$STEP_CODE" -eq 0 ] || exit 1
 copilot_prompt l3-research "Level 3" "Send RPI research task" rpi-research 1800 --continue
-for f in Program.cs tracks.json App.tsx; do
-  log_has "$f" && check "research mentions $f" true || check "research mentions $f" false
-done
+if RPI_RESEARCH_PATH=$(resolve_rpi_artifact research "$RESULTS_DIR/steps/$STEP_ID.log"); then
+  RPI_TASK_SLUG=$(basename "$RPI_RESEARCH_PATH" -research.md)
+  export RPI_RESEARCH_PATH
+  check "returned research artifact exists" true "$RPI_RESEARCH_PATH"
+else
+  check "returned research artifact exists" false "missing, ambiguous, or unreadable artifact"
+fi
 tree_clean_check
 finish_step
-
-step l3-research-checkpoint "Level 3" "Research checkpoint: git status" literal 30 'git status'
-tree_clean_check
-finish_step
+[ "$STEP_CODE" -eq 0 ] && [ -n "$RPI_RESEARCH_PATH" ] || exit 1
 
 copilot_prompt l3-plan-command "Level 3" "Activate RPI plan" rpi-plan-command 900 --continue
 finish_step
 [ "$STEP_CODE" -eq 0 ] || exit 1
 copilot_prompt l3-plan "Level 3" "Send RPI plan task" rpi-plan 1800 --continue
-log_has 'dotnet test' && check "plan includes dotnet test" true || check "plan includes dotnet test" false
-log_has 'npm test' && check "plan includes npm test" true || check "plan includes npm test" false
+if RPI_PLAN_PATH=$(resolve_rpi_artifact plan "$RESULTS_DIR/steps/$STEP_ID.log" "$RPI_TASK_SLUG"); then
+  export RPI_PLAN_PATH
+  check "plan belongs to the research task" true "$RPI_PLAN_PATH"
+  grep -qi 'dotnet test' "$RPI_PLAN_PATH" && check "plan includes API validation" true || check "plan includes API validation" false
+  grep -qi 'npm.*test' "$RPI_PLAN_PATH" && check "plan includes front-end validation" true || check "plan includes front-end validation" false
+else
+  check "plan belongs to the research task" false "missing, ambiguous, or unreadable artifact"
+fi
 tree_clean_check
 finish_step
-
-step l3-plan-checkpoint "Level 3" "Plan checkpoint: git status" literal 30 'git status'
-tree_clean_check
-finish_step
+[ "$STEP_CODE" -eq 0 ] && [ -n "$RPI_PLAN_PATH" ] || exit 1
 
 implementation_base=$(git rev-parse HEAD) || exit 1
 copilot_prompt l3-implement-command "Level 3" "Activate RPI implementation" rpi-implement-command 900 --continue
 finish_step
 [ "$STEP_CODE" -eq 0 ] || exit 1
 copilot_prompt l3-implement "Level 3" "Send RPI implementation task" rpi-implement 3600 --continue
+if RPI_CHANGES_PATH=$(resolve_rpi_artifact changes "$RESULTS_DIR/steps/$STEP_ID.log" "$RPI_TASK_SLUG"); then
+  export RPI_CHANGES_PATH
+  check "changes record belongs to the approved plan" true "$RPI_CHANGES_PATH"
+else
+  check "changes record belongs to the approved plan" false "missing, ambiguous, or unreadable artifact"
+fi
 if implementation_changes=$(implementation_changes_since "$implementation_base"); then
   [ -n "$implementation_changes" ] && check "agent edited implementation files" true "$(printf '%s\n' "$implementation_changes" | head -n 20)" \
     || check "agent edited implementation files" false "no implementation change since $implementation_base"
@@ -211,6 +225,7 @@ fi
 grep -rqs 'Your playlist is empty. Add a track to get started.' src/front/src \
   && check "exact empty-state text present in src/front/src" true || check "exact empty-state text present in src/front/src" false
 finish_step
+[ "$STEP_CODE" -eq 0 ] && [ -n "$RPI_CHANGES_PATH" ] || exit 1
 
 step l3-dotnet-test "Level 3" "Validate API tests" literal 900 'dotnet test'
 log_has 'Passed!|passed' && check "dotnet test reports passing tests" true || check "dotnet test reports passing tests" false
@@ -230,14 +245,15 @@ if [ "$STEP_CODE" -eq 0 ]; then
   s=$(http_status GET http://localhost:5080/api/tracks)
   c=$(node -e 'try{console.log(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).length)}catch{console.log(-1)}' "$RESULTS_DIR/http-last.json")
   [ "$s" = 200 ] && [ "$c" = 12 ] && check "GET /api/tracks returns 12 tracks" true || check "GET /api/tracks returns 12 tracks" false "status=$s count=$c"
-  first=$(node -e 'try{const t=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));console.log(t[0].id)}catch{}' "$RESULTS_DIR/http-last.json")
+  payload=$(node -e 'const tracks=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.stdout.write(JSON.stringify({trackId:tracks[0].id}));' "$RESULTS_DIR/http-last.json")
+  unknown_payload=$(node -e 'const tracks=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.stdout.write(JSON.stringify({trackId:Math.max(...tracks.map(track=>track.id))+1}));' "$RESULTS_DIR/http-last.json")
   s=$(http_status GET http://localhost:5080/api/playlist)
   [ "$s" = 200 ] && check "GET /api/playlist returns 200" true "$(head -c 300 "$RESULTS_DIR/http-last.json")" || check "GET /api/playlist returns 200" false "status=$s"
-  s=$(http_status POST http://localhost:5080/api/playlist/does-not-exist-999)
+  s=$(http_status POST http://localhost:5080/api/playlist/tracks "$unknown_payload")
   [ "$s" = 404 ] && check "POST unknown track returns 404" true "$(head -c 300 "$RESULTS_DIR/http-last.json")" || check "POST unknown track returns 404" false "status=$s"
-  s=$(http_status POST "http://localhost:5080/api/playlist/$first")
-  case $s in 2??) check "POST existing track succeeds" true "status=$s";; *) check "POST existing track succeeds" false "status=$s id=$first";; esac
-  s=$(http_status POST "http://localhost:5080/api/playlist/$first")
+  s=$(http_status POST http://localhost:5080/api/playlist/tracks "$payload")
+  case $s in 2??) check "POST existing track succeeds" true "status=$s";; *) check "POST existing track succeeds" false "status=$s";; esac
+  s=$(http_status POST http://localhost:5080/api/playlist/tracks "$payload")
   [ "$s" = 409 ] && check "POST duplicate returns 409" true "$(head -c 300 "$RESULTS_DIR/http-last.json")" || check "POST duplicate returns 409" false "status=$s"
   s=$(http_status GET http://127.0.0.1:5173/api/tracks)
   [ "$s" = 200 ] && check "Vite dev server proxies /api" true || check "Vite dev server proxies /api" false "status=$s"
@@ -254,21 +270,26 @@ tree_clean_check
   || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
 finish_step
 
+review_base=$(git rev-parse HEAD) || exit 1
 copilot_prompt l3-review-command "Level 3" "Activate RPI review" rpi-review-command 900 --continue
 finish_step
 [ "$STEP_CODE" -eq 0 ] || exit 1
 copilot_prompt l3-review "Level 3" "Send RPI review task" rpi-review 2400 --continue
-log_has 'pass|fail' && check "review returns a pass/fail summary" true || check "review returns a pass/fail summary" false
+if review_path=$(resolve_rpi_artifact review "$RESULTS_DIR/steps/$STEP_ID.log" "$RPI_TASK_SLUG"); then
+  check "review belongs to the implemented task" true "$review_path"
+else
+  check "review belongs to the implemented task" false "missing, ambiguous, or unreadable artifact"
+fi
+log_has 'Conformant|Defects found|Residual work|Not accepted' \
+  && check "review reports an acceptance outcome" true || check "review reports an acceptance outcome" false
+tree_clean_check
+[ "$(git rev-parse HEAD)" = "$review_base" ] \
+  && check "review does not create source commits" true || check "review does not create source commits" false
 finish_step
 
 step l3-review-dotnet "Level 3" "Validate after review: dotnet test" literal 900 'dotnet test'
 finish_step
 step l3-review-npm "Level 3" "Validate after review: npm test" translated 600 'cd src/front && npm test'
-finish_step
-
-step l3-review-commit "Level 3" "Commit review checkpoint" translated 60 \
-  'git status; git add -A; git commit -m "Review playlist slice" || echo "nothing to commit"'
-tree_clean_check
 finish_step
 
 skip_step l3-tech-lead "Level 3" "Tech Lead extension (ADR Creator, Code Review agent, /git-commit)" \
@@ -410,12 +431,8 @@ ISSUE_NUMBER=${ISSUE_URL##*/}
 [ -n "$ISSUE_NUMBER" ] && check "issue created" true "$ISSUE_URL" || check "issue created" false
 finish_step
 
-step l5-seed-issues "Level 5" "Turn deferred review findings into issues" translated 120 \
-  "gh issue create -R $SANDBOX_REPO --title 'Show track count in the playlist panel' --body 'Display the number of tracks currently in the in-memory playlist.' && gh issue create -R $SANDBOX_REPO --title 'Add an API test for an unknown track id' --body 'Cover adding an unknown track id to the playlist with an xUnit test.'"
-note "-R added so gh targets the sandbox repository explicitly; the tester creates two synthetic review-finding issues instead of parsing the Level 3 review for a deferred finding"
-seeded=$(gh issue list -R "$SANDBOX_REPO" --state open --json number --jq 'length' 2>/dev/null)
-[ "${seeded:-0}" -ge 3 ] && check "at least three open issues" true "open=$seeded" || check "at least three open issues" false "open=${seeded:-unknown}"
-finish_step
+skip_step l5-seed-issues "Level 5" "Turn deferred review findings into issues" \
+  "requires a genuine residual finding and a human decision to defer it; do not create synthetic review findings"
 
 # wait_aw_run <step-id> <workflow> <title>
 wait_aw_run() {
