@@ -149,7 +149,7 @@ Install the tools yourself. Afternoon 2 needs every row. Afternoon 1 needs only 
 
 ## 5. Sign in and verify tools (all options)
 
-Run these commands in the terminal you will use on the day: the Codespace terminal, the dev container terminal, or your local terminal.
+Run these commands in the terminal you will use on the day: the Codespace terminal, the dev container terminal, or your local terminal. Open the terminal at your workshop repository root before starting `copilot`.
 
 ```bash
 gh auth login           # choose GitHub.com, HTTPS, and sign in with the browser
@@ -163,6 +163,16 @@ copilot --version
 apm --version           # Afternoon 2 only
 gh aw version           # Afternoon 2 only
 ```
+
+On first start, Copilot CLI may show **Confirm folder trust**. Check that the displayed path is your workshop repository before continuing; the screenshot below shows an example started from `src/front`, but start your workshop session from the repository root.
+
+- Choose **Yes** to trust the folder for this session.
+- Choose **Yes, and remember this folder for future sessions** only if you also want to retain that trust.
+- Choose **No (Esc)** if the path is unexpected or you do not trust the files.
+
+Use the arrow keys to select an option and press **Enter** to confirm. Folder trust allows Copilot to read files there; edits and code or shell execution still require the permissions described in the prompt.
+
+![Copilot CLI folder-trust prompt with the folder path and options to trust once, remember trust, or decline](assets/copilot-trust-folder.png)
 
 For Afternoon 2, also confirm that your GitHub CLI credential can push workflow files. Afternoon 2 Level 5 pushes files under `.github/workflows`, which needs the `workflow` scope:
 
@@ -318,5 +328,6 @@ Admin or facilitator:
 
 - [ ] Afternoon 1: fork [Philess/gh-copilot-demo](https://github.com/Philess/gh-copilot-demo) and open it with your chosen option.
 - [ ] Afternoon 2: create your private repository from the [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop) template and open it with your chosen option.
+- [ ] Afternoon 2: complete [Starter readiness (prerequisite)](afternoon-2/workshop.md#starter-readiness-prerequisite) once before the workshop: both test suites pass and the working tree is clean.
 - [ ] Run section 5 in that environment, including `copilot` → `/login`.
 - [ ] Delete or stop any test Codespaces you no longer need.

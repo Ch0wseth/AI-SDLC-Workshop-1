@@ -14,7 +14,6 @@ navigation_levels: 3
 navigation_numbering: false
 sections_title:
   - 'AI SDLC with GitHub and GitHub Copilot'
-  - 'Level 0: Setup and starting point'
   - 'Level 1: HVE orientation and HVE-Core CLI plugin'
   - 'Level 2: Design Thinking with DT Coach'
   - 'Level 3: RPI implementation loop'
@@ -143,7 +142,31 @@ To complete this lab, you need:
 - A GitHub account with a GitHub Copilot licence. Business or Enterprise is recommended. Copilot cloud agent, plugins, and gh-aw may need administrator enablement. See the [full prerequisites checklist](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/prerequisites.md) for the policy, licence, and administrator checks, or the checklist for your delivery option: [Codespaces](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-codespace.md), [local dev container](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-devcontainer.md) or [local tools](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-local.md).
 - **Your own repository** created from the workshop template. Level 4 pushes a marketplace, Level 5 runs workflows and assigns an issue to Copilot cloud agent, and Level 6 reviews its pull request, so the repository must belong to you.
 
-Create your repository from the template: open [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop), select **Use this template** → **Create a new repository**, and choose a **private** repository under your account. [Learn more about template repositories](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template). Level 0 Step 1 gives the equivalent `gh` command and a fallback.
+Create your repository from the template: open [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop), select **Use this template** → **Create a new repository**, and choose a **private** repository under your account. [Learn more about template repositories](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+
+<details>
+<summary>Create the repository with GitHub CLI, or use the copy fallback</summary>
+
+After signing in with `gh auth login`, replace `my-music-catalog` with any name:
+
+```powershell
+gh repo create my-music-catalog --private --template Justrebl/AI-SDLC-Workshop --clone
+cd my-music-catalog
+```
+
+If template creation is blocked in your organization, copy the repository with a fresh history. Run these commands only in the new copy:
+
+```powershell
+git clone https://github.com/Justrebl/AI-SDLC-Workshop my-music-catalog
+cd my-music-catalog
+Remove-Item -Recurse -Force .git
+git init -b main; git add -A; git commit -m "Workshop starter"
+gh repo create my-music-catalog --private --source . --remote origin --push
+```
+
+`gh repo view` should show your own repository with a `main` branch. If the push is rejected for missing the `workflow` scope, follow the tip in Level 5 "Push your branch", then run `git push -u origin main`.
+
+</details>
 
 The repository ships a [dev container](https://code.visualstudio.com/docs/devcontainers/containers) based on a **prebuilt image**. The image already contains Git, Node.js 22, .NET 10, GitHub CLI, Copilot CLI, and APM CLI. On first start, the dev container installs the gh-aw extension and restores the API and front-end dependencies.
 
@@ -194,13 +217,17 @@ Then clone your repository, run `gh extension install github/gh-aw`, `dotnet res
 
 ## 🔐 Sign in and check your tools
 
-Sign in to GitHub CLI, and then to Copilot CLI. Copilot CLI asks you to run `/login` on first start.
+From your workshop repository root, sign in to GitHub CLI, and then to Copilot CLI. Copilot CLI asks you to run `/login` on first start.
 
 ```bash
 gh auth login
 copilot
 > `From Copilot` : exit
 ```
+
+If **Confirm folder trust** appears, check that the displayed path is your workshop repository. Select **Yes** for this session, or **Yes, and remember this folder for future sessions** if you want to retain that trust, then press **Enter**. Choose **No (Esc)** if the path is unexpected or you do not trust the files. The screenshot shows a session started from `src/front`; use the repository root for the workshop.
+
+![Copilot CLI folder-trust prompt showing the folder path and trust choices](../assets/copilot-trust-folder.png)
 
 Check that every tool answers:
 
@@ -225,6 +252,27 @@ If a command is missing:
 
 </details>
 
+## Starter readiness (prerequisite)
+
+Complete this once before the workshop, after opening your copy and restoring its dependencies. If you already completed these checks, go straight to Level 1; there is no separate app-validation level.
+
+From the repository root, check both test suites and the working tree:
+
+```powershell
+dotnet test
+npm --prefix src/front test
+git status
+```
+
+Expected result:
+- xUnit and Vitest pass.
+- The working tree is clean before agents edit the repository. A fresh template copy already has an initial commit; no extra baseline commit is needed.
+- The starter only serves and displays `/api/hello`. The 12 synthetic tracks in `src\api\Data\tracks.json` are not exposed by an endpoint yet, and the playlist capability is not implemented.
+
+The application lives in `src\api` and `src\front`, with API tests in `tests\api` and reference solutions in `solutions\afternoon-2`. If a check fails, resolve it using your [delivery-option prerequisites](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/prerequisites.md) before starting Level 1.
+
+![Starting repository in VS Code](assets/starter-repository.png)
+
 <div class="info" data-title="Documented capability labels">
 
 > This workshop labels mechanisms as **documented capability**, **configuration**, **experimental**, **architectural recommendation**, or **workshop simulation**. Keep those labels when you adapt the material so participants do not confuse a verified product feature with a teaching pattern.
@@ -238,109 +286,6 @@ If a command is missing:
 </div>
 
 ![AI SDLC with GitHub and GitHub Copilot route map](assets/a2-route-map.png)
-
----
-
-# Level 0: Setup and starting point
-
-## Topic
-
-You will verify the starter repository, run both test suites, confirm that the playlist capability is not implemented yet, and create a clean checkpoint.
-
-![Starting repository in VS Code](assets/l0-starting-repository.png)
-
-## Validate the starter
-
-### Step 1: Create your workshop repository
-
-You need a repository that you own: Level 4 pushes a marketplace, Level 5 runs workflows and assigns an issue to Copilot cloud agent, and Level 6 reviews its pull request. Skip this step if you already created your repository from the template in **🚀 Dev Environment Setup** (introduction page) and opened it.
-
-Otherwise, create it from the template with GitHub CLI. Replace `my-music-catalog` with any name:
-
-```powershell
-gh repo create my-music-catalog --private --template Justrebl/AI-SDLC-Workshop --clone
-cd my-music-catalog
-```
-
-If template creation is blocked in your organization, copy the repository with a fresh history:
-
-```powershell
-git clone https://github.com/Justrebl/AI-SDLC-Workshop my-music-catalog
-cd my-music-catalog
-Remove-Item -Recurse -Force .git
-git init -b main; git add -A; git commit -m "Workshop starter"
-gh repo create my-music-catalog --private --source . --remote origin --push
-```
-
-Expected result:
-- `gh repo view` shows your own repository with a `main` branch.
-- You can open it locally or in a Codespace.
-
-> The copy contains files under `.github\workflows`. If the push is rejected for missing the `workflow` scope, follow the tip in Level 5 "Push your branch", then run `git push -u origin main`.
-
-### Step 2: Open the repository root
-
-Open the repository root. The expected layout is:
-
-```text
-src\front
-src\api
-tests\api
-MusicCatalog.slnx
-.github\copilot-instructions.md
-.github\workflows\copilot-setup-steps.yml
-.github\ISSUE_TEMPLATE\feature.yml
-solutions\afternoon-2
-```
-
-Expected result:
-- `src\api\Program.cs` exposes `GET /api/hello` only.
-- `src\front\src\App.tsx` fetches `/api/hello` only.
-- `src\api\Data\tracks.json` contains 12 synthetic tracks and is not wired to an endpoint yet.
-
-### Step 3: Run API tests
-
-Run from the repository root:
-
-```powershell
-dotnet test
-```
-
-Expected result:
-- xUnit tests pass.
-- The existing hello endpoint still works.
-
-### Step 4: Run front-end tests
-
-Run:
-
-```powershell
-cd src\front
-npm test
-```
-
-Expected result:
-- Vitest passes.
-- The existing test verifies the hello message.
-
-### Step 5: Create a baseline checkpoint
-
-Run from the repository root:
-
-```powershell
-git status
-git add -A; git commit -m "Baseline Afternoon 2 starter"
-```
-
-Expected result:
-- Your working tree is clean.
-- You can roll back before starting the HVE/RPI flow.
-
-<div class="tip" data-title="If you already committed">
-
-> If Git says there is nothing to commit, that is fine. The important part is that `git status` is clean before you ask agents to edit the repository.
-
-</div>
 
 ---
 
@@ -416,6 +361,12 @@ Expected result:
 
 ### Step 4: VS Code alternative
 
+<div class="warning" data-title="Prefer the direct plugin">
+
+> The direct HVE-Core Copilot CLI plugin is recommended: it is updated more often than the VS Code extension, which may lag behind the latest agents, commands, and skills. Use the extension as a fallback when the plugin path is blocked.
+
+</div>
+
 If the Copilot CLI plugin path is blocked, install the VS Code extension instead:
 
 ```text
@@ -426,7 +377,7 @@ Expected result:
 - You can select HVE agents from Copilot Chat in VS Code.
 - The remaining prompts still work, but the UI path is different.
 
-![HVE-Core VS Code extension alternative](assets/l1-vscode-extension.png)
+![VS Code Marketplace showing the HVE Core extension by ISE HVE Essentials and its Install Pre-Release button](../assets/vscode-hve-core.png)
 
 ## Commit checkpoint
 
@@ -445,78 +396,227 @@ Expected result:
 
 ## Topic
 
-You will use HVE-Core DT Coach to frame the feature. To keep the room aligned, the inputs and decisions are fixed. The output should identify one capability: browse tracks and add a track to a single in-memory playlist. Duplicate adds are rejected. An empty-state is shown.
+You will experiment with HVE-Core DT Coach through a short tour of its **nine Design Thinking methods**. Start with a user problem, not a prescribed feature: how might someone choose music for a listening moment? You choose the person, context, ideas, and concept to explore. The coach helps you question assumptions, sketch alternatives, and decide what you would learn next.
 
-**Why this level:** an agent builds exactly what you ask. Before you hand it work, decide what is worth asking and what is out of scope. The decisions you lock here become the boundaries of every prompt that follows.
+**Why this level:** good delivery starts with a worthwhile problem, not just a detailed coding prompt. Experience the coach helping you think rather than asking it to fill in predetermined answers. After exploration, you will explicitly map your concept to the small playlist slice used by the rest of the workshop; ideas outside that slice remain future possibilities, not rejected brainstorming.
+
+The exercise is a **10–15 minute sampler**, not completion of nine full methods. Methods 1–3 explore the problem, 4–6 explore possible solutions, and 7–9 consider implementation, testing, and iteration. You will plan or simulate the activities that need more time, real users, or working prototypes. These shortcuts do not satisfy the full methods' evidence gates.
 
 An extended Product Manager track then turns these decisions into a BRD, a PRD, and GitHub issues with the HVE-Core planning agents.
+
+### BRD: why the business needs the capability
+
+A **Business Requirements Document (BRD)** explains the problem worth solving, who benefits, and what a successful outcome would mean. It gives stakeholders a shared basis for deciding whether to invest in the work before the team commits to a solution.
+
+A useful BRD records the business context, stakeholder and user needs, intended outcomes, scope, constraints, assumptions, risks, and unresolved questions. It distinguishes evidence from hypotheses: an agent must not invent customer interviews, adoption figures, or a return on investment. Success measures need stakeholder agreement; writing a metric into a document does not validate it.
+
+For this synthetic Music Catalog exercise, the BRD explains why participants need a small, bounded playlist capability to practise a governed agentic delivery workflow. It records the learning context and the single-playlist, in-memory boundary. It does **not** claim that real customers have requested the feature or that it will generate revenue.
+
+Use the BRD to align sponsors and stakeholders, compare proposed scope with the agreed need, and revisit the rationale when priorities change. It is not a technical implementation plan or a collection of coding tasks.
+
+### PRD: what the product must do
+
+A **Product Requirements Document (PRD)** turns the agreed business need into a clear description of the product behaviour. It answers what users should be able to do, which states and failure cases must be handled, and how the team will decide that the capability is acceptable.
+
+A useful PRD describes the user journey, functional requirements, relevant non-functional requirements such as accessibility, acceptance criteria, dependencies, and explicit exclusions. It should be detailed enough for engineers, designers, and testers to work from the same intent without unnecessarily prescribing the implementation.
+
+For the playlist slice, the PRD specifies browsing tracks, adding a track to the single playlist, rejecting duplicate adds, displaying the empty state, and providing labelled, accessible controls. It also preserves the exclusions: no users, authentication, persistence, reorder, remove, search, or playlist creation. Those behaviours become acceptance criteria that the implementation and tests must satisfy.
+
+Use the PRD to review proposed designs, plan delivery, derive test cases, and assess changes. It is not proof that a feature works: implementation, testing, and human review still provide that evidence. Architecture choices and the coding sequence belong in the subsequent technical plan or an architecture decision record when needed.
+
+| Artifact | Main question | How the PM uses it |
+| --- | --- | --- |
+| BRD | Why do this, for whom, and toward which outcome? | Align the need, value, constraints, and investment decision with stakeholders. |
+| PRD | What must the product do, and what counts as acceptable? | Agree behaviour and scope with delivery teams and reviewers. |
+| GitHub issues | Which bounded pieces of work will deliver those requirements? | Track ownership, dependencies, acceptance criteria, and progress, with links back to the requirements. |
+
+The chain is **framed need → BRD → PRD → reviewed backlog → implementation and validation**. Keep the documents proportional to the decision: this workshop uses short artifacts for a small slice, not paperwork for its own sake. If the scope changes, update the affected requirements and work items together rather than letting the backlog silently diverge from the agreed intent.
+
+### How a Product Manager uses HVE principles
+
+HVE-Core's principle is **"AI carries the rules, humans keep the judgment."** For a PM, this means delegating repeatable structuring and consistency work while retaining responsibility for the product decisions. The following is a practical interpretation for this workshop, not an additional HVE-Core policy.
+
+1. **Frame before specifying.** Use DT Coach to make the problem, user need, assumptions, and boundaries explicit. In real product work, bring research and stakeholder evidence; the coach can organize that evidence but cannot substitute for it.
+2. **Turn intent into reviewable artifacts.** Use BRD Builder and PRD Builder to draft structured requirements and surface gaps or contradictions. Review the drafts with the relevant stakeholders; generated text is a proposal, not approval.
+3. **Make scope and success explicit.** Ask agents to preserve exclusions and produce observable acceptance criteria. The PM decides which outcomes matter, how to prioritize competing needs, and which trade-offs are acceptable.
+4. **Separate planning from action.** Use Functional Planner to propose an issue hierarchy and Backlog Manager to recommend ordering and dependencies. Inspect the handoff before authorizing `/backlog-execute` to create or change issues in the confirmed repository.
+5. **Preserve traceability and curate the handoff.** Keep the reviewed BRD, PRD, and decisions linked to the backlog. Commit useful, agreed deliverables rather than raw agent conversations, sensitive meeting notes, or unsupported claims.
+6. **Close the feedback loop.** Compare delivered behaviour and review findings with the PRD, then evaluate outcomes using actual evidence. Accept, reject, or revise follow-up work deliberately; passing tests does not by itself establish business value.
+
+The PM's role therefore shifts from repeatedly formatting documents and tickets to checking evidence, resolving ambiguity, aligning stakeholders, and owning prioritization. HVE provides a repeatable path between those decisions and engineering work; it does not make the decisions authoritative merely because an agent produced them.
+
+The [extended Product Manager track](#extended-track-product-manager-with-hve-core) demonstrates this handoff with BRD Builder, PRD Builder, Functional Planner, and Backlog Manager. It is optional: the core workshop proceeds with a reviewed implementation handoff after the open exploration.
 
 ![DT Coach framing the playlist capability](assets/l2-dt-coach-framing.png)
 
 ## Start a DT project
 
-### Step 1: Open Copilot CLI or VS Code Chat
+### Step 1: Set Auto with the intelligence profile for the rest of the lab
 
-Use the surface where HVE-Core is available. Select **DT Coach** if your UI offers an agent picker.
+Before starting the Design Thinking exercise, switch to **Auto** model selection with the **intelligence** profile. Keep this setting for the remaining interactive lab work, including the RPI phases.
 
-### Step 2: Start the project
+In Copilot CLI, start `copilot` from the repository root and enter:
+
+```text
+/model auto intelligence
+```
+
+Confirm that **Auto** and the **intelligence** profile are selected. If your CLI version opens a selection menu instead, use `/model` to select **Auto** and its **intelligence** profile. You can also start a new session with the explicit runtime options:
+
+```powershell
+copilot --model auto --auto-tier intelligence
+```
+
+Auto chooses an available model allowed by your account and organization policies; it does not guarantee a particular model. This setting applies to your interactive session, not to separate cloud-agent or workflow runs. If you start a new session later, confirm the setting again.
+
+If you use VS Code Chat, select **Auto** in the model picker and **intelligence** if your version offers the profile. If that profile is unavailable, use Copilot CLI for the workshop's Auto intelligence configuration.
+
+### Step 2: Select DT Coach in Copilot CLI or VS Code Chat
+
+Use the surface where you installed HVE-Core in Level 1.
+
+**Copilot CLI:** there is no persistent agent-picker dropdown. In the session configured above, open the agent selection menu with:
+
+```text
+/agent
+```
+
+Find **DT Coach** (it may appear as **DT-Coach** or a plugin-prefixed name), select it with the arrow keys, and press **Enter**. Confirm that DT Coach is the active agent before pasting the project prompt.
+
+If your instructions refer to `/agents`, check `/help` for the command supported by your installed version; Copilot CLI 1.0.90-3 lists the singular `/agent`. If DT Coach is missing, check `/plugin` and complete the HVE-Core installation from Level 1 before continuing.
+
+**VS Code Chat:** open Chat, use the agent picker, and select **DT Coach**. If it is missing, confirm that the HVE-Core extension is installed and enabled.
+
+### Step 3: Start a learner-led nine-method sampler
+
+Choose a listening situation you want to explore: a commute, focused work, a shared evening, or your own example. These are starting points, not personas or validated research. Set your own 10–15 minute timer; the coach cannot reliably enforce elapsed time.
 
 Copy paste the following prompt:
 
 ```text
 /dt-start-project
 
-Project name: Music Catalog playlist slice
-Audience: workshop participants building a small full-stack feature
-Business context: a synthetic music catalog app used to learn governed agentic SDLC practices
-Capability: browse tracks and add tracks to a single in-memory playlist
-Constraints:
-- exactly one playlist
-- in-memory API state only
-- no users, authentication, persistence, reorder, remove, search, or playlist creation in this slice
-- duplicate add is rejected
-- empty playlist state is shown
-- front-end controls must be accessible by role and label
-Expected output: a concise problem statement, user need, success criteria, assumptions, and implementation boundaries
-Do not edit files.
+Project name: Music Catalog listening experience
+Starting question: How might we help someone choose music for a listening moment?
+Help me brainstorm and sample all nine HVE Design Thinking methods within a 10–15 minute learning exercise. I will manage the timer.
+Ask me first who I want to design for and in what situation. Do not choose the persona, problem, or solution for me.
+For each method, explain its purpose in one sentence, then give me one small activity or focused question. Wait for my answer before moving on.
+Let me contribute and challenge ideas; help me diverge before converging. Do not assume a playlist is the best solution.
+Keep responses short. If I say "next method", summarize what we learned and move on within this sampler. If I say "timebox", summarize the current method and give a brief guided preview of the remaining methods.
+For Design Research, use only observations I provide; label assumptions and fictional role-play explicitly. For prototyping, use a text sketch and a plan, not application code. For User Testing, use a peer walkthrough if available or write a test plan; do not invent results. For Iteration at Scale, propose what we would measure and revisit, not a rollout.
+Record each method as sampled, simulated, planned, or not reached. Do not claim that the full method gates passed.
+Expected output: my chosen problem framing, alternative ideas, a concept sketch, assumptions, a testing/iteration plan, and an honest nine-method coverage recap.
+You may create or update local working notes only under .copilot-tracking/. Do not create or modify files elsewhere, including application code, tests, or published documentation.
 ```
 
 Expected result:
-- DT Coach frames the problem and the user need.
+- You supply the user/context and make choices rather than accepting a prewritten feature definition.
+- DT Coach guides small activities across the nine methods, or explicitly reports which were only previewed or not reached.
 - It does not implement code.
-- It preserves the fixed decisions.
+- It separates your observations from assumptions, and proposed tests from actual results.
+- Any agent-written working notes stay under the local, ignored `.copilot-tracking/` folder.
 
-<div class="important" data-title="Workshop simulation">
+<div class="tip" data-title="Choose how to approve local working-note edits">
 
-> This is a compressed Design Thinking exercise for a four-hour workshop. It is not validated customer research. Treat the result as facilitator-owned scope control for the implementation exercise.
+> If DT Coach requests permission to create or update its `.copilot-tracking/` notes, you may approve that edit for the session when your client offers the option. Check the requested path and permission scope first; prefer an approval limited to the tracking folder rather than all repository writes.
+>
+> If you want fewer repeated permission prompts, you may instead enable **autoapproved / AI-assisted permissions** in your client's permission controls, where available. This lets the permission system assess requests with less interruption; it is not a guarantee that every request will be allowed. It is optional and separate from **Auto intelligence**, which selects the model.
+>
+> In either mode, DT Coach's write boundary remains `.copilot-tracking/` only. Decline requests to edit application code, tests, or published documentation during this exercise. Do not use unrestricted **allow-all / YOLO** permissions as a substitute for AI-assisted approval.
 
 </div>
 
-## Lock the decisions
+### Step 4: Experiment, challenge, and move between methods
 
-### Step 1: Ask for a decision summary
+Use the table as a route map, not nine prompts to paste at once. Spend more of your time generating and comparing ideas; keep later implementation and rollout work as plans.
+
+| Method | Small activity you can try | What the shortcut does not establish |
+| --- | --- | --- |
+| 1. Scope Conversations | Choose a listener and situation; describe what feels difficult. | Stakeholder agreement or validated demand. |
+| 2. Design Research | Share an observation, or ask what neutral question you would ask a listener. | Research that nobody conducted. |
+| 3. Input Synthesis | Separate observations from assumptions and write a "How might we…" question. | A representative research synthesis. |
+| 4. Brainstorming | Add your own ideas, request contrasting alternatives, and resist choosing immediately. | That the first plausible solution is the best one. |
+| 5. User Concepts | Choose a concept and describe the listener's short journey and its trade-off. | User validation of that concept. |
+| 6. Low-Fidelity Prototypes | Sketch the flow in text or on paper; notice a confusing state. | A working application. |
+| 7. High-Fidelity Prototypes | Identify what a functional prototype would need to prove and plan it. | Technical feasibility; no hi-fi prototype is built here. |
+| 8. User Testing | Ask a peer to walk through the sketch, or plan a neutral task and observation. | Full Method 8 testing of a functional prototype. |
+| 9. Iteration at Scale | Choose a next experiment, success signal, and reason to revisit an earlier method. | Scaled rollout or measured impact. |
+
+Try saying **"Challenge my assumption"**, **"Give me a contrasting idea"**, **"Let's revisit research"**, or **"Next method"**. Before moving on, contribute an answer, decision, sketch, or question of your own. The nine methods are not a one-way checklist: discovering a weak assumption is a reason to revisit an earlier method.
+
+When your timer ends, say **"Timebox: recap what we actually tried and preview what remains."** Do not rush through fabricated research or pretend you completed prototyping just to tick every method. If latency prevents nine interactive stops, keep the recap explicit about guided previews.
+
+<div class="important" data-title="Workshop simulation">
+
+> This is a compressed learning exercise, not validated customer research or a completed nine-method project. A fictional user response is a simulation, a text sketch is low fidelity, and a test plan is not a test result. The learner controls the exploration; the shared implementation contract below is a separate facilitator-owned constraint.
+
+</div>
+
+## Debrief and hand off to the shared implementation slice
+
+Keep your explored concept and learning notes, even if they differ from a playlist. To make Level 3 comparable across the room, everyone implements the same technical slice: browse tracks and add them to **one in-memory playlist**, reject duplicates, show an empty state, and use accessible controls. No users, authentication, persistence, reorder, remove, search, or playlist creation are added in this slice.
+
+This is a workshop delivery boundary, **not the conclusion of your user research**. Map what fits from your concept into the slice and keep other ideas as deferred possibilities. The duplicate-add user experience remains a real choice at Level 3's plan gate.
+
+### Step 1: Separate exploration from the implementation handoff
 
 Copy paste the following prompt:
 
 ```text
 Summarize the final decisions for the Music Catalog playlist slice in exactly six bullets:
+This is the shared implementation handoff, not a claim that my explored concept was validated.
+Use this facilitator-owned contract: browse tracks and add to one in-memory playlist; GET /api/tracks, GET /api/playlist, POST /api/playlist/tracks; reject duplicate adds with HTTP 409; show the empty state; use accessible labelled controls; exclude users, authentication, persistence, reorder, remove, search, and playlist creation.
+Leave the duplicate-feedback UX choice open for the RPI plan gate.
 1. user-visible capability
 2. API endpoints
 3. front-end states
 4. duplicate handling
 5. accessibility expectation
 6. out-of-scope items
-Do not edit files.
+After those six bullets, add a separate exploration recap: my chosen context/concept, one idea I changed my mind about, deferred ideas, and the nine methods marked sampled, simulated, planned, or not reached. Do not invent any missing session history.
+You may create or update local working notes only under .copilot-tracking/. Do not create or modify files elsewhere.
 ```
 
 Expected result:
 - The summary includes browse tracks and add-to-playlist.
 - It states duplicate add returns a rejection, not a silent success.
 - It states the empty playlist state is visible.
+- The separate recap preserves your exploration without treating it as validated research or silently changing the implementation scope.
 
-### Step 2: Validate against the fixed scope
+### Step 2: Review the mapping, not the creativity
 
-Manually check that the DT output does not add extra features. Reject additions such as multiple playlists, persistence, users, album search, drag-and-drop, or recommendation logic.
+Check that the six implementation bullets respect the shared contract. Keep broader ideas in the exploration recap rather than deleting them. Tell the coach where you disagree with its framing and ask it to revise the recap. Name one assumption that would need real research and one next experiment; do not commit invented evidence.
+
+### Step 3: Save and inspect the local coaching notes
+
+After the brainstorming and decision summary, ask DT Coach to persist the outcome before inspecting the folder:
+
+```text
+Save or update the local working notes for this Music Catalog playlist slice under .copilot-tracking/.
+Record my explored problem framing, ideas, concept sketch, assumptions, unresolved questions, and the nine-method coverage recap.
+Keep the six shared implementation decisions separate from the exploration and label them as the workshop handoff.
+Use the existing coaching state and method-note locations if they already exist; do not create a duplicate record.
+Do not modify files outside .copilot-tracking/.
+Tell me the exact files you created or updated so I can inspect them.
+```
+
+Wait for the agent to finish and report the paths. Then expand `.copilot-tracking` in VS Code Explorer and open the reported files. If the folder is hidden by your Explorer settings, use **File > Open File** with the reported path. From a PowerShell terminal at the repository root, you can also list the files:
+
+```powershell
+Get-ChildItem .copilot-tracking -Recurse -File | Select-Object FullName, LastWriteTime
+git status --short
+```
+
+Read the contents, not just the filenames. Check that the notes reflect **your listening-experience exploration**, distinguish the six shared implementation decisions, and separate observations, assumptions, open questions, planned tests, and any peer feedback. Check the nine-method recap is honest about what happened. Use the agent's reported paths to distinguish this session's notes from older tracking files.
+
+Expected result:
+- At least one reported working-state file exists under `.copilot-tracking/` and contains the framing or decisions from the conversation.
+- No application code, tests, or published documentation were changed.
+- `git status --short` does not list the tracking files, because the template ignores the folder.
+
+If the agent reports no saved files or the files do not exist, ask it to complete the save and confirm the paths before proceeding. Do not treat an empty folder or a chat-only answer as persisted state. If tracking files appear in Git status, resolve the ignore rule in [Curate what you commit](#curate-what-you-commit) before staging anything.
+
+These are **local working notes**, not the deliverable. Later in this level, you will curate a short, reviewed decision record for the repository instead of committing the tracking folder.
 
 ![DT decisions summary](assets/l2-dt-decisions.png)
 
@@ -1262,7 +1362,7 @@ A sample ADR is in `solutions\afternoon-2\docs\planning\adrs\0001-in-memory-play
 Select **Code Review**. Copy paste the following prompt:
 
 ```text
-Review the local commits for the playlist slice since the commit "Baseline Afternoon 2 starter".
+Review the local commits for the playlist slice since the initial commit of this workshop repository (the template copy or "Workshop starter" commit).
 
 Use the standard profile with the functional, standards, accessibility, and security perspectives at basic depth.
 Report findings only. Do not edit files.

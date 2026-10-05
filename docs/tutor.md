@@ -54,9 +54,9 @@ In the recap, walk the autonomy ladder explicitly and point out that the upstrea
 
 | Start | Block | Minutes | Checkpoint | If late |
 | --- | --- | --- | --- | --- |
-| 0:00 | Level 0 Setup | 10 | Starter green | Skip the tour |
+| 0:00 | Introduction and prerequisite readiness | 10 | Prerequisites already complete; unblock attendees if needed | Skip checks already completed before the workshop |
 | 0:10 | Level 1 HVE-Core plugin | 10 | `copilot plugin list` shows hve-core | Use the VS Code extension |
-| 0:20 | Level 2 Design Thinking | 20 | DT decisions captured | Hand out the decision summary |
+| 0:20 | Level 2 Design Thinking | 20 | Learner-led sampler, honest nine-method recap, shared implementation handoff | Preview remaining methods without claiming completion; hand out only the implementation contract |
 | 0:40 | Level 2 Curate what you commit | 10 | Design record committed, `.copilot-tracking` ignored | Show `git check-ignore` and commit the provided record |
 | 0:50 | Level 3 RPI, with context engineering and the duplicate-add decision | 65 | Playlist feature merged, tests green, decision debriefed | Share your finished branch; keep the 5-minute decision debrief |
 | 1:55 | Break | 10 | Implementation committed, tests pass | |
@@ -68,6 +68,8 @@ In the recap, walk the autonomy ladder explicitly and point out that the upstrea
 
 Level 3 and the break together form a 75-minute block. In Level 3, stop the room at the plan gate for the duplicate-add decision (option A or B), and run a 5-minute debrief after the review: ask one attendee per option to explain the trade-off. In Level 5, make sure every attendee assigns the issue to Copilot cloud agent as soon as the ruleset step is done: the agent works for 10 to 20 minutes while attendees run the accessibility workflow, and the pull request is ready for Level 6. The Extra Credits page is optional: use it only for early finishers or as a facilitator-led discussion.
 
+For Level 2, allocate 10–15 minutes to the learner-led nine-method sampler and the remaining time to the debrief, shared implementation handoff, and saved-note inspection. Encourage different listening contexts and concepts; do not distribute the six playlist decisions as the brainstorming answer. Use short turns, prioritize learner contributions in Methods 1–6, and preview Methods 7–9 as prototype/test/iteration plans if time runs short. Tell attendees when the timebox ends; model latency makes this a pacing target, not a guaranteed duration. Never mark simulated research or planned testing as completed evidence. The separate 10-minute curation block remains unchanged.
+
 ### Extended tracks (outside the 240 minutes)
 
 The core agenda above does not include the role-based extended tracks. Choose how to use them before the day:
@@ -78,7 +80,7 @@ The core agenda above does not include the role-based extended tracks. Choose ho
 | Tech Lead: ADR Creator, Code Review agent, `/git-commit` | End of Level 3 | 10 to 15 | Tech Lead, Engineer | Early finishers |
 | Security Architect: report-only security review delegated to Copilot cloud agent | End of Level 5 | about 20, plus agent run time | Security Architect | Facilitator demo, or hands-on for a security-focused room |
 
-To keep the afternoon at 240 minutes when you run a track hands-on, take the time from elsewhere: shorten the DT Coach prompts in Level 2 (keep the 10-minute curation block), demo Level 4 from recordings, or move Level 5 accessibility and Extra Credits to a demo. For a PM-only audience, run Levels 0 to 2 with the Product Manager track, then Level 5, and demo the rest.
+To keep the afternoon at 240 minutes when you run a track hands-on, take the time from elsewhere: shorten the DT Coach prompts in Level 2 (keep the 10-minute curation block), demo Level 4 from recordings, or move Level 5 accessibility and Extra Credits to a demo. For a PM-only audience, start with the introduction and Levels 1 to 2 with the Product Manager track, then Level 5, and demo the rest.
 
 Rules for the tracks:
 - Meeting Analyst needs a Microsoft 365 Copilot licence and WorkIQ, and cannot read local transcripts. Always demo it yourself, or skip it.
@@ -90,7 +92,7 @@ Rules for the tracks:
 ## Pre-flight (day before)
 
 1. Run the AI SDLC smoke test on a fresh copy of the repository:
-   1. Create the copy (Level 0 Step 1) and run Level 0 end to end.
+   1. Create the copy using the introduction's **Dev Environment Setup** instructions and complete **Starter readiness (prerequisite)**.
    2. Run `copilot plugin marketplace add microsoft/hve-core` and `copilot plugin install hve-core@hve-core`.
    3. Run `apm install` with the pinned `apm.yml`, then `apm policy status --policy-source apm-policy.yml`.
    4. Run `gh aw compile` and `gh aw run daily-backlog`, and confirm the summary issue is created.
@@ -108,7 +110,7 @@ Rules for the tracks:
 | Risk | Signal | Fallback |
 | --- | --- | --- |
 | RPI runs longer than planned | Research still running at +25 min | Tell attendees to accept the plan as-is, or continue from the facilitator's finished branch |
-| Model output diverges between attendees | Different file layouts | Prompts are fixed except for the duplicate-add decision; compare against the acceptance criteria (duplicate returns 409, empty state shown, duplicate feedback announced), not against identical code |
+| Model output diverges between attendees | Different file layouts | Level 2 exploration deliberately varies; reconcile only the implementation handoff. Level 3 keeps the shared acceptance criteria and duplicate-add UX choice; compare behaviour (409, empty state, accessible feedback), not identical code |
 | `apm install` takes a long time | Install still running | Start it first, then explain the lockfile and policy while it runs; blocked attendees can use `solutions/afternoon-2/apm.yml` as the reference |
 | `apm audit` slow or stuck | No output after several minutes | Show the recorded output; point out that `--no-drift` exists and costs coverage |
 | APM tag pin fails | Resolution error | Use the commit SHA pin from `solutions/afternoon-2/apm.yml` |

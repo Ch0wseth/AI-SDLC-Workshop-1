@@ -60,10 +60,10 @@ setup() {
   [ "$STEP_CODE" -eq 0 ] || return 1
 
   if [ -n "${SOURCE_REPO-}" ]; then
-    step infra-template preflight "Source repository template flag (Level 0 Step 1 template path)" translated 30 \
+    step infra-template preflight "Source repository template flag (Dev Environment Setup template path)" translated 30 \
       "gh api repos/$SOURCE_REPO --jq .is_template"
     if log_has '^true'; then finish_step; else
-      note "the repository is not a template, so only the Level 0 Step 1 copy fallback works for participants; the tester mirrors that fallback with a snapshot"
+      note "the repository is not a template, so only the Dev Environment Setup copy fallback works for participants; the tester mirrors that fallback with a snapshot"
       record "$STEP_ID" "$STEP_LEVEL" "$STEP_TITLE" "$STEP_MODE" "$STEP_CMD" "$STEP_CODE" "$STEP_DUR" warn
     fi
   fi
@@ -90,7 +90,7 @@ setup() {
   finish_step
   [ "$STEP_CODE" -eq 0 ] || return 1
 
-  # A snapshot of the tested commit with a single fresh commit, mirroring the Level 0 Step 1 copy fallback.
+  # A snapshot of the tested commit with a single fresh commit, mirroring the Dev Environment Setup copy fallback.
   step infra-sandbox infra "Create the private sandbox repository from a snapshot of the tested commit" translated 600 "
     set -e
     tmp=\$(mktemp -d)

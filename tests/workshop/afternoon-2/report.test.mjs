@@ -48,9 +48,9 @@ const step = (id, level, status, checks = []) => ({
 });
 
 test('reports successful completed runs including documented skips', () => {
-  const report = render({ lab: [step('l0-test', 'Level 0', 'pass'), step('ui', 'Level 1', 'skip')] });
+  const report = render({ lab: [step('pre-dotnet-test', 'preflight', 'pass'), step('ui', 'Level 1', 'skip')] });
   assert.match(report, /\*\*Passed\*\* — 3 recorded steps: 2 passed, 0 failed, 0 warned, 1 skipped/);
-  assert.match(report, /\| Level 0 \| 1 \| 1 \| 0 \| 0 \| 0 \|/);
+  assert.match(report, /\| preflight \| 1 \| 1 \| 0 \| 0 \| 0 \|/);
   assert.match(report, /\[Run and downloadable results\]/);
 });
 
@@ -76,7 +76,7 @@ test('keeps valid partial results but calls out malformed rows', () => {
 });
 
 test('does not pass a run with an empty infrastructure record', () => {
-  const report = render({ infra: [], lab: [step('l0-test', 'Level 0', 'pass')] });
+  const report = render({ infra: [], lab: [step('pre-dotnet-test', 'preflight', 'pass')] });
   assert.match(report, /\*\*Incomplete\*\*/);
   assert.match(report, /No infrastructure steps were collected/);
 });
@@ -84,14 +84,14 @@ test('does not pass a run with an empty infrastructure record', () => {
 test('marks syntactically valid but truncated results incomplete', () => {
   const report = render({
     infra: [step('infra-ready', 'infra', 'pass'), step('preflight', 'preflight', 'pass')],
-    lab: [step('l0-test', 'Level 0', 'pass')], summarySteps: 2,
+    lab: [step('pre-dotnet-test', 'preflight', 'pass')], summarySteps: 2,
   });
   assert.match(report, /\*\*Incomplete\*\*/);
   assert.match(report, /expects 2 steps, but 1 were collected/);
 });
 
 test('rejects an invalid expected step count', () => {
-  const report = render({ lab: [step('l0-test', 'Level 0', 'pass')], summarySteps: 'unknown' });
+  const report = render({ lab: [step('pre-dotnet-test', 'preflight', 'pass')], summarySteps: 'unknown' });
   assert.match(report, /\*\*Incomplete\*\*/);
   assert.match(report, /invalid expected step count/);
 });

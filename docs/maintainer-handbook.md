@@ -37,7 +37,7 @@ These decisions shape the content. Changing one usually affects several modules,
 | D8 | One feature: browse tracks and add a track to a playlist | Small enough for one RPI loop, rich enough for review findings. |
 | D9 | Exactly one in-memory playlist: no persistence, no users, no playlist creation or reordering | Avoids databases and authentication, which add setup without teaching the method. |
 | D10 | One decision stays truly open: the duplicate-add experience (option A, keep Add enabled and announce the 409; option B, disable Add with a label and a message). The API contract (409) and the empty-state text are fixed | Attendees choose at the plan gate and debrief their choices after the review. Fixing the rest keeps the workshop tester and the debriefs comparable. |
-| D11 | Every Design Thinking and RPI step has a fixed copy-paste prompt | Keeps the room in step and makes debriefs comparable. The workshop tester extracts these prompts. |
+| D11 | Level 2 uses a learner-led nine-method DT sampler, then an explicit shared implementation handoff; RPI keeps fixed copy-paste prompts | Allows real exploration without widening the implementation slice. The tester extracts prompts but skips the interactive sampler; it replays only the shared handoff and local-note persistence. |
 | D12 | Design Thinking plus RPI takes under 2 hours, including the context engineering segment and the decision debrief | Leaves time for APM, workflows, delegation and the architect capstone. |
 | D13 | HVE-Core is installed through APM inside the application repository | Copilot cloud agent and agentic workflows only see what is in the repository, so a local plugin is not enough. |
 | D14–D15 | Agentic workflows: daily backlog management, accessibility review, and security-review delegation | Shows recurring automation that feeds issues back to people and agents. |
@@ -92,6 +92,27 @@ When a fact cannot be confirmed in official documentation, label it as preview, 
 | The sample plugin marketplace installs from this repository | Not tested live | Medium |
 
 ## Current status
+
+### Pedagogy review after the tester
+
+The repository custom agent [Workshop Pedagogy Reviewer](../.github/agents/workshop-pedagogy-reviewer.agent.md) critiques content, narrative flow, presentation, and the short concept primer at the beginning of each level. It does not execute the lab or change files. Its detailed report includes level-by-level coverage, evidence-backed findings, and a prioritized improvement conclusion. It complements the execution tester; neither a green test run nor an editorial assessment proves learner comprehension.
+
+The [pedagogy review workflow](../.github/workflows/workshop-pedagogy-review.yml) runs after **Workshop tester: Afternoon 2 validation report** completes on `main`, including successful runs that create no failure issue. It uses the tester's exact commit and reports the tester conclusion as context. Failed or cancelled tester runs do not prevent a content review, but they do not establish successful execution. Same-repository and tester-path checks exclude fork and unrelated workflow runs.
+
+Setup:
+
+1. Keep the existing `WORKSHOP_TESTER_ENABLED=true` opt-in; attendee copies remain inactive.
+2. Create the repository label **`pedagogy-review`** in GitHub's Issues > Labels before the first run. The publisher does not create or edit labels.
+3. Use the existing `WORKSHOP_TESTER_COPILOT_TOKEN` inference-only secret, or allow `GITHUB_TOKEN` Copilot requests through the organization's policy. The reviewer receives no infrastructure or issue-write token.
+4. Ensure Copilot CLI Auto routing is allowed. The workflow pins CLI `1.0.90-3` and explicitly requests `--model auto --auto-tier intelligence`; a fixed model is not substituted if this fails. Review the pin periodically.
+
+The workflow copies Markdown documents into an isolated review workspace and records local image existence without giving the model image pixels. It loads the custom agent from the trusted automation checkout and treats the reviewed revision as data: it never executes that revision's scripts or lab commands. Tool availability is restricted to file reading and searching, with shell and file writes denied; built-in MCP servers and project instructions are disabled for this run. The CLI's stdout is validated for report sections and coverage rows. A separate publisher job creates one `pedagogy-review` issue and writes the Actions summary; it does not assign, update, or close issues. Re-running the same tester run attempt reuses its existing report issue instead of creating another.
+
+If inference or report validation fails, the run is marked failed and the summary states that the review is incomplete; no report issue is created. If publishing fails, the validated report remains in the summary and the `workshop-pedagogy-report` artifact. Fix the missing label or permission and rerun the failed job.
+
+To review manually, run `gh workflow run workshop-pedagogy-review.yml --ref main`. To invoke the same read-only agent locally, run `copilot --agent workshop-pedagogy-reviewer --model auto --auto-tier intelligence` and request a review of both local guides. Local use returns a report in the conversation; only the Actions workflow publishes an issue.
+
+Run the local regression checks with `node --test tests/workshop/pedagogy/review.test.mjs`. Live inference, publication permissions, and learner comprehension still need a maintainer dry run after these files reach `main`.
 
 - **Guides.** Both guides keep `published: false` until a dry run is complete.
 - **Kick-off deck.** `docs/kick-off.pptx` is current on `main`.
@@ -148,4 +169,4 @@ The change is on `main`, the attendee guides stay free of maintainer-only conten
 | `gh aw compile` hangs | Add `--no-check-update` |
 | `apm install` fails with "No harness detected" | Pass `--target copilot` |
 | APM rejects the HVE-Core pin | Pin a commit SHA, not a release tag |
-| The workshop tester cannot find the baseline | Keep the `Baseline Afternoon 2 starter` commit message unchanged |
+| Starter readiness reports a dirty working tree | Use a fresh template copy or the documented copy fallback; prerequisite checks do not create an extra baseline commit |

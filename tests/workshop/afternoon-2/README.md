@@ -8,7 +8,7 @@ An agentic workflow that replays the full AI SDLC with GitHub and GitHub Copilot
 flowchart LR
   A[push to main] --> B[lab_run job<br/>deterministic, has secrets]
   B -->|setup| C[sandbox repo + Codespace]
-  C -->|run-lab.sh L0..L6| C
+  C -->|run-lab.sh prerequisites + L1..L6| C
   B -->|collect, cleanup| D[(artifact<br/>workshop-tester-results)]
   D --> E[agent job<br/>read-only validator]
   E --> F[safe-outputs:<br/>create-issue or noop]
@@ -20,7 +20,7 @@ flowchart LR
 | --- | --- | --- |
 | [`.github/workflows/workshop-tester.md`](../../../.github/workflows/workshop-tester.md) | gh-aw source | Trigger, `lab_run` custom job, validator prompt, safe outputs. Compile with `gh aw compile workshop-tester`. |
 | [`orchestrate.sh`](orchestrate.sh) | Actions runner | `setup` (snapshot of the tested commit into a private sandbox repo, Codespace creation), `run` (starts the lab and polls), `collect`, `cleanup` (always deletes the Codespace and sandbox and sweeps orphans). |
-| [`run-lab.sh`](run-lab.sh) | Codespace | Executes every lab step from Level 0 to Level 6 and records one JSON line per step in `results.jsonl`. |
+| [`run-lab.sh`](run-lab.sh) | Codespace | Checks introductory starter prerequisites, then executes Levels 1 to 6 and records one JSON line per check or step in `results.jsonl`. |
 | [`extract-prompts.mjs`](extract-prompts.mjs) | Codespace | Reads the copy-paste prompts and L6 form values directly from `workshop.md`, so the tester uses the published text. |
 | [`lib.sh`](lib.sh) | Codespace | Step and check recording, token redaction, Copilot CLI prompt replay. |
 
@@ -35,6 +35,10 @@ The validator agent compares the lab's steps against the result ids to detect co
 It must use only the lab's guided steps, supplied links, and captured results. It does not browse for alternate instructions or infer undocumented procedures. The `report` job writes an Actions run summary with job status, per-level counts, and failed or warned steps, even when the validator cannot finish. Missing results or interrupted jobs are marked **Incomplete**, not passed; the downloadable artifact retains detailed logs.
 
 Level 3 captures `HEAD` before implementation and compares the approved source/test paths afterward, including untracked files. Implementation commits count as edits even when the working tree is clean. The checkpoint commits only a nonempty index; staging or commit errors still fail the step. Run the local regression fixtures with `bash tests/workshop/afternoon-2/git-checkpoint.test.sh`.
+
+Run the starter-prerequisite structure and report regression checks with `node --test tests/workshop/afternoon-2/prerequisites.test.mjs tests/workshop/afternoon-2/report.test.mjs`.
+
+After this Actions workflow completes on `main`, the separate [Workshop Pedagogy Reviewer](../../../.github/agents/workshop-pedagogy-reviewer.agent.md) reviews the tested revision's teaching content with Auto intelligence routing. It publishes an Actions summary and one `pedagogy-review` issue even for a clean tester run. It does not replay commands or change workshop files. See the [maintainer setup and boundaries](../../../docs/maintainer-handbook.md#pedagogy-review-after-the-tester) and run its local checks with `node --test tests/workshop/pedagogy/review.test.mjs`.
 
 ## Setup
 
@@ -113,9 +117,10 @@ See the official GitHub billing documentation for current rates; this repository
 
 ## Known limitations
 
+- Level 2's learner-led nine-method sampler is skipped, not simulated as successful coaching. The tester replays the separate implementation handoff and note-save prompt; it checks nonempty local files but cannot verify learner contributions, a 10–15 minute interaction, peer feedback, or personal inspection. A missing exploration recap is an evidence gap, not permission to invent learner decisions.
 - Copilot CLI prompts are model output. The checks verify the lab's acceptance criteria (endpoints, status codes, tests, files), not identical code.
 - Whether `copilot -p` expands plugin prompts such as `/rpi-research`, and how `--continue` behaves with `-p`, depend on the Copilot CLI version. A failure there is reported as a tester limitation, not a lab defect.
-- Level 0 Step 1 offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
+- The introduction's **Dev Environment Setup** offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
 - Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Copilot cloud agent PR JSON, the Copilot code review JSON).
 - Level 5 delegation differs from the attendee path in three places:
   - The feature request is created with `gh issue create` and the lab's field labels, and the deferred review finding is replaced by two synthetic review-finding issues.

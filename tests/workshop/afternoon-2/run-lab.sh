@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Replays the entire AI SDLC with GitHub and GitHub Copilot lab (docs/afternoon-2/workshop.md, Levels 0-6) inside a Codespace
+# Replays the AI SDLC with GitHub and GitHub Copilot prerequisites and Levels 1-6 (docs/afternoon-2/workshop.md) inside a Codespace
 # opened on a throwaway sandbox repository. Every step is recorded in $RESULTS_DIR/results.jsonl.
 #
 # Required environment:
@@ -47,8 +47,8 @@ step pre-prompts preflight "Extract copy-paste prompts from workshop.md" transla
   "node '$SCRIPT_DIR/extract-prompts.mjs' docs/afternoon-2/workshop.md '$RESULTS_DIR/prompts'"
 finish_step
 
-# ---------------------------------------------------------------- Level 0
-step l0-layout "Level 0" "Open the repository root and check the starter layout" translated 30 \
+# ---------------------------------------------------------------- Starter readiness (prerequisite)
+step pre-starter-layout preflight "Starter readiness: hello-only app and synthetic tracks" translated 30 \
   'for p in src/front src/api tests/api MusicCatalog.slnx .github/copilot-instructions.md .github/workflows/copilot-setup-steps.yml .github/ISSUE_TEMPLATE/feature.yml solutions/afternoon-2; do [ -e "$p" ] && echo "ok $p" || { echo "missing $p"; exit 1; }; done'
 grep -q '/api/hello' src/api/Program.cs && ! grep -q '/api/tracks' src/api/Program.cs \
   && check "Program.cs exposes GET /api/hello only" true || check "Program.cs exposes GET /api/hello only" false "$(grep -n 'Map' src/api/Program.cs)"
@@ -58,14 +58,13 @@ n=$(node -e 'console.log(JSON.parse(require("fs").readFileSync("src/api/Data/tra
 [ "$n" = 12 ] && check "tracks.json contains 12 tracks" true || check "tracks.json contains 12 tracks" false "count=$n"
 finish_step
 
-step l0-dotnet-test "Level 0" "Run API tests" literal 900 'dotnet test'
+step pre-dotnet-test preflight "Starter readiness: xUnit passes" literal 900 'dotnet test'
 finish_step
 
-step l0-npm-test "Level 0" "Run front-end tests" translated 600 'cd src/front && npm test'
+step pre-npm-test preflight "Starter readiness: Vitest passes" literal 600 'npm --prefix src/front test'
 finish_step
 
-step l0-baseline "Level 0" "Create a baseline checkpoint" translated 60 \
-  'git status; git add -A; git commit -m "Baseline Afternoon 2 starter" || echo "nothing to commit (allowed by the lab)"'
+step pre-clean-tree preflight "Starter readiness: clean working tree" literal 60 'git status'
 tree_clean_check
 finish_step
 
@@ -91,14 +90,21 @@ tree_clean_check
 finish_step
 
 # ---------------------------------------------------------------- Level 2
-copilot_prompt l2-dt-start "Level 2" "Start the DT project (/dt-start-project)" dt-start 1200
-tree_clean_check
-finish_step
+skip_step l2-dt-start "Level 2" "Start the learner-led nine-method sampler (/dt-start-project)" \
+  "interactive 10–15 minute learner-led exploration; non-interactive replay cannot supply authentic choices, peer feedback, or method completion"
 
-copilot_prompt l2-dt-summary "Level 2" "Ask for the six-bullet decision summary" dt-summary 900 --continue
+copilot_prompt l2-dt-summary "Level 2" "Separate exploration from the six-bullet implementation handoff" dt-summary 900
+note "shared contract replay only; no learner exploration occurred, so its recap must report missing session history"
 log_has 'playlist' && check "summary mentions the playlist capability" true || check "summary mentions the playlist capability" false
 log_has '409|conflict|reject|duplicate' && check "summary states duplicate add is rejected" true || check "summary states duplicate add is rejected" false
 log_has 'empty' && check "summary mentions the empty state" true || check "summary mentions the empty state" false
+finish_step
+
+copilot_prompt l2-dt-notes "Level 2" "Save and inspect the local coaching notes" dt-notes 900 --continue
+tracking_files=$(find .copilot-tracking -type f -size +0c 2>/dev/null | head -n 20)
+[ -n "$tracking_files" ] && check "nonempty local working-state files exist" true "$tracking_files" || check "nonempty local working-state files exist" false
+tree_clean_check
+note "file existence checked; learner inspection of method coverage and personal insights is not replayed"
 finish_step
 
 skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Functional Planner, Backlog Manager)" \

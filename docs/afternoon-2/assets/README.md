@@ -4,11 +4,11 @@ This folder intentionally contains placeholders referenced by `docs\afternoon-2\
 
 - `banner.png` — MOAW banner image for the AI SDLC with GitHub and GitHub Copilot workshop page.
 - `a2-route-map.png` — Visual route map in three acts: build the feature (HVE, Design Thinking, RPI), scale the method (APM, policy, marketplace, gh-aw), close the loop (Copilot cloud agent delegation and review), then the architect capstone.
-- `l0-starting-repository.png` — VS Code view of the clean starter repository layout before Level 0 validation.
+- `starter-repository.png` — VS Code view of the clean starter repository layout during introductory prerequisite checks.
 - `l1-hve-plugin-installed.png` — Copilot CLI showing HVE-Core plugin installed or listed.
-- `l1-vscode-extension.png` — VS Code Marketplace page for the `ise-hve-essentials.hve-core` extension alternative.
-- `l2-dt-coach-framing.png` — DT Coach responding to the fixed playlist capability prompt.
-- `l2-dt-decisions.png` — Concise DT decision summary with duplicate rejection and empty-state decisions.
+- Level 1 Step 4 uses the supplied `docs\assets\vscode-hve-core.png` — VS Code Marketplace page for the `ise-hve-essentials.hve-core` extension alternative; no separate placeholder remains.
+- `l2-dt-coach-framing.png` — DT Coach asking a focused question during the learner-led nine-method listening-experience sampler, with an actual learner contribution visible.
+- `l2-dt-decisions.png` — Exploration recap and clearly separated shared playlist implementation handoff, including duplicate rejection and empty-state decisions.
 - `l3-rpi-agent-walkthrough.png` — RPI Agent output showing Research, Plan, Implement, and Review phases.
 - `l3-playlist-implemented.png` — Browser view of the implemented track list and playlist panel.
 - `l4-apm-marketplace.png` — Terminal output for APM install or audit plus repository marketplace files.
