@@ -8,10 +8,69 @@ import assert from 'node:assert/strict';
 
 const workshop = readFileSync(new URL('../../../docs/afternoon-2/workshop.md', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 const runner = readFileSync(new URL('./run-lab.sh', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-const level3 = workshop.slice(workshop.indexOf('# Level 3:'), workshop.indexOf('# Break'));
-const phasePrompt = (phase) => level3.match(new RegExp(
-  '```text\\n/' + phase + '\\n```[\\s\\S]*?```text\\n([\\s\\S]*?)\\n```',
+const level3 = workshop.slice(workshop.indexOf('# Level 3:'), workshop.indexOf('# Level 4:'));
+const phaseInvocation = (phase) => level3.match(new RegExp(
+  '```text\\n(/hve-core:' + phase + '\\n[\\s\\S]*?)\\n```',
 ))?.[1];
+const phasePrompt = (phase) => phaseInvocation(phase)?.split('\n').slice(1).join('\n').trim();
+
+test('Level 3 proceeds directly to Level 4 without a break page or checkpoint', () => {
+  assert.doesNotMatch(workshop, /^# Break$|^  - 'Break'$|Before leaving your machine|data-title="After the break"/m);
+  const pages = workshop.replace(/^---\n[\s\S]*?\n---\n/, '').split(/\n\n---\n\n/);
+  const level3Index = pages.findIndex((page) => /^# Level 3:/m.test(page));
+  assert.ok(level3Index >= 0);
+  assert.match(pages[level3Index + 1], /^# Level 4:/m);
+  assert.doesNotMatch(level3, /^# Level 4:/m);
+  assert.doesNotMatch(runner, /break-status|Working tree clean before the break/);
+});
+
+test('Level 4 preserves the pinned installation without maintainer verification notes', () => {
+  const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
+  assert.doesNotMatch(level4, /Documented capability plus live verification|Live verification for this workshop|release-tag pins failed/);
+  assert.match(level4, /```bash\ncp solutions\/afternoon-2\/apm\.yml \.\/apm\.yml\n```/);
+  assert.match(level4, /microsoft\/hve-core#1dbd6a7ea90b74accaf8c809262e38952bd4c359/);
+  assert.match(level4, /apm install --target copilot/);
+});
+
+test('Level 4 copies the policy with Linux syntax and restores success by changing deny to allow', () => {
+  const policy = workshop.slice(workshop.indexOf('## Apply repository policy'),
+    workshop.indexOf('### Step 5: Add the PR audit workflow'));
+  assert.match(policy, /```bash\ncp solutions\/afternoon-2\/apm-policy\.yml \.\/apm-policy\.yml\n```/);
+  const demonstration = policy.slice(policy.indexOf('### Step 4:'));
+  assert.match(demonstration, /change `deny:` back to `allow:`/);
+  assert.match(demonstration, /```bash\napm audit --ci --policy apm-policy\.yml\n```/);
+  assert.doesNotMatch(demonstration, /cp solutions\/|Restore the solution policy/);
+  assert.match(runner, /sed -i '.*deny:.*allow:.*' apm-policy\.yml && apm audit --ci --policy apm-policy\.yml/);
+  assert.doesNotMatch(policy, /Copy-Item/);
+  assert.match(policy, /no `apm experimental enable` command is needed/);
+  assert.doesNotMatch(policy, /validated command used the experimental policy path/);
+});
+
+test('Level 4 marketplace copying and inspection use Linux paths without nesting plugins on rerun', () => {
+  const marketplace = workshop.slice(workshop.indexOf('## Add a team plugin marketplace'),
+    workshop.indexOf('### Step 4: VS Code Agent Plugins view'));
+  assert.match(marketplace, /```bash\nmkdir -p \.github\/plugin \.github\/copilot plugins/);
+  assert.match(marketplace, /cp -R solutions\/afternoon-2\/plugins\/\. \.\/plugins\//);
+  assert.match(marketplace, /plugins\/music-catalog-conventions\/agents\/music-catalog-test-writer\.agent\.md/);
+  assert.match(marketplace, /plugins\/music-catalog-conventions\/skills\/add-api-endpoint\/SKILL\.md/);
+  assert.doesNotMatch(marketplace, /New-Item|Copy-Item|\\/);
+  assert.match(runner, /cp -R solutions\/afternoon-2\/plugins\/\. \.\/plugins\//);
+});
+
+test('Level 4 explains duplicate agent entries and shows the supplied screenshot after APM installation', () => {
+  const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
+  const install = level4.slice(level4.indexOf('### Step 2: Install the APM dependency'),
+    level4.indexOf('### Step 3: Inspect the lockfile'));
+  assert.match(install, /class="warning" data-title="Duplicate agent entries are expected"/);
+  assert.match(install, /\*\*Copilot CLI\*\*.*\*\*VS Code Copilot Chat\*\*/);
+  assert.match(install, /plugin installed in Level 1.*custom agents now living in your repository/);
+  assert.match(install, /Duplicate entries do not mean the installation failed/);
+  assert.match(install, /!\[VS Code Copilot Chat agent picker showing duplicate HVE-Core agent entries\]\(assets\/l4-duplicate-agent-entries\.png\)/);
+  const image = readFileSync(new URL('../../../docs/afternoon-2/assets/l4-duplicate-agent-entries.png', import.meta.url));
+  assert.deepEqual([...image.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+  const inventory = readFileSync(new URL('../../../docs/afternoon-2/assets/README.md', import.meta.url), 'utf8');
+  assert.match(inventory, /`l4-duplicate-agent-entries\.png`/);
+});
 
 test('starter readiness belongs to the introduction, not a separate level', () => {
   const introduction = workshop.indexOf('# AI SDLC with GitHub and GitHub Copilot');
@@ -35,13 +94,16 @@ test('lab runner checks prerequisite readiness without creating a baseline commi
 });
 
 test('DT prompts allow local tracking notes but preserve the implementation boundary', () => {
-  const start = workshop.slice(workshop.indexOf('/dt-start-project\n'),
+  const start = workshop.slice(workshop.indexOf('/hve-core:dt-start-project.prompt\n'),
     workshop.indexOf('## Extended track: Product Manager'));
   assert.match(start, /sample all nine HVE Design Thinking methods within a 10–15 minute/);
   assert.match(start, /Now follow the chat for the next 10 minutes/);
   assert.match(start, /the conversation is the exercise/);
   assert.match(start, /Keep working notes under \.copilot-tracking\/ only/);
   assert.match(start, /application code, tests, and published documentation stay unchanged/);
+  assert.match(start, /Auto intelligence selects the model; it does not grant write permissions/);
+  assert.match(start, /Keep normal approval prompts/);
+  assert.doesNotMatch(start, /--assisted-approval|AI-assisted permissions|\/settings experimental/);
   assert.doesNotMatch(start, /Do not edit files\./);
   assert.match(start, /Out of scope:\*\* users, authentication, persistence, reorder, remove, search, and playlist creation/);
 });
@@ -54,7 +116,7 @@ test('DT sampler permits exploration and keeps its shortcuts distinct from imple
   ]) assert.ok(dt.includes(method), method);
   assert.match(dt, /Start with a user problem, not a prescribed feature/);
   assert.match(dt, /These shortcuts do not satisfy the full methods' evidence gates/);
-  assert.match(dt, /not the conclusion of your user research/);
+  assert.match(dt, /not a result that your DT session must produce or validate/);
   assert.match(dt, /HTTP 409/);
   assert.match(dt, /leave the duplicate-feedback UX choice open/i);
   assert.match(dt, /Do not claim that sampling validated the concept or completed a method/);
@@ -64,17 +126,20 @@ test('DT sampler permits exploration and keeps its shortcuts distinct from imple
 
 test('Level 2 names native DT handoffs without treating the sampler as completed evidence', () => {
   const handoff = workshop.slice(workshop.indexOf('## Debrief and hand off to the shared implementation slice'),
-    workshop.indexOf('### Step 2: Review the mapping, not the creativity'));
+    workshop.indexOf('### Step 2: Review the recap and coding scope'));
   for (const prompt of [
     'dt-handoff-problem-space.prompt', 'dt-handoff-solution-space.prompt',
     'dt-handoff-implementation-space.prompt', 'dt-canonical-deck.prompt', 'dt-figma-export.prompt',
   ]) assert.ok(handoff.includes(prompt), prompt);
-  assert.match(handoff, /```text\r?\n\/hve-core:dt-handoff-implementation-space\.prompt\r?\n```/);
+  assert.match(handoff, /```text\n\/hve-core:dt-handoff-implementation-space\.prompt\n\nUse project slug/);
   assert.match(handoff, /Use project slug music-catalog-listening-experience/);
   assert.match(handoff, /if no Implementation Space method is complete/);
   assert.match(handoff, /workshop-only recap/);
   assert.match(handoff, /it does not start implementation/);
   assert.match(handoff, /Figma MCP server and permission/);
+  assert.match(handoff, /feature is chosen for the workshop, not a result that your DT session must produce or validate/);
+  assert.match(handoff, /requirements are supplied by the facilitator/);
+  assert.match(handoff, /A formal DT handoff is not needed for this workshop recap/);
   for (const label of [
     'User-visible capability', 'API endpoints', 'Front-end states',
     'Duplicate handling', 'Accessibility', 'Out of scope',
@@ -86,13 +151,14 @@ test('Level 2 inspects coach-generated notes without prescribing a save prompt',
     workshop.indexOf('## Extended track: Product Manager'));
   assert.match(checkpoint, /you do not need to send a separate save prompt/);
   assert.match(checkpoint, /Once it has finished writing/);
-  assert.match(checkpoint, /Read the contents, not just the filenames/);
-  assert.match(checkpoint, /At least one coach-generated working-state file exists/);
-  assert.match(checkpoint, /no manual save step is required/);
-  assert.match(checkpoint, /Do not create placeholder notes yourself/);
-  assert.match(checkpoint, /Do not treat an empty folder or a chat-only answer as persisted state/);
+  assert.match(checkpoint, /Open a coach-created note in Explorer/);
+  assert.match(checkpoint, /local, ignored working notes/);
+  assert.match(checkpoint, /Source Control view to review the staged diff/);
   assert.match(checkpoint, /dt-coach-tracking-folder\.png/);
-  assert.doesNotMatch(checkpoint, /Save or update the local working notes/);
+  assert.doesNotMatch(checkpoint, /Save or update the local working notes|Get-ChildItem|git status/);
+  const curator = workshop.slice(workshop.indexOf('## Curate what you commit'), workshop.indexOf('# Level 3:'));
+  assert.match(curator, /Open each staged file to review the diff that will be committed/);
+  assert.doesNotMatch(curator, /git status/);
 });
 
 test('tester extracts the exploration and implementation handoff separately', () => {
@@ -105,23 +171,27 @@ test('tester extracts the exploration and implementation handoff separately', ()
     ], { encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr);
     const start = readFileSync(join(output, 'dt-start.txt'), 'utf8');
-    const brief = readFileSync(join(output, 'dt-brief.txt'), 'utf8');
+    const brief = start.split('\n').slice(1).join('\n').trim();
     const summary = readFileSync(join(output, 'dt-summary.txt'), 'utf8');
-    assert.equal(start.trim(), '/dt-start-project');
-    assert.equal(readFileSync(join(output, 'dt-method-next-command.txt'), 'utf8').trim(), '/hve-core:dt-method-next.prompt');
+    assert.match(start, /^\/hve-core:dt-start-project\.prompt\n\nProject name:/);
+    assert.match(readFileSync(join(output, 'dt-method-next.txt'), 'utf8'), /^\/hve-core:dt-method-next\.prompt\n\nAssess project/);
     for (const phase of ['research', 'plan', 'implement', 'review']) {
-      assert.equal(readFileSync(join(output, `rpi-${phase}-command.txt`), 'utf8').trim(), `/rpi-${phase}`);
       const prompt = readFileSync(join(output, `rpi-${phase}.txt`), 'utf8').trim();
-      assert.equal(prompt, phasePrompt(`rpi-${phase}`));
-      assert.doesNotMatch(prompt, /^\//);
-      assert.match(runner, new RegExp(`rpi-${phase}-command 900`));
+      assert.equal(prompt, phaseInvocation(`rpi-${phase}`));
+      assert.match(prompt, new RegExp(`^/hve-core:rpi-${phase}\\n\\n\\S`));
+      assert.match(runner, new RegExp(`copilot_prompt l3-${phase} `));
     }
+    assert.doesNotMatch(runner, /copilot_prompt l3-(research|plan|implement|review)-command|l2-dt-brief/);
     assert.equal(brief.trim().split('\n').length, 3);
     assert.match(brief, /10–15 minute learning exercise/);
     assert.doesNotMatch(start, /POST \/api\/playlist\/tracks/);
     assert.match(summary, /shared playlist delivery contract in docs\/afternoon-2\/workshop\.md/);
     assert.doesNotMatch(summary, /exactly six bullets|POST \/api\/playlist/);
     assert.match(readFileSync(join(output, 'dt-record.txt'), 'utf8'), /Use author mode/);
+    const adr = readFileSync(join(output, 'adr-author.txt'), 'utf8').trim();
+    assert.equal(adr.split('\n').length, 1);
+    assert.match(adr, /^\/hve-core:adr-author Create the Music Catalog playlist storage ADR;/);
+    assert.equal(adr, workshop.match(/```text\n(\/hve-core:adr-author[^\n]+)\n```/)?.[1]);
     const dtExample = readFileSync(join(output, 'dt-example-01.txt'), 'utf8');
     const brdExample = readFileSync(join(output, 'brd-example-06.txt'), 'utf8');
     assert.match(dtExample, /tech-savvy hi-fi enthusiasts/);
@@ -139,7 +209,7 @@ test('HVE capabilities are exposed without supplying the agents document outline
   assert.match(workshop, /Let HVE carry the procedure/);
   assert.match(workshop, /Do not supply a document outline, grading rubric, or coding recipe/);
   const dt = workshop.slice(workshop.indexOf('# Level 2:'), workshop.indexOf('## Extended track: Product Manager'));
-  assert.match(dt, /```text\n\/hve-core:dt-method-next\.prompt\n```/);
+  assert.match(dt, /```text\n\/hve-core:dt-method-next\.prompt\n\nAssess project/);
   assert.match(dt, /missing exit evidence is not permission to mark a method complete/);
   assert.match(dt, /Let DT Coach choose its questions and activities/);
   assert.match(workshop, /Let BRD Builder guide its own Discover, Define, and Govern process/);
@@ -147,6 +217,9 @@ test('HVE capabilities are exposed without supplying the agents document outline
 });
 
 test('the reviewed delivery brief is curated before the builders consume it', () => {
+  const curationLinks = [...workshop.matchAll(/\[Curate what you commit\]\(([^)]+)\)/g)];
+  assert.equal(curationLinks.length, 2);
+  for (const [, target] of curationLinks) assert.equal(target, '?step=2#curate-what-you-commit');
   const record = workshop.indexOf('Write a curated Design Thinking decision record');
   const brd = workshop.indexOf('### Step 3: Write the BRD');
   const prd = workshop.indexOf('### Step 4: Turn the BRD into a PRD');
@@ -158,6 +231,20 @@ test('the reviewed delivery brief is curated before the builders consume it', ()
   assert.match(runner, /skip_step l2-method-next/);
   const curator = workshop.slice(workshop.indexOf('## Curate what you commit'), workshop.indexOf('# Level 3:'));
   assert.doesNotMatch(curator, /Write a curated Design Thinking decision record/);
+});
+
+test('developer essentials stay visible while the detailed RPI lecture is collapsed', () => {
+  const developer = level3.slice(level3.indexOf('## Work as a developer'), level3.indexOf('## Research phase'));
+  const detailStart = developer.indexOf('<details>');
+  const essentials = developer.slice(0, detailStart);
+  assert.ok(detailStart > 0);
+  assert.match(essentials, /coordinates four skills: Research, Plan, Implement, and Review/);
+  assert.match(essentials, /Work through each phase with me/);
+  assert.doesNotMatch(essentials, /\| Engineer guide stage|Context engineering:|### One agent runs/);
+  assert.match(developer, /<details>\n<summary>How RPI Agent coordinates developer work<\/summary>/);
+  assert.ok(developer.indexOf('### Context engineering:') > detailStart);
+  assert.ok(developer.indexOf('### One agent runs') > detailStart);
+  assert.ok(developer.trim().endsWith('</details>'));
 });
 
 test('RPI prompts consume the reviewed requirements and preceding artifacts instead of scripting the work', () => {
@@ -185,7 +272,7 @@ test('RPI prompts consume the reviewed requirements and preceding artifacts inst
 
 test('the shared brief specifies the API and empty state before RPI implementation', () => {
   const handoff = workshop.slice(workshop.indexOf('## Debrief and hand off to the shared implementation slice'),
-    workshop.indexOf('### Step 2: Review the mapping, not the creativity'));
+    workshop.indexOf('### Step 2: Review the recap and coding scope'));
   assert.match(handoff, /POST \/api\/playlist\/tracks.*JSON body containing `trackId`/);
   assert.match(handoff, /HTTP 404.*HTTP 409/);
   assert.match(handoff, /Your playlist is empty\. Add a track to get started\./);
@@ -234,14 +321,95 @@ test('the RPI tester uses returned same-task artifacts and keeps Review read-onl
   assert.doesNotMatch(runner, /two synthetic review-finding issues|at least three open issues/);
 });
 
-test('published skill commands are standalone blocks without arguments or task prose', () => {
-  const handbook = readFileSync(new URL('../../../docs/maintainer-handbook.md', import.meta.url), 'utf8');
+test('ADR authoring prefills the captured choices in one line without bypassing native gates', () => {
+  const adr = level3.slice(level3.indexOf('### Step 1: Record the in-memory decision as an ADR'),
+    level3.indexOf('### Step 2: Review the change with the Code Review agent'));
+  assert.match(adr, /repository-root Copilot session/);
+  assert.match(adr, /type `\/adr-author`.*press \*\*Tab\*\*/);
+  const request = adr.match(/```text\n(\/hve-core:adr-author[^\n]+)\n```/)?.[1];
+  assert.ok(request, 'one-line native ADR request');
+  for (const choice of [
+    'entry mode: from-planner-handoff', 'slug: music-catalog-playlist',
+    'output template: madr-v4', 'handoff payload: <plan-path>', 'decision-makers: TPM',
+    'repo visibility: <repo-visibility>', 'diagram format: mermaid',
+    'ASR triggers: performance, maintainability, availability (all three apply)',
+    'decision: Option A (host-owned lock-protected in-memory store)',
+    'autonomy tier: partial', 'target status: accepted', 'effort: S',
+    'backlog target: GitHub work items',
+  ]) assert.ok(request.includes(choice), choice);
+  assert.match(adr, /does not replace the agent selection/);
+  assert.doesNotMatch(adr, /\/hve-code:|\/adr-creator/);
+  assert.match(adr, /exact reviewed plan path returned in Level 3/);
+  assert.match(adr, /actual visibility.*`private`.*`public`/);
+  assert.doesNotMatch(request, /2026-10-05|repo visibility: public/);
+  assert.match(adr, /Confirm or revise them.*reviewed plan/);
+  assert.match(adr, /not an approval shortcut/);
+  assert.match(adr, /approval before external writes or handoff persistence/);
+  assert.match(adr, /https:\/\/microsoft\.github\.io\/hve-core\/docs\/reference\/agents\/project-planning\/adr-creation\//);
+  assert.match(adr, /adr-plans\/<project-slug>\/state\.json/);
+  for (const option of ['capture', 'from-planner-handoff', 'adopt-template', 'madr-v4', 'y-statement']) {
+    assert.ok(adr.includes(`| \`${option}\` |`), option);
+  }
+  assert.match(adr, /Project slug.*music-catalog-playlist/);
+  assert.match(adr, /selecting the mode does not create that handoff/);
+  assert.match(adr, /Frame and Decide summaries/);
+  assert.match(adr, /Govern allocates the ADR number/);
+  assert.match(adr, /docs\/planning\/adrs\//);
+  assert.doesNotMatch(adr, /Consequences to cover:|ask at most two clarifying questions/);
+  assert.doesNotMatch(workshop, /`docs\\decisions\\`/);
+});
+
+test('Run the app uses the current forwarded frontend address and supplied Ports screenshot', () => {
+  const run = level3.slice(level3.indexOf('### Step 2: Run the app'),
+    level3.indexOf('### Step 3: Commit implementation checkpoint'));
+  assert.match(run, /Start each terminal from the repository root/);
+  assert.match(run, /```bash\ncd src\/api\ndotnet run\n```/);
+  assert.match(run, /```bash\ncd src\/front\nnpm run dev\n```/);
+  assert.doesNotMatch(workshop, /^cd .*\\/m);
+  assert.match(run, /\*\*Ports\*\* tab beside \*\*Terminal\*\*/);
+  assert.match(run, /\*\*Forwarded Address\*\* for the frontend/);
+  assert.match(run, /normally \*\*5173\*\*/);
+  assert.match(run, /not the API \(\*\*5080\*\*\)/);
+  assert.match(run, /assets\/l3-frontend-ports\.png/);
+  const image = readFileSync(new URL('../../../docs/afternoon-2/assets/l3-frontend-ports.png', import.meta.url));
+  assert.deepEqual([...image.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+});
+
+test('HVE commands are selected with Tab and include their task in the same code block', () => {
+  const handbook = readFileSync(new URL('../../../docs/maintainer-handbook.md', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   for (const document of [workshop, handbook]) {
+    assert.match(document, /press \*\*Tab\*\*/);
     const blocks = [...document.matchAll(/```text\r?\n([\s\S]*?)\r?\n```/g)];
     for (const [, body] of blocks) {
       if (!/^\/(?:hve-core:|rpi\b|rpi-|dt-|backlog-|git-commit\b|pull-request\b)/.test(body)) continue;
-      assert.match(body, /^\/\S+$/, `skill command must be standalone: ${body}`);
+      const invocation = body.match(/^(\/hve-core:[\w.-]+)(?:[ \t]+|\n)([\s\S]+)$/);
+      assert.ok(invocation, `selected HVE command with task: ${body}`);
+      const [, command, task] = invocation;
+      assert.ok(task.trim(), `task must accompany ${command}`);
+      assert.doesNotMatch(task, /^\/hve-core:/m, 'one invocation per block');
     }
+  }
+  assert.match(workshop, /do not submit the command line first/);
+});
+
+test('extraction rejects a command-only HVE invocation', () => {
+  const output = mkdtempSync(join(tmpdir(), 'hve-missing-task-'));
+  try {
+    const source = join(output, 'workshop.md');
+    const fixtures = [
+      workshop.replace(/(```text\n\/hve-core:rpi-plan)\n[\s\S]*?\n```/, '$1\n```'),
+      workshop.replace(/(```text\n\/hve-core:adr-author)[^\n]*\n```/, '$1 \t\n```'),
+    ];
+    for (const fixture of fixtures) {
+      writeFileSync(source, fixture);
+      const result = spawnSync(process.execPath, [
+        fileURLToPath(new URL('./extract-prompts.mjs', import.meta.url)), source, join(output, 'prompts'),
+      ], { encoding: 'utf8' });
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /HVE invocation must include its command and task in one block/);
+    }
+  } finally {
+    rmSync(output, { recursive: true });
   }
 });
 
@@ -328,17 +496,17 @@ test('PM backlog checks use the reviewed plan rather than a prescribed reference
   assert.match(backlog, /start a \*\*fresh session\*\*/);
   assert.match(backlog, /copilot --enable-all-github-mcp-tools/);
   assert.match(backlog, /use the default agent rather than switching back/);
-  assert.match(backlog, /```text\r?\n\/backlog-execute\r?\n```/);
-  assert.match(backlog, /Then send a separate prompt/);
+  assert.match(backlog, /```text\n\/hve-core:backlog-execute\n\nRun the reviewed plan/);
+  assert.match(backlog, /press \*\*Tab\*\*/);
   assert.doesNotMatch(backlog, /gh issue create/);
   assert.doesNotMatch(backlog, /four sub-issues|five issues|Five open issues|hand-written sample/);
 });
 
-test('sprint planning activates the skill separately from its task prompt', () => {
+test('sprint planning combines the Tab-selected command and read-only task', () => {
   const sprint = workshop.slice(workshop.indexOf('### Step 8: Get a sprint order'),
     workshop.indexOf('### Step 9: Hand off to curation'));
-  assert.match(sprint, /```text\r?\n\/backlog-plan\r?\n```/);
-  assert.match(sprint, /separate message/);
+  assert.match(sprint, /```text\n\/hve-core:backlog-plan\n\nUse sprint mode/);
+  assert.match(sprint, /press \*\*Tab\*\*/);
   assert.match(sprint, /hve-core:backlog-plan/);
   assert.match(sprint, /Use sprint mode to plan the next iteration/);
   assert.match(sprint, /changing the prompt does not grant tool access/);

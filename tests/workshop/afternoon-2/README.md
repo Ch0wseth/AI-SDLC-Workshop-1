@@ -21,7 +21,7 @@ flowchart LR
 | [`.github/workflows/workshop-tester.md`](../../../.github/workflows/workshop-tester.md) | gh-aw source | Trigger, `lab_run` custom job, validator prompt, safe outputs. Compile with `gh aw compile workshop-tester`. |
 | [`orchestrate.sh`](orchestrate.sh) | Actions runner | `setup` (snapshot of the tested commit into a private sandbox repo, Codespace creation), `run` (starts the lab and polls), `collect`, `cleanup` (always deletes the Codespace and sandbox and sweeps orphans). |
 | [`run-lab.sh`](run-lab.sh) | Codespace | Checks introductory starter prerequisites, then executes Levels 1 to 6 and records one JSON line per check or step in `results.jsonl`. |
-| [`extract-prompts.mjs`](extract-prompts.mjs) | Codespace | Reads the copy-paste prompts and L6 form values directly from `workshop.md`, keeping RPI skill commands separate from their task messages. |
+| [`extract-prompts.mjs`](extract-prompts.mjs) | Codespace | Reads the copy-paste prompts and L6 form values directly from `workshop.md`, preserving each HVE command and its task as one message. |
 | [`lib.sh`](lib.sh) | Codespace | Step and check recording, token redaction, Copilot CLI prompt replay. |
 
 Every step has a mode that the validator reports:
@@ -40,11 +40,13 @@ The examples supply a learner's facts and choices, not a document outline or sub
 
 This is **example replay**, not authentic user research or proof of method completion. The tester checks that coaching state and the BRD draft exist, but does not infer evidence quality, human review, or sign-off from those files. BRD steps 12–13 remain skipped because they depend on actual human inspection and approval; PRD/backlog execution remains skipped until that gate is satisfied. Missing answers and readiness gaps must be reported, not improvised or waived by the tester.
 
-Level 3 replays each skill command separately from its short task message. It resolves the artifact paths returned by each invocation and substitutes the published placeholders for the same task. Missing, unreadable, or ambiguous paths stop the sequence; it does not select artifacts by recency. Review must leave source files and commits unchanged. The independent API checks use the shared `POST /api/playlist/tracks` contract with a JSON `trackId` body; these tester checks are not additional manual learner steps.
+Interactive learners select the HVE command with Tab and add their task before sending. The headless tester emulates that completed message, not the keyboard/autocomplete interaction. DT startup and each RPI phase replay the combined published block in one invocation; extraction supports a task on the command line or following lines, but command-only HVE blocks fail. The tester resolves returned same-task artifact paths and substitutes the published placeholders. Missing, unreadable, or ambiguous paths stop the sequence; it does not select by recency. Review must leave source files and commits unchanged. The independent API checks use `POST /api/playlist/tracks` with a JSON `trackId` body; they are not extra manual learner steps.
 
 Level 3 captures `HEAD` before implementation and compares the approved source/test paths afterward, including untracked files. Implementation commits count as edits even when the working tree is clean. The checkpoint commits only a nonempty index; staging or commit errors still fail the step. Run the local regression fixtures with `bash tests/workshop/afternoon-2/git-checkpoint.test.sh`.
 
-Run the starter-prerequisite structure and report regression checks with `node --test tests/workshop/afternoon-2/prerequisites.test.mjs tests/workshop/afternoon-2/report.test.mjs`.
+Run the guide structure, progressive-disclosure, creator-skill, and report regression checks with `node --test tests/workshop/afternoon-2/prerequisites.test.mjs tests/workshop/afternoon-2/progressive-disclosure.test.mjs tests/workshop/afternoon-2/report.test.mjs`.
+
+Run the APM PR gate regression checks with `node --test tests/workshop/afternoon-2/apm-ci.test.mjs`. The failure-propagation cases use a Bash mock, not an APM installation or network request.
 
 Run the local artifact-binding and HTTP request fixtures with `bash tests/workshop/afternoon-2/rpi-flow.test.sh`. They use temporary files and a mock `curl`; no Copilot invocation or network request runs.
 
@@ -120,7 +122,7 @@ Each run consumes several independent usage units. Do not add them up as one "co
 - **Agentic workflow inference** for the sandbox `daily-backlog` and `a11y-review` runs and for this validator.
 - **One Copilot cloud agent session** for the issue delegated in Level 5.
 - **One Copilot code review** on the Copilot cloud agent pull request (AI credits, plus Actions minutes on the private sandbox).
-- **Actions minutes** for the CI workflow and the Copilot setup steps that Level 5 adds to the sandbox.
+- **Actions minutes** for the Level 4 APM audit workflow, the Level 5 CI workflow, and Copilot setup steps.
 - **Actions minutes** for the runner that orchestrates the run, up to 6 hours (the lab itself is capped at 4 hours by `LAB_TIMEOUT_S`).
 
 See the official GitHub billing documentation for current rates; this repository makes no price claims. Path filters (`docs/afternoon-2/**`, `solutions/afternoon-2/**`, `src/**`, `tests/**`, `.github/**` and the dev container) limit runs to relevant changes.
@@ -129,12 +131,13 @@ See the official GitHub billing documentation for current rates; this repository
 
 - Level 2's learner-led nine-method sampler and generated-note inspection are skipped, not simulated as successful coaching. The tester replays the separate implementation handoff but cannot verify learner contributions, a 10–15 minute interaction, peer feedback, or personal inspection. A missing exploration recap is an evidence gap, not permission to invent learner decisions.
 - Copilot CLI prompts are model output. The checks verify the lab's acceptance criteria (endpoints, status codes, tests, files), not identical code.
-- Whether `copilot -p` expands plugin prompts such as `/rpi-research`, and how `--continue` behaves with `-p`, depend on the Copilot CLI version. A failure there is reported as a tester limitation, not a lab defect.
+- Whether `copilot -p` expands plugin commands such as `/hve-core:rpi-research`, and how `--continue` behaves with `-p`, depend on the Copilot CLI version. A failure there is reported as a tester limitation, not a lab defect.
 - The introduction's **Dev Environment Setup** offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
 - Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Copilot cloud agent PR JSON, the Copilot code review JSON).
 - Level 5 delegation differs from the attendee path in three places:
   - The feature request is created with `gh issue create` and the lab's field labels. Publishing a deferred review finding is skipped because it needs a genuine finding and a human decision to defer it; the tester does not invent replacement findings.
   - The branch ruleset (`l5-ruleset`) is always recorded as skipped, because the sandbox-scoped token has no Administration permission. The solution JSON is checked statically, and the CI run on `main` is checked live.
+  - The APM workflow is copied in Level 4. After the setup-step push, `l5-apm-ci` checks the audit on the exact latest main commit. Its no-bypass rule is validated locally, but applying it (`l5-apm-ruleset`) remains an explicit administration-dependent skip; a successful audit is not claimed as live merge enforcement.
   - The issue is assigned whether or not the backlog summary lists it under **Can be developed in parallel**. The tester records where the summary placed it as a note.
 - In Level 6, approving the workflows on the Copilot pull request (`l6-approve-checks`) and the test-writer pass (`l6-test-writer`) are always recorded as skipped: both are interactive.
 - The Level 6 push protection demo is always recorded as skipped. It needs GitHub Secret Protection on the private sandbox, plus settings-UI steps (custom pattern and dry run) that the tester does not automate.
@@ -142,7 +145,7 @@ See the official GitHub billing documentation for current rates; this repository
   - **Level 2 Product Manager track:** multi-turn agent Q&A, and a human confirms before `/backlog-execute` writes issues.
   - **Level 3 Tech Lead extension:** human-gated agents.
   - **Level 5 security delegation:** a second Copilot pull request would collide with the Level 6 PR detection, and the gh-aw variant needs a `GH_AW_AGENT_TOKEN` PAT.
-  - The new text prompts in these tracks deliberately avoid the first lines and leads that `extract-prompts.mjs` matches, so they do not replace the core prompts.
+  - Extended-track prompts do not replace the core prompts. The one-line ADR request is extracted for structural coverage only; the human-gated Tech Lead extension is not executed.
 
 ## Run the lab script by hand
 

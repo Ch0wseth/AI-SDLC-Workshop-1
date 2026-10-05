@@ -17,7 +17,6 @@ sections_title:
   - 'Level 1: HVE orientation and HVE-Core CLI plugin'
   - 'Level 2: Design Thinking with DT Coach'
   - 'Level 3: RPI implementation loop'
-  - 'Break'
   - 'Level 4: APM, policy and plugin marketplace'
   - 'Level 5: Agentic workflows and delegation'
   - 'Level 6: Review the delegated work'
@@ -30,6 +29,11 @@ sections_title:
 *Version 1.0 - September 2026*
 
 Welcome to this workshop. It follows **GitHub Copilot Zero to Hero**: there you used Copilot primitives one at a time. Here you combine them into a governed, AI-assisted software development lifecycle (SDLC) for a real repository.
+
+Build a small Music Catalog feature: browse tracks and add them to **one in-memory playlist**, with duplicate rejection and a visible empty state. Then share the method, automate surrounding work, and review a delegated change.
+
+<details>
+<summary>How the afternoon connects the SDLC stages</summary>
 
 You will go from an idea to a merged change and then automate the work around it. The afternoon tells one story in three acts:
 
@@ -48,9 +52,11 @@ The recap turns this into an operating model, then looks at it as an architect w
 
 The shared application is the Music Catalog starter. It has a React + TypeScript + Vite front end in `src\front`, a .NET 10 minimal API in `src\api`, xUnit API tests in `tests\api`, and synthetic seed data in `src\api\Data\tracks.json`. The capability for today is fixed: **browse tracks and add tracks to a single in-memory playlist**. Duplicate adds are rejected. The empty playlist state is visible.
 
+</details>
+
 <div class="task" data-title="How to read this lab">
 
-> Each level starts with a short **Topic**, followed by numbered steps and an **Expected result**. Copy-paste prompts are in code blocks. Reference solutions are in `solutions\afternoon-2`. Commit a checkpoint at the end of each level so that you can always come back to a working state.
+> Each level starts with a short **Topic**, followed by numbered steps and an **Expected result**. Expand the optional explanations when you want more background; required actions and warnings stay visible. Copy-paste prompts are in code blocks. Reference solutions are in `solutions\afternoon-2`. Commit reviewed changes when a step calls for it.
 
 </div>
 
@@ -62,7 +68,10 @@ The shared application is the Music Catalog starter. It has a React + TypeScript
 
 ## 🎓 Key concepts
 
-This is a quick reminder of what you will practise, not a lecture. Each concept links to its reference documentation.
+You can start the lab without reading the full reference below. Return to it when a term is unfamiliar.
+
+<details>
+<summary>Reference: Copilot primitives, HVE, APM, workflows, and trust</summary>
 
 ### Copilot primitives (recap from GitHub Copilot Zero to Hero)
 
@@ -134,6 +143,8 @@ Three ideas connect the levels. Each one gets a short segment where it matters.
 - [Customize the Copilot cloud agent environment](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [Copilot billing and usage](https://docs.github.com/en/copilot/concepts/billing-and-usage)
+
+</details>
 
 ## 🚀 Dev Environment Setup
 
@@ -293,15 +304,24 @@ The application lives in `src\api` and `src\front`, with API tests in `tests\api
 
 ## Topic
 
-You will install HVE-Core as a personal Copilot CLI plugin and identify the HVE agents used later: DT Coach, RPI Agent, Backlog Manager, Accessibility Reviewer, and Accessibility Planner. The extended tracks also use BRD Builder, PRD Builder, Functional Planner, Code Review, ADR Creator, and Security Reviewer.
+Install HVE-Core as a personal Copilot CLI plugin and find DT Coach and RPI Agent for the next exercises.
 
-**Why this level:** in GitHub Copilot Zero to Hero, you wrote your own primitives. HVE-Core gives you a shared, opinionated method instead of a personal one. You install it for yourself first; Level 4 explains why that is not enough for a team.
+**Why this level:** reuse a shared method instead of writing every agent's rules yourself. Level 4 will move that method into the repository for the team.
 
 ![HVE-Core plugin installed in Copilot CLI](assets/l1-hve-plugin-installed.png)
 
 ## Understand HVE-Core
 
 HVE-Core is an opinionated agentic SDLC framework. Its published principle is: **AI carries the rules, humans keep the judgment.** In this workshop, HVE-Core is a methodology source, not a promise that every generated output is correct.
+
+<details>
+<summary>Which HVE agents the workshop uses</summary>
+
+The core exercises use DT Coach, RPI Agent, Backlog Manager, Accessibility Reviewer, and Accessibility Planner. The extended tracks also use BRD Builder, PRD Builder, Functional Planner, Code Review, ADR Creator, and Security Reviewer.
+
+In GitHub Copilot Zero to Hero, you wrote your own primitives. Here you install reusable agents, instructions, prompts, and skills for your own environment first; later levels address repository-owned context and team governance.
+
+</details>
 
 <div class="warning" data-title="Rapidly evolving framework">
 
@@ -357,9 +377,9 @@ Then type:
 
 Expected result:
 - You can see installed plugins or plugin help for your CLI version.
-- `/rpi`, `/rpi-research`, `/rpi-plan`, `/rpi-implement`, `/rpi-review`, and Design Thinking prompts may be discoverable depending on your version.
+- HVE skills and prompts use the `/hve-core:...` namespace, such as `/hve-core:rpi-research`. Select the matching entry from the slash-command menu if needed.
 
-**For every skill or prompt command in this workshop:** send the slash command on its own, then send the task or options as a separate message. If the short name is not recognized, select the matching HVE-Core entry from the slash-command menu. Built-in CLI commands such as `/agent <name>`, `/model auto intelligence`, and `/settings experimental on` retain their command arguments, but are still sent separately from task prompts.
+**For every HVE invocation:** type the short name, such as `/rpi-research`, select the matching HVE-Core entry, and press **Tab** to accept it. Add the task text before sending. Each block below shows the expanded `/hve-core:...` command and its prompt together as **one message**; do not submit the command line first. Built-in CLI commands such as `/agent <name>` and `/model auto intelligence` stay separate.
 
 ### Step 4: VS Code alternative
 
@@ -396,13 +416,31 @@ Expected result:
 
 # Level 2: Design Thinking with DT Coach
 
+## Scenario: Music Catalog
+
+The starter is a small music-catalog application, not a streaming service. It currently displays a greeting from the API. Later, you will add catalog browsing and one in-memory playlist using synthetic tracks; no accounts or saved playlists are needed.
+
+```text
+src\
+  api\
+    Program.cs          ASP.NET Core API entry point: /api/hello
+    Data\tracks.json    The synthetic track catalog
+  front\
+    src\App.tsx         React screen that currently reads /api/hello
+    src\main.tsx        Front-end entry point
+    vite.config.ts      Vite development server and /api proxy
+```
+
 ## Topic
 
-You will experiment with HVE-Core DT Coach through a short tour of its **nine Design Thinking methods**. Start with a user problem, not a prescribed feature: how might someone choose music for a listening moment? You choose the person, context, ideas, and concept to explore. The coach helps you question assumptions, sketch alternatives, and decide what you would learn next.
+Start with a user problem, not a prescribed feature: how might someone choose music for a listening moment? DT Coach guides the exploration; you choose the context and ideas.
 
-**Why this level:** good delivery starts with a worthwhile problem, not just a detailed coding prompt. Experience the coach helping you think rather than asking it to fill in predetermined answers. After exploration, you will explicitly map your concept to the small playlist slice used by the rest of the workshop; ideas outside that slice remain future possibilities, not rejected brainstorming.
+**Why this level:** experience HVE helping you think, not filling in predetermined answers. This **10–15 minute sampler is not completion of nine full methods**. Keep the exploration separate from the shared playlist coding exercise that follows.
 
-The exercise is a **10–15 minute sampler**, not completion of nine full methods. Methods 1–3 explore the problem, 4–6 explore possible solutions, and 7–9 consider implementation, testing, and iteration. You will plan or simulate the activities that need more time, real users, or working prototypes. These shortcuts do not satisfy the full methods' evidence gates.
+<details>
+<summary>How DT Coach and the planning agents support discovery</summary>
+
+DT Coach supports nine methods: Methods 1–3 explore the problem, 4–6 explore possible solutions, and 7–9 consider implementation, testing, and iteration. You will plan or simulate the activities that need more time, real users, or working prototypes. These shortcuts do not satisfy the full methods' evidence gates.
 
 An extended Product Manager track then turns these decisions into a BRD, a PRD, and GitHub issues with the HVE-Core planning agents.
 
@@ -424,9 +462,6 @@ The copyable examples below are optional responses to actual questions, not a ch
 | **BRD — Business Requirements Document** | Why the business needs a capability, who benefits, and which outcomes matter. | Align stakeholders on the need, value, and investment before defining a solution. |
 | **PRD — Product Requirements Document** | What the product must do, its boundaries, and what counts as acceptable. | Give engineers, designers, and testers shared behaviour and acceptance criteria. |
 | **GitHub issues** | The bounded work items that deliver the agreed requirements. | Track ownership, dependencies, and progress, with links back to the BRD and PRD. |
-
-<details>
-<summary>How a Product Manager uses HVE Principles</summary>
 
 ### BRD: why the business needs the capability
 
@@ -457,7 +492,7 @@ HVE-Core's principle is **"AI carries the rules, humans keep the judgment."** Fo
 1. **Frame before specifying.** Use DT Coach to make the problem, user need, assumptions, and boundaries explicit. In real product work, bring research and stakeholder evidence; the coach can organize that evidence but cannot substitute for it.
 2. **Turn intent into reviewable artifacts.** Use BRD Builder and PRD Builder to draft structured requirements and surface gaps or contradictions. Review the drafts with the relevant stakeholders; generated text is a proposal, not approval.
 3. **Make scope and success explicit.** Ask agents to preserve exclusions and produce observable acceptance criteria. The PM decides which outcomes matter, how to prioritize competing needs, and which trade-offs are acceptable.
-4. **Separate planning from action.** Use Functional Planner to propose an issue hierarchy and Backlog Manager to recommend ordering and dependencies. Inspect the handoff before authorizing `/backlog-execute` to create or change issues in the confirmed repository.
+4. **Separate planning from action.** Use Functional Planner to propose an issue hierarchy and Backlog Manager to recommend ordering and dependencies. Inspect the handoff before authorizing `/hve-core:backlog-execute` to create or change issues in the confirmed repository.
 5. **Preserve traceability and curate the handoff.** Keep the reviewed BRD, PRD, and decisions linked to the backlog. Commit useful, agreed deliverables rather than raw agent conversations, sensitive meeting notes, or unsupported claims.
 6. **Close the feedback loop.** Compare delivered behaviour and review findings with the PRD, then evaluate outcomes using actual evidence. Accept, reject, or revise follow-up work deliberately; passing tests does not by itself establish business value.
 
@@ -511,15 +546,11 @@ If your instructions refer to `/agents`, check `/help` for the command supported
 
 Choose a listening situation you want to explore: a commute, focused work, a shared evening, or your own example. These are starting points, not personas or validated research. Set your own 10–15 minute timer; the coach cannot reliably enforce elapsed time.
 
-First, invoke the project-start prompt and let DT Coach respond:
+Type `/dt-start-project`, select the HVE-Core project-start prompt, and press **Tab**. Then add the project brief below and send the whole message:
 
 ```text
-/dt-start-project
-```
+/hve-core:dt-start-project.prompt
 
-Then send this short project brief as a separate message:
-
-```text
 Project name: Music Catalog listening experience — a workshop demonstration POC.
 Starting question: How might we help someone choose music for a listening moment?
 Help me brainstorm and sample all nine HVE Design Thinking methods within a 10–15 minute learning exercise. I will manage the timer. Keep proposed specifications POC-sized: no authentication, database, persistence, or external services; retain the existing src/api and src/front setup.
@@ -538,33 +569,13 @@ Expected result:
 - It separates your observations from assumptions, and proposed tests from actual results.
 - Any agent-written working notes stay under the local, ignored `.copilot-tracking/` folder.
 
-<div class="tip" data-title="Choose how to approve local working-note edits">
+<div class="tip" data-title="Approve local working-note edits">
 
 > If DT Coach requests permission to create or update its `.copilot-tracking/` notes, you may approve that edit for the session when your client offers the option. Check the requested path and permission scope first; prefer an approval limited to the tracking folder rather than all repository writes.
 >
-> If you want fewer repeated permission prompts, you may instead enable **autoapproved / AI-assisted permissions** in your client's permission controls, where available. This lets the permission system assess requests with less interruption; it is not a guarantee that every request will be allowed. It is optional and separate from **Auto intelligence**, which selects the model.
->
-> In either mode, DT Coach's write boundary remains `.copilot-tracking/` only. Decline requests to edit application code, tests, or published documentation during this exercise. Do not use unrestricted **allow-all / YOLO** permissions as a substitute for AI-assisted approval.
+> DT Coach's write boundary remains `.copilot-tracking/` only. Decline requests to edit application code, tests, or published documentation during this exercise. **Auto intelligence selects the model; it does not grant write permissions.** Keep normal approval prompts and do not use unrestricted **allow-all / YOLO** permissions for this exercise.
 
 </div>
-
-#### Optional: enable AI-assisted permissions in Copilot CLI
-
-Copilot CLI **1.0.90-3** provides an **assisted** permission mode. A safety check approves requests it judges safe and asks you about others. Availability depends on your CLI version and organization policy; it may require experimental features.
-
-1. In your existing session, enter `/permissions` and select **assisted** if it is offered.
-2. If assisted mode is unavailable and your organization permits experimental features, enter `/settings experimental on`, then reopen `/permissions` and select **assisted**.
-3. Confirm the session shows assisted permissions before continuing the DT conversation. To return to explicit approvals, reopen `/permissions` and select **manual**.
-
-Alternatively, start a new session from the repository root with:
-
-```powershell
-copilot --experimental --assisted-approval --model auto --auto-tier intelligence
-```
-
-Then select DT Coach again with `/agent dt-coach`. This starts a new conversation; use `/resume` if you need to return to your earlier session, and check its permission mode after resuming. If your CLI does not recognize these options or policy blocks them, keep manual approvals; assisted mode is not required for the lab.
-
-**Assisted approval is not a tracking-folder sandbox.** It assesses permission requests but does not enforce the `.copilot-tracking/`-only boundary for you. Keep that boundary in your instructions and inspect the files afterwards. Do not add `--allow-all`, `--yolo`, or `/allow-all`. Enabling experimental features changes a client setting; you can turn it off later with `/settings experimental off`.
 
 ### Example outcome after visiting all nine methods
 
@@ -653,10 +664,12 @@ Use the table as a route map, not nine prompts to paste at once. Spend more of y
 | 8. User Testing | Ask a peer to walk through the sketch, or plan a neutral task and observation. | Full Method 8 testing of a functional prototype. |
 | 9. Iteration at Scale | Choose a next experiment, success signal, and reason to revisit an earlier method. | Scaled rollout or measured impact. |
 
-To assess where to go next, use DT Coach's **Method Next** handoff or send this native prompt on its own:
+To assess where to go next, use DT Coach's **Method Next** handoff, or type `/dt-method-next`, select the HVE-Core entry, and press **Tab**. Add the request below before sending:
 
 ```text
 /hve-core:dt-method-next.prompt
+
+Assess project music-catalog-listening-experience and recommend the next method from its current coaching state.
 ```
 
 Let it read the current project's coaching state and explain its recommendation. If it asks which project to use, provide `music-catalog-listening-experience` in a separate reply. It may recommend more work or a return to an earlier method; missing exit evidence is not permission to mark a method complete. In this sampler, ask for a preview of the remaining work when full progression is not justified.
@@ -673,35 +686,31 @@ When your timer ends, say **"Timebox: recap what we actually tried and preview w
 
 ## Debrief and hand off to the shared implementation slice
 
-Keep your explored concept and learning notes, even if they differ from a playlist. To make Level 3 comparable across the room, everyone implements the same technical slice: browse tracks and add them to **one in-memory playlist**, reject duplicates, show an empty state, and use accessible controls. No users, authentication, persistence, reorder, remove, search, or playlist creation are added in this slice.
+Keep the ideas you explored with DT Coach. For Level 3, however, everyone builds the same small playlist feature so the coding exercise stays focused and comparable across the room.
 
-This is a workshop delivery boundary, **not the conclusion of your user research**. Map what fits from your concept into the slice and keep other ideas as deferred possibilities. The duplicate-add user experience remains a real choice at Level 3's plan gate.
+**This feature is chosen for the workshop, not a result that your DT session must produce or validate.** Your explored concept does not have to be a playlist. Keep other ideas, such as mood filtering, for possible future work. You still choose how the interface handles duplicate adds at Level 3's plan gate.
 
 ### Step 1: Separate exploration from the implementation handoff
 
-HVE includes prompts for extending the coaching work beyond this sampler. Type `/dt-` to discover them in your client; Copilot CLI may show the namespaced form `/hve-core:dt-….prompt`.
+The following native HVE prompts are **optional for this workshop**. They support fuller DT projects and check the evidence needed for a formal handoff. You do not need one to continue from this short sampler to the shared coding exercise. Type `/hve-core:dt-` to discover the matching prompts in your client's slash-command menu.
 
-- **`dt-handoff-problem-space.prompt`** packages completed Methods 1–3 discovery evidence for `/rpi-research`.
-- **`dt-handoff-solution-space.prompt`** packages completed Methods 4–6 concept and low-fidelity prototype evidence for `/rpi-research`.
-- **`dt-handoff-implementation-space.prompt`** packages completed Methods 7–9 technical, testing, and scaling evidence, plus earlier discovery lineage, for `/rpi-research`.
+- **`dt-handoff-problem-space.prompt`** packages completed Methods 1–3 discovery evidence for `/hve-core:rpi-research`.
+- **`dt-handoff-solution-space.prompt`** packages completed Methods 4–6 concept and low-fidelity prototype evidence for `/hve-core:rpi-research`.
+- **`dt-handoff-implementation-space.prompt`** packages completed Methods 7–9 technical, testing, and scaling evidence, plus earlier discovery lineage, for `/hve-core:rpi-research`.
 - **`dt-canonical-deck.prompt`** creates or refreshes a canonical snapshot and can optionally build a presentation from available artifacts.
 - **`dt-figma-export.prompt`** exports suitable artifacts to FigJam or Figma for collaborative review; it requires the Figma MCP server and permission to create the external file.
 
-For an Implementation Space handoff, select **`dt-handoff-implementation-space.prompt`** from the prompt picker. Send the command on its own:
+For an Implementation Space handoff, type `/dt-handoff-implementation-space`, select the matching HVE-Core prompt, and press **Tab**. Add your actual project slug before sending, for example:
 
 ```text
 /hve-core:dt-handoff-implementation-space.prompt
-```
 
-Then supply your actual project slug in a separate message, for example:
-
-```text
 Use project slug music-catalog-listening-experience for the Implementation Space handoff.
 ```
 
 The prompt checks coaching state and readiness before producing a research-ready handoff. **Sampling a method is not completing it:** if no Implementation Space method is complete, resume coaching for a real handoff, or continue with the workshop-only recap below. Do not mark simulated tests or planned prototypes as completed evidence. An eligible handoff produces `handoff-summary-implementation-space.md` in your DT project folder and a research topic under `.copilot-tracking/research/`; it does not start implementation.
 
-For the workshop, keep the following six bullets as the reviewed Level 3 delivery contract, separate from any richer DT handoff:
+**For Level 3, build the playlist feature described below.** These requirements are supplied by the facilitator; you do not need to derive them from your DT exploration:
 
 - **User-visible capability:** browse tracks and add them to one in-memory playlist.
 - **API endpoints:** `GET /api/tracks`, `GET /api/playlist`, and `POST /api/playlist/tracks` with a JSON body containing `trackId`.
@@ -710,21 +719,21 @@ For the workshop, keep the following six bullets as the reviewed Level 3 deliver
 - **Accessibility:** accessible, labelled controls and perceivable status feedback.
 - **Out of scope:** users, authentication, persistence, reorder, remove, search, and playlist creation.
 
-Ask the coach to recap the mapping, whether or not the formal handoff was eligible:
+Now ask DT Coach to recap your exploration and keep the supplied coding scope separate from it. A formal DT handoff is not needed for this workshop recap:
 
 ```text
 Summarize the final decisions from our Music Catalog listening-experience exploration, distinguishing evidence, assumptions, and planned work.
-Map what fits to the shared playlist delivery contract in docs/afternoon-2/workshop.md under "Debrief and hand off to the shared implementation slice". Keep exploratory ideas separate and leave the duplicate-feedback UX choice open.
+Separately recap the shared playlist delivery contract in docs/afternoon-2/workshop.md under "Debrief and hand off to the shared implementation slice". This is the common Level 3 coding exercise, not a result of our exploration. Leave the duplicate-feedback UX choice open.
 Do not claim that sampling validated the concept or completed a method. Keep working notes under .copilot-tracking/ only.
 ```
 
 Expected result:
 - The recap preserves your exploration and its evidence limits.
-- The delivery mapping respects the shared contract without silently widening it.
+- The common coding scope is kept separate from your explored concept, without changing the supplied requirements.
 
-### Step 2: Review the mapping, not the creativity
+### Step 2: Review the recap and coding scope
 
-Check the delivery mapping against the shared contract. Keep broader ideas in the exploration recap rather than deleting them. Tell the coach where you disagree with its framing and ask it to revise the recap. Name one assumption that would need real research and one next experiment; do not commit invented evidence.
+Check that the recap reflects your conversation and that the coding scope matches the requirements above. Your broader ideas remain in the exploration recap; they do not need to fit the playlist exercise. Ask the coach to correct any misunderstanding. Keep assumptions and proposed experiments distinct from actual research or test results.
 
 ### Step 3: Explore the local coaching notes
 
@@ -734,23 +743,7 @@ The example below includes `coaching-state.md`, `sampler-recap.md`, `implementat
 
 ![VS Code Explorer showing project-specific DT coaching state, sampler recap, implementation handoff, and user-testing notes under the local tracking folder](../assets/dt-coach-tracking-folder.png)
 
-If the folder is hidden by your Explorer settings, use **File > Open File** with a path reported by the coach. From a PowerShell terminal at the repository root, you can also list the files:
-
-```powershell
-Get-ChildItem .copilot-tracking -Recurse -File | Select-Object FullName, LastWriteTime
-git status --short
-```
-
-Read the contents, not just the filenames. Check that the coach-generated notes reflect **your listening-experience exploration** and separate observations, assumptions, open questions, planned tests, and any peer feedback. If a recap or implementation handoff exists, check it against the conversation. Use the project folder and modification times to distinguish this session's notes from older tracking files. **You are inspecting the coach's output, not manually creating or saving notes.**
-
-Expected result:
-- At least one coach-generated working-state file exists under `.copilot-tracking/` and reflects the conversation; no manual save step is required.
-- No application code, tests, or published documentation were changed.
-- `git status --short` does not list the tracking files, because the template ignores the folder.
-
-If no files exist, check whether a write permission is still awaiting approval and let the coach finish. Do not create placeholder notes yourself. Do not treat an empty folder or a chat-only answer as persisted state; ask the facilitator if the coach produced no artifacts. If tracking files appear in Git status, resolve the ignore rule in [Curate what you commit](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/afternoon-2/workshop.md#curate-what-you-commit) before staging anything.
-
-These are **local working notes**, not the deliverable. The next step curates a short, reviewed decision record for the repository instead of committing the tracking folder.
+Open a coach-created note in Explorer to see how it captures your conversation. These are **local, ignored working notes**, not files to commit. The next step creates the shareable delivery brief; later, use VS Code's Source Control view to review the staged diff before committing that document.
 
 ### Step 4: Save the reviewed delivery brief
 
@@ -768,7 +761,7 @@ Use author mode to create a short reference from the reviewed shared playlist de
 Keep private coaching notes and personal details out of the document. Limit published changes to this file.
 ```
 
-Open the saved file and compare it with the reviewed contract. Correct differences before sharing it. This brief is the input for PRD Builder and Level 3, not a required reproduction of the coach's headings or filenames. Keep it uncommitted until [Curate what you commit](#curate-what-you-commit), where you review it with any BRD and PRD.
+Open the saved file and compare it with the reviewed contract. Correct differences before sharing it. This brief is the input for PRD Builder and Level 3, not a required reproduction of the coach's headings or filenames. Keep it uncommitted until [Curate what you commit](?step=2#curate-what-you-commit), where you review it with any BRD and PRD.
 
 ![DT decisions summary](assets/l2-dt-decisions.png)
 
@@ -776,7 +769,7 @@ Open the saved file and compare it with the reviewed contract. Correct differenc
 
 <div class="info" data-title="Extended track">
 
-> This track adds about 40 minutes. Your facilitator tells you whether the room runs it hands-on, watches it as a demo, or skips it. Level 3 works without it: if you skip it, go to [Curate what you commit](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/afternoon-2/workshop.md#curate-what-you-commit).
+> This track adds about 40 minutes. Your facilitator tells you whether the room runs it hands-on, watches it as a demo, or skips it. Level 3 works without it: if you skip it, go to [Curate what you commit](?step=2#curate-what-you-commit).
 
 </div>
 
@@ -793,13 +786,13 @@ Use the agents in this order:
 | 3 | Product definition | **BRD Builder** | A business requirements document (BRD) in `docs\project-planning` | No |
 | 4 | Product definition | **PRD Builder** | A product requirements document (PRD) in `docs\project-planning` | No |
 | 5 | Decomposition | **Functional Planner** | A GitHub issue hierarchy plan and a handoff file you can review | No, read-only |
-| 6 | Execution | **Backlog Manager** or `/backlog-execute` | GitHub issues and sub-issues | **Yes**, after you confirm |
-| 7 | Sprint planning | **Backlog Manager** with `/backlog-plan` | A recommended order and dependencies | No, read-only |
+| 6 | Execution | **Backlog Manager** or `/hve-core:backlog-execute` | GitHub issues and sub-issues | **Yes**, after you confirm |
+| 7 | Sprint planning | **Backlog Manager** with `/hve-core:backlog-plan` | A recommended order and dependencies | No, read-only |
 
 Why this order:
 
 - **Why before what.** The BRD states the business need and who benefits. The PRD states what the product does and how to test it. The TPM guide recommends writing the BRD before creating any work item.
-- **Planning is separate from writing.** Functional Planner and `/backlog-plan` cannot change the tracker. Only `/backlog-execute` writes to GitHub, and only after you review the handoff and confirm the repository.
+- **Planning is separate from writing.** Functional Planner and `/hve-core:backlog-plan` cannot change the tracker. Only `/hve-core:backlog-execute` writes to GitHub, and only after you review the handoff and confirm the repository.
 - **One owner per role.** In the Business Program Manager guide (beta), a BPM stops at the BRD and user stories, then works with a TPM, who manages the issues. In this track, you play both roles.
 
 <div class="important" data-title="Workshop simulation">
@@ -1037,15 +1030,11 @@ If GitHub write tools are missing, exit the current Copilot CLI session. From a 
 copilot --enable-all-github-mcp-tools
 ```
 
-In that new session, use the default agent rather than switching back to the read-only Backlog Manager. Send this command **on its own**:
+In that new session, use the default agent rather than switching back to the read-only Backlog Manager. Type `/backlog-execute`, select the HVE-Core entry, and press **Tab**. Replace the handoff path and repository, then send the command and task together:
 
 ```text
-/backlog-execute
-```
+/hve-core:backlog-execute
 
-Then send a separate prompt, replacing the handoff path and repository:
-
-```text
 Run the reviewed plan at <reviewed-handoff-path> and create the corresponding issues in GitHub repository <owner>/<repo>.
 ```
 
@@ -1069,15 +1058,11 @@ Expected result:
 
 ### Step 8: Get a sprint order (read-only)
 
-Run `/agent backlog-manager` in Copilot CLI, or select **Backlog Manager** in VS Code. Send the following command **on its own**, without a mode or task prompt:
+Run `/agent backlog-manager` in Copilot CLI, or select **Backlog Manager** in VS Code. Type `/backlog-plan`, select the HVE-Core entry, and press **Tab**. Replace `<owner>/<repo>` and add the read-only request before sending:
 
 ```text
-/backlog-plan
-```
+/hve-core:backlog-plan
 
-If the short command is not recognized, select **hve-core:backlog-plan** from the slash-command menu. Then send this as a **separate message**, replacing `<owner>/<repo>`:
-
-```text
 Use sprint mode to plan the next iteration for <owner>/<repo> from the open playlist slice issues.
 Read-only: recommend an implementation order with dependencies and say which issues can be developed in parallel. Do not change any issue.
 ```
@@ -1116,7 +1101,7 @@ The rule is simple: never commit the tracking folder. Curate what matters out of
 | **Meeting Analyst** | Extracted transcript notes | Nothing. Anonymize what feeds the PRD, then delete the notes after handoff | [Security model](https://microsoft.github.io/hve-core/docs/security/security-model) |
 | **BRD Builder** | Session state under `.copilot-tracking\` | `docs\project-planning\<name>-brd.md` | [Product definition](https://microsoft.github.io/hve-core/docs/hve-guide/lifecycle/product-definition) |
 | **PRD Builder** | Session state under `.copilot-tracking\` | `docs\project-planning\<name>.md` | [Product definition](https://microsoft.github.io/hve-core/docs/hve-guide/lifecycle/product-definition) |
-| **ADR Creator** | Draft notes under `.copilot-tracking\` | `docs\decisions\` (used in the Level 3 Tech Lead extension) | [Agents catalog](https://microsoft.github.io/hve-core/docs/agents/) |
+| **ADR Creator** | Session state under `.copilot-tracking\adr-plans\` | Numbered ADRs in `docs\planning\adrs\` | [Agents catalog](https://microsoft.github.io/hve-core/docs/agents/) |
 | **Functional Planner** and **Backlog Manager** | Planning logs and `handoff.md` under `.copilot-tracking\` | GitHub issues, not files | [TPM guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tpm) |
 | **RPI Agent** (Level 3) | Research, plans, change logs and reviews under `.copilot-tracking\` | The code, the tests and the pull request | [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-engineering) |
 
@@ -1134,10 +1119,9 @@ Stage the reviewed folder by path, not with `git add -A`:
 
 ```powershell
 git add docs\project-planning
-git status
 ```
 
-In VS Code's Source Control file tree, **Staged Changes should contain only the reviewed files under `docs/project-planning/`**. No `.copilot-tracking/` file should be included. If other files are staged, leave them out of this commit.
+In VS Code's Source Control view, **Staged Changes should contain only the reviewed files under `docs/project-planning/`**. Open each staged file to review the diff that will be committed. No `.copilot-tracking/` file should be included. If other files are staged, leave them out of this commit.
 
 The tracking folder stays local and ignored because it contains agent session state, draft reasoning, and potentially sensitive raw notes, not reviewed deliverables. Commit the curated outcomes instead; other readers cannot rely on links to your local working state.
 
@@ -1175,15 +1159,22 @@ One decision remains yours: **how the user interface handles a duplicate add**. 
 
 ## Work as a developer
 
+**RPI Agent coordinates four skills: Research, Plan, Implement, and Review.** Start from the reviewed Level 2 requirements, work one phase at a time, and read each returned artifact before continuing. Keep its path for the next phase.
+
+If the agent asks how to proceed, choose **Work through each phase with me**. HVE carries the procedure; you own the decisions and approval.
+
+<details>
+<summary>How RPI Agent coordinates developer work</summary>
+
 This level follows the HVE-Core [Engineer guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/engineer) and [Tech Lead guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tech-lead).
 
 | Engineer guide stage | HVE-Core command | Where in this level |
 | --- | --- | --- |
-| Research | `/rpi-research` | Research phase |
-| Plan | `/rpi-plan` | Plan phase |
-| Implement | `/rpi-implement` | Implement phase |
-| Review | `/rpi-review` | Review phase |
-| Commit and pull request | `/git-commit`, `/pull-request` | Tech Lead extension |
+| Research | `/hve-core:rpi-research` | Research phase |
+| Plan | `/hve-core:rpi-plan` | Plan phase |
+| Implement | `/hve-core:rpi-implement` | Implement phase |
+| Review | `/hve-core:rpi-review` | Review phase |
+| Commit and pull request | `/hve-core:git-commit.prompt`, `/hve-core:pull-request` | Tech Lead extension |
 
 Apply these practices from the guides:
 
@@ -1194,18 +1185,16 @@ Apply these practices from the guides:
 
 ### One agent runs the phases
 
-The phase commands are not separate agents, and each one also works on its own without RPI Agent. **RPI Agent** is the HVE-Core agent that coordinates them. It runs `/rpi-research`, `/rpi-plan` and `/rpi-implement`, then `/rpi-review`, and saves each phase's output to files so the next phase and later sessions can pick up where it stopped.
+The phase commands are not separate agents, and each one also works on its own without RPI Agent. **RPI Agent** is the HVE-Core agent that coordinates them. It runs `/hve-core:rpi-research`, `/hve-core:rpi-plan` and `/hve-core:rpi-implement`, then `/hve-core:rpi-review`, and saves each phase's output to files so the next phase and later sessions can pick up where it stopped.
 
 You can drive it in two ways:
 
 | Mode | How you start it | When to use it |
 | --- | --- | --- |
-| Phase by phase (this level) | Run `/agent rpi-agent` in Copilot CLI (select **RPI Agent** in VS Code), then run one `/rpi-*` command at a time | Learning RPI, or when you want to check each phase before the next one |
-| Full loop | Send `/rpi` alone, then describe the task in a separate message | A well-scoped task you trust the agent to carry through |
+| Phase by phase (this level) | Run `/agent rpi-agent` in Copilot CLI (select **RPI Agent** in VS Code), then run one `/hve-core:rpi-*` command at a time | Learning RPI, or when you want to check each phase before the next one |
+| Full loop | Type `/rpi`, select the HVE-Core prompt with **Tab**, and add the task before sending | A well-scoped task you trust the agent to carry through |
 
-If RPI Agent asks how to proceed, choose **Work through each phase with me** for this exercise.
-
-With `/rpi`, RPI Agent asks how much control you want, unless your separate task message already says (for example, "use automatic mode"). It offers four choices: run end to end, keep going but check with you on unclear decisions, research and plan with you then stop before implementation, or work through each phase with you. In VS Code, the agent's **Full Auto** button starts the end-to-end choice. It still stops for safety confirmations and blockers. To resume a saved task or start a follow-up from a review finding, send `/rpi` alone, then identify the saved task or finding and your requested action in a separate message.
+With `/hve-core:rpi.prompt`, RPI Agent asks how much control you want, unless the task text already says (for example, "use automatic mode"). It offers four choices: run end to end, keep going but check with you on unclear decisions, research and plan with you then stop before implementation, or work through each phase with you. In VS Code, the agent's **Full Auto** button starts the end-to-end choice. It still stops for safety confirmations and blockers. To resume a saved task or start a follow-up, select the prompt with **Tab** and identify that task or finding in the same message.
 
 This level drives the phases one at a time so you see each output. Level 5 hands the full loop to RPI Agent on Copilot cloud agent.
 
@@ -1229,19 +1218,17 @@ See [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-
 
 </div>
 
+</details>
+
 ## Research phase
 
 ### Step 1: Ask RPI to research only
 
-Run `/agent rpi-agent` in Copilot CLI, or select **RPI Agent** in the VS Code agent picker. Send the skill command on its own:
+Run `/agent rpi-agent` in Copilot CLI, or select **RPI Agent** in the VS Code agent picker. Type `/rpi-research`, select the HVE-Core entry, and press **Tab**. Add the research request before sending:
 
 ```text
-/rpi-research
-```
+/hve-core:rpi-research
 
-Then send the task prompt as a separate message:
-
-```text
 Research the Music Catalog playlist slice described in docs/project-planning/playlist-design-decisions.md against the current repository.
 Identify the evidence, risks, and decisions needed before planning. Do not change application files.
 ```
@@ -1258,15 +1245,11 @@ Open the returned file. Check what supports its key conclusions and which questi
 
 ### Step 1: Ask for an implementation plan
 
-Send the skill command on its own:
+Type `/rpi-plan`, select the HVE-Core entry, and press **Tab**. Replace `<research-path>` with this task's returned artifact path, then send the command and request together:
 
 ```text
-/rpi-plan
-```
+/hve-core:rpi-plan
 
-Replace `<research-path>` with the artifact path returned for this task, then send a separate message:
-
-```text
 Plan the playlist slice from the reviewed requirements and research at <research-path>.
 Keep the scope workshop-sized. Explain the duplicate-feedback options and their trade-offs so I can decide.
 ```
@@ -1290,15 +1273,11 @@ Replace the placeholders with your actual choice and reasoning. Once the plan re
 
 ### Step 1: Ask RPI to implement
 
-Send the skill command on its own:
+Type `/rpi-implement`, select the HVE-Core entry, and press **Tab**. Replace `<plan-path>` with the approved plan's path before sending:
 
 ```text
-/rpi-implement
-```
+/hve-core:rpi-implement
 
-Replace `<plan-path>` with the approved plan's path, then send a separate message:
-
-```text
 Implement the approved plan at <plan-path>.
 ```
 
@@ -1311,19 +1290,25 @@ Expected result:
 
 ### Step 2: Run the app
 
+Start each terminal from the repository root.
+
 In one terminal:
 
-```powershell
-cd src\api
+```bash
+cd src/api
 dotnet run
 ```
 
 In another terminal:
 
-```powershell
-cd src\front
+```bash
+cd src/front
 npm run dev
 ```
+
+In a Codespace or dev container, open the **Ports** tab beside **Terminal** in VS Code's bottom panel. Open the **Forwarded Address** for the frontend (normally **5173**), not the API (**5080**). Use your session's address, not the example URL in the screenshot. With local tools, use the frontend URL printed by Vite.
+
+![VS Code Ports tab showing forwarded addresses for the Music Catalog API on 5080 and frontend on 5173](assets/l3-frontend-ports.png)
 
 Expected result:
 - The browser shows the track catalog.
@@ -1350,15 +1335,11 @@ Expected result:
 
 ### Step 1: Ask RPI to review the implementation
 
-Send the skill command on its own:
+Type `/rpi-review`, select the HVE-Core entry, and press **Tab**. Replace the placeholders with this task's plan and changes-record paths before sending:
 
 ```text
-/rpi-review
-```
+/hve-core:rpi-review
 
-Replace the placeholders with this task's approved plan and changes-record paths, then send a separate message:
-
-```text
 Review the completed implementation against the approved plan at <plan-path> and changes record at <changes-path>.
 ```
 
@@ -1396,21 +1377,52 @@ Expected result:
 
 ### Step 1: Record the in-memory decision as an ADR
 
-Run `/agent adr-creation` in Copilot CLI, or select **ADR Creator** in VS Code. Copy paste the following prompt:
+Use your repository-root Copilot session, not the API or frontend server terminal. In Copilot CLI, switch to ADR Creator with:
 
 ```text
-Capture an architecture decision record for the Music Catalog playlist slice: the playlist state is kept in memory in the API process, not in a database or in tracks.json.
-
-Context: a workshop slice with a single playlist and no users. API tests use WebApplicationFactory.
-Consequences to cover: the state is lost on restart, it works for a single API instance only, and a later persistence change would replace it.
-Keep it short and ask at most two clarifying questions.
+/agent adr-creation
 ```
 
-Expected result:
-- ADR Creator drafts a decision record with context, decision, and consequences, then asks you to confirm it.
-- When you confirm, it saves the final ADR as a numbered file in `docs\planning\adrs`, for example `0001-in-memory-playlist-state.md`. Keep it there; Step 3 commits it.
+In VS Code, select **ADR Creator** in the agent picker. Keep that agent selected, then type `/adr-author`, select the HVE-Core entry, and press **Tab**. Add this one-line request before sending. Replace `<plan-path>` with the exact reviewed plan path returned in Level 3 and `<repo-visibility>` with your repository's actual visibility (`private` for the workshop template path; `public` in the captured example):
 
-A sample ADR is in `solutions\afternoon-2\docs\planning\adrs\0001-in-memory-playlist-state.md`.
+```text
+/hve-core:adr-author Create the Music Catalog playlist storage ADR; entry mode: from-planner-handoff; slug: music-catalog-playlist; output template: madr-v4; handoff payload: <plan-path>; decision-makers: TPM; repo visibility: <repo-visibility>; diagram format: mermaid; ASR triggers: performance, maintainability, availability (all three apply); decision: Option A (host-owned lock-protected in-memory store); autonomy tier: partial; target status: accepted; effort: S; backlog target: GitHub work items.
+```
+
+`adr-author` is the native authoring skill; it loads the ADR workflow but does not replace the agent selection above. See the [ADR Creator reference](https://microsoft.github.io/hve-core/docs/reference/agents/project-planning/adr-creation/).
+
+These are the captured conversation's choices, not proof that your plan supports them. Confirm or revise them with the agent against your reviewed plan. `accepted` is the target after the native gates, not an approval shortcut; `partial` requires approval before external writes or handoff persistence.
+
+ADR Creator manages its own session under `.copilot-tracking/adr-plans/<project-slug>/state.json`. If it cannot identify the right RPI context, give it the actual plan or review path returned in Level 3 rather than asking it to use the newest file.
+
+**Native startup choices:** read the disclaimer. For a new ADR session, the agent confirms the following three fields from your request, or asks for any that are missing:
+
+**Entry mode**
+
+| Option | Meaning |
+| --- | --- |
+| `capture` | Start a fresh guided ADR conversation without an upstream handoff payload. |
+| `from-planner-handoff` | Start from an actual planner handoff and confirm the prefilled context. |
+| `adopt-template` | Adopt your repository's existing ADR template and derive its required questions. |
+
+Use `from-planner-handoff` only when you can share the actual upstream output; selecting the mode does not create that handoff. Otherwise, `capture` can use the RPI artifacts as ordinary context.
+
+**Project slug:** a short kebab-case name for this ADR session, here `music-catalog-playlist`; it selects the tracking folder.
+
+**Output template**
+
+| Option | Meaning |
+| --- | --- |
+| `madr-v4` | Full MADR v4 record, including evaluation of architecturally significant requirement (ASR) triggers. |
+| `y-statement` | Compact six-part decision statement for a low-stakes or reversible choice. |
+
+Answer the native questions and review the Frame and Decide summaries. Let the agent derive the options, rationale, consequences, and validation with you; do not force a question limit or mark a gate passed just to finish quickly.
+
+Expected result:
+- ADR Creator preserves the chosen session and template, guides the decision, and reports any missing inputs or validation blockers.
+- After its gates are satisfied, Govern allocates the ADR number and saves the record under `docs/planning/adrs/`. Keep the reported filename and any generated `.adr-config.yml` changes for the reviewed commit in Step 3.
+
+A sample ADR is in `solutions\afternoon-2\docs\planning\adrs\0001-in-memory-playlist-state.md`. It is a reference, not a filename or document shape your agent must reproduce.
 
 ### Step 2: Review the change with the Code Review agent
 
@@ -1427,11 +1439,11 @@ Code Review asks you to confirm the scope and the perspectives before it runs.
 
 Expected result:
 - A short walkthrough of the change, then one findings report merged from each perspective.
-- Findings that `/rpi-review` missed, or a confirmation that there are none.
+- Findings that `/hve-core:rpi-review` missed, or a confirmation that there are none.
 
-How it differs from `/rpi-review`:
+How it differs from `/hve-core:rpi-review`:
 
-| | `/rpi-review` | Code Review agent |
+| | `/hve-core:rpi-review` | Code Review agent |
 | --- | --- | --- |
 | Reviews against | The plan, the requirements and the changes record | The diff, from several perspectives |
 | Who steers | The RPI flow | You choose the scope, perspectives and depth |
@@ -1439,12 +1451,14 @@ How it differs from `/rpi-review`:
 
 In Level 6, Copilot code review adds a third reviewer on the pull request itself.
 
-### Step 3: Commit with `/git-commit`
+### Step 3: Commit with `/hve-core:git-commit.prompt`
 
-If Steps 1 and 2 left changes to keep, type:
+If Steps 1 and 2 left changes to keep, type `/git-commit`, select the HVE-Core prompt, and press **Tab**. Add the commit request before sending:
 
 ```text
-/git-commit
+/hve-core:git-commit.prompt
+
+Prepare a commit for the reviewed changes. Let me confirm the selected files and commit message.
 ```
 
 Expected result:
@@ -1456,44 +1470,19 @@ Expected result:
 
 </div>
 
-### Step 4: Draft the pull request with `/pull-request`
+### Step 4: Draft the pull request with `/hve-core:pull-request`
 
-Send the skill command on its own:
-
-```text
-/pull-request
-```
-
-Then send the preparation request as a separate message:
+Type `/pull-request`, select the HVE-Core entry, and press **Tab**. Add the preparation-only request before sending:
 
 ```text
+/hve-core:pull-request
+
 Prepare a pull request title and description for the committed changes. Do not publish a pull request or push the branch.
 ```
 
 Expected result:
 - The agent reads the committed diff of your branch, runs quick checks on the changed areas, and shows you a pull request title and description.
 - This is preparation only: nothing is written to GitHub. You do not push until Level 4, so keep the draft as the description for a pull request you open later.
----
-
-# Break
-
-Before leaving your machine, make sure the implementation is committed and tests pass.
-
-Run:
-
-```powershell
-git status
-```
-
-Expected result:
-- Your working tree is clean.
-- Your latest commit contains the reviewed playlist feature.
-
-<div class="tip" data-title="After the break">
-
-> You have built the feature. The rest of the afternoon scales the method that built it, then closes the loop. Keep the playlist implementation as-is unless a later validation command fails.
-
-</div>
 
 ---
 
@@ -1503,13 +1492,20 @@ Expected result:
 
 You will install HVE-Core as a repository-owned APM dependency pinned by commit SHA, audit it, inspect a policy failure, and add a team Copilot plugin marketplace containing local Music Catalog conventions.
 
-**Why this level:** the HVE-Core plugin you installed in Level 1 lives in **your** Copilot environment. Copilot cloud agent and agentic workflows run on GitHub, in a fresh environment built from the repository: they cannot see your personal plugins, settings or `.copilot-tracking\` notes. A colleague who clones the repository cannot see them either. If the method is going to run in Levels 5 and 6, and for the whole team, it has to live in the repository, at a pinned version, under a policy.
+**Why this level:** repository-owned context travels with the code, so colleagues and cloud agents can use the same pinned method and policy.
+
+<details>
+<summary>Why a personal plugin is not enough for a team</summary>
+
+The HVE-Core plugin you installed in Level 1 lives in **your** Copilot environment. Copilot cloud agent and agentic workflows run on GitHub, in a fresh environment built from the repository: they cannot see your personal plugins, settings or `.copilot-tracking\` notes. A colleague who clones the repository cannot see them either. If the method is going to run in Levels 5 and 6, and for the whole team, it has to live in the repository, at a pinned version, under a policy.
 
 | | Personal plugin (Level 1) | Repository dependency (this level) |
 | --- | --- | --- |
 | Who sees it | You, on your machine | Everyone who clones the repository, Copilot cloud agent, agentic workflows |
 | Version | Whatever you installed last | Pinned in `apm.yml` and recorded in `apm.lock.yaml` |
 | Governance | None | Policy and `apm audit` in CI |
+
+</details>
 
 ![APM audit and plugin marketplace](assets/l4-apm-marketplace.png)
 
@@ -1519,19 +1515,13 @@ You will install HVE-Core as a repository-owned APM dependency pinned by commit 
 
 Run from the repository root:
 
-```powershell
-Copy-Item solutions\afternoon-2\apm.yml .\apm.yml
+```bash
+cp solutions/afternoon-2/apm.yml ./apm.yml
 ```
 
 Expected result:
 - `apm.yml` exists at the repository root.
 - It contains the dependency `microsoft/hve-core#1dbd6a7ea90b74accaf8c809262e38952bd4c359`.
-
-<div class="info" data-title="Documented capability plus live verification">
-
-> APM supports GitHub dependencies pinned by ref or SHA. Live verification for this workshop showed that HVE-Core installs successfully when pinned to commit SHA `1dbd6a7ea90b74accaf8c809262e38952bd4c359`; release-tag pins failed for this package version.
-
-</div>
 
 ### Step 2: Install the APM dependency
 
@@ -1546,6 +1536,14 @@ Expected result:
 - `apm.lock.yaml` is created.
 - The lockfile records the resolved commit.
 - The install may take a few minutes.
+
+<div class="warning" data-title="Duplicate agent entries are expected">
+
+> You may now see duplicate agent names in **Copilot CLI** or **VS Code Copilot Chat**. This is expected: the HVE-Core plugin installed in Level 1 and the custom agents now living in your repository are both available. Duplicate entries do not mean the installation failed.
+
+</div>
+
+![VS Code Copilot Chat agent picker showing duplicate HVE-Core agent entries](assets/l4-duplicate-agent-entries.png)
 
 ### Step 3: Inspect the lockfile
 
@@ -1573,8 +1571,8 @@ Expected result:
 
 Run:
 
-```powershell
-Copy-Item solutions\afternoon-2\apm-policy.yml .\apm-policy.yml
+```bash
+cp solutions/afternoon-2/apm-policy.yml ./apm-policy.yml
 ```
 
 Expected result:
@@ -1609,7 +1607,7 @@ apm audit --ci --policy apm-policy.yml
 
 Expected result:
 - The audit passes for the pinned HVE-Core dependency.
-- The `--policy` flag is treated as **experimental** in this workshop because the validated command used the experimental policy path.
+- The policy is enforced directly; no `apm experimental enable` command is needed for this exercise.
 
 <div class="important" data-title="Tighten-only inheritance">
 
@@ -1658,27 +1656,32 @@ apm audit --ci --policy apm-policy.yml
 Expected result:
 - The command fails with exit code `1` because `enforcement: block` denies the installed dependency.
 
-Restore the solution policy:
+In `apm-policy.yml`, change `deny:` back to `allow:`, leaving `"microsoft/hve-core"` in the list. Save the file and rerun:
 
-```powershell
-Copy-Item solutions\afternoon-2\apm-policy.yml .\apm-policy.yml
+```bash
 apm audit --ci --policy apm-policy.yml
 ```
 
 Expected result:
 - The audit passes again.
 
-### Step 5: Discuss CI
+### Step 5: Add the PR audit workflow
 
-APM publishes `microsoft/apm-action@v1` for GitHub Actions. A minimal CI pattern is:
+Copy the solution workflow from the repository root:
 
-```yaml
-- uses: microsoft/apm-action@v1
+```bash
+mkdir -p .github/workflows
+cp solutions/afternoon-2/.github/workflows/apm-audit.yml .github/workflows/apm-audit.yml
 ```
 
+Open `.github/workflows/apm-audit.yml`. It uses `microsoft/apm-action@v1` to set up APM **without reinstalling your packages**, then runs `apm audit --ci --no-cache --policy apm-policy.yml`. This checks the committed files as they are, rather than overwriting drift before checking it. The workflow pins APM `0.33.0`; use the same release locally when regenerating the committed APM outputs.
+
 Expected result:
-- Participants understand that CI can install and audit the declared agent package dependencies.
-- The workshop does not require authoring a new CI workflow now.
+- After the commit checkpoint below pushes the workflow, **APM Audit** runs on `main`.
+- Opening, reopening, or updating any pull request runs the `apm-audit` check; an audit violation fails it.
+- Level 5 makes `apm-audit` required before delegation, after the remaining setup pushes. A workflow alone does not block merging.
+
+See [Enforce in CI](https://microsoft.github.io/apm/enterprise/enforce-in-ci/) and [APM in CI/CD](https://microsoft.github.io/apm/integrations/ci-cd/).
 
 ## Add a team plugin marketplace
 
@@ -1686,27 +1689,26 @@ Expected result:
 
 Run from the repository root:
 
-```powershell
-New-Item -ItemType Directory -Force .github\plugin | Out-Null
-New-Item -ItemType Directory -Force .github\copilot | Out-Null
-Copy-Item solutions\afternoon-2\.github\plugin\marketplace.json .github\plugin\marketplace.json
-Copy-Item solutions\afternoon-2\.github\copilot\settings.json .github\copilot\settings.json
-Copy-Item -Recurse -Force solutions\afternoon-2\plugins .\plugins
+```bash
+mkdir -p .github/plugin .github/copilot plugins
+cp solutions/afternoon-2/.github/plugin/marketplace.json .github/plugin/marketplace.json
+cp solutions/afternoon-2/.github/copilot/settings.json .github/copilot/settings.json
+cp -R solutions/afternoon-2/plugins/. ./plugins/
 ```
 
 Expected result:
-- `.github\plugin\marketplace.json` defines `music-catalog-marketplace`.
-- `.github\copilot\settings.json` defines `extraKnownMarketplaces` and enables `music-catalog-conventions@music-catalog-marketplace`.
-- `plugins\music-catalog-conventions\plugin.json` defines a local plugin with one test-writer agent and one API endpoint skill.
+- `.github/plugin/marketplace.json` defines `music-catalog-marketplace`.
+- `.github/copilot/settings.json` defines `extraKnownMarketplaces` and enables `music-catalog-conventions@music-catalog-marketplace`.
+- `plugins/music-catalog-conventions/plugin.json` defines a local plugin with one test-writer agent and one API endpoint skill.
 
 ### Step 2: Inspect the plugin contents
 
 Open:
 
 ```text
-plugins\music-catalog-conventions\plugin.json
-plugins\music-catalog-conventions\agents\music-catalog-test-writer.agent.md
-plugins\music-catalog-conventions\skills\add-api-endpoint\SKILL.md
+plugins/music-catalog-conventions/plugin.json
+plugins/music-catalog-conventions/agents/music-catalog-test-writer.agent.md
+plugins/music-catalog-conventions/skills/add-api-endpoint/SKILL.md
 ```
 
 Expected result:
@@ -1716,7 +1718,7 @@ Expected result:
 
 ### Step 3: Prepare the marketplace settings
 
-Replace `YOUR-ORG/YOUR-REPO` in `.github\copilot\settings.json` with your repository, for example `octo-user/my-music-catalog`. Copilot CLI registers a GitHub marketplace from the remote repository, so you register it after the commit checkpoint pushes these files.
+Replace `YOUR-ORG/YOUR-REPO` in `.github/copilot/settings.json` with your repository, for example **`<my-user>/AI-SDLC-Workshop`**. Copilot CLI registers a GitHub marketplace from the remote repository, so you register it after the commit checkpoint pushes these files.
 
 Expected result:
 - `extraKnownMarketplaces.music-catalog-marketplace.source.repo` points to your repository.
@@ -1741,14 +1743,15 @@ Run from the repository root:
 
 ```powershell
 git status
-git add apm.yml apm.lock.yaml apm-policy.yml .github plugins\music-catalog-conventions
+git add apm.yml apm.lock.yaml apm-policy.yml .github .agents plugins\music-catalog-conventions
 git commit -m "Add governed HVE and plugin marketplace setup"
 git push
 ```
 
 Expected result:
 - The APM manifest, lockfile, policy, marketplace, settings, and local plugin are committed.
-- The HVE-Core agents, prompts, and skills that APM deployed under `.github` are committed too. Level 5 imports `.github\agents\backlog-manager.agent.md` and selects the RPI Agent from the default branch.
+- The HVE-Core agents, prompts, and instructions under `.github`, and shared skills under `.agents/skills`, are committed too. Level 5 imports `.github\agents\backlog-manager.agent.md` and selects the RPI Agent from the default branch.
+- `.github/workflows/apm-audit.yml` is published, and its **APM Audit** run appears in Actions.
 - No generated workflow lock files are committed in this level.
 - `git status` is clean and your default branch on GitHub contains the marketplace.
 
@@ -1781,9 +1784,19 @@ Expected result:
 
 ## Topic
 
+Run a guarded backlog workflow, prepare the test contract, and delegate one issue to Copilot cloud agent. Inspect the accessibility workflow while the agent works.
+
+**Why this level:** automation can work alongside you. Keep workflow writes limited to declared safe outputs, and keep issue assignment and acceptance as human decisions.
+
+<details>
+<summary>How scheduled workflows and delegated coding fit together</summary>
+
 You will install gh-aw, initialize the repository, copy two workflow source files, and compile them to `.lock.yml`. You will seed the backlog from your own Level 2 and Level 3 artifacts, run the daily backlog workflow, and read the threat model behind it. Then you will make the tests a required check, prepare the agent's environment, and delegate one parallelizable issue to Copilot cloud agent. While it works, you inspect the accessibility workflow pattern. An extended track shows how to delegate a security review to Copilot cloud agent with the HVE-Core Security Reviewer.
 
-**Why this level:** everything so far needed you at the keyboard to start a session. Agentic workflows run on a schedule or on events, and Copilot cloud agent works while you do something else. Both only work because Level 4 put the method in the repository, and both need guardrails because nobody watches them run.
+Everything so far needed you at the keyboard to start a session. Agentic workflows run on a schedule or on events, and Copilot cloud agent works while you do something else. Both only work because Level 4 put the method in the repository, and both need guardrails because nobody watches them run.
+
+</details>
+
 
 ![gh-aw workflow compilation](assets/l5-ghaw-compile.png)
 
@@ -2113,9 +2126,26 @@ Copilot cloud agent reads custom agents and setup steps from the default branch.
 
 Check:
 - `.github\workflows\copilot-setup-steps.yml` is on the default branch, with your build step.
-- HVE-Core RPI Agent files from APM are committed, so they are available on the default branch before you select that custom agent.
+- HVE-Core RPI Agent files and `.agents/skills` from APM are committed, so the agent and its capabilities are available on the default branch.
 - `plugins\music-catalog-conventions` is committed. The agent cannot use your installed plugins, but it can read the plugin files in the repository.
 - Your organization allows Copilot cloud agent.
+
+Wait for **APM Audit** on the latest `main` commit to pass. Then make its `apm-audit` check required:
+
+```bash
+gh api --method POST "repos/{owner}/{repo}/rulesets" --input solutions/afternoon-2/rulesets/main-apm-audit-required.json
+```
+
+Expected result:
+- **Settings > Rules > Rulesets** shows the active **APM audit must pass on main** rule, requiring `apm-audit` on the default branch.
+- This rule has **no bypass list**, including for administrators. It adds to the existing `test` rule; its audit requirement is not bypassed by the test rule's administrator exception.
+- A failed or missing `apm-audit` blocks merging the delegated pull request. Publish any later default-branch changes through a pull request, not a direct push.
+
+<div class="warning" data-title="Required-check permissions">
+
+> Creating a ruleset requires repository administration permission and a GitHub plan that supports rulesets for your repository's visibility. If unavailable, watch the facilitator demonstrate it. A passing workflow is not an enforced merge gate until the rule is active.
+
+</div>
 
 <div class="warning" data-title="Policy-dependent feature">
 
@@ -2176,9 +2206,9 @@ This track follows the HVE-Core [Security Architect guide](https://microsoft.git
 1. Plans controls with **Security Planner**.
 2. Adds supply-chain review with **SSSC Planner**.
 3. Adds **RAI Planner** only when the system has AI components.
-4. Tracks risks with `/risk-register`.
-5. Checks the implementation with `/rpi-review` and **Security Reviewer**.
-6. Uses `/incident-response` in operations.
+4. Tracks risks with `/hve-core:risk-register`.
+5. Checks the implementation with `/hve-core:rpi-review` and **Security Reviewer**.
+6. Uses `/hve-core:incident-response` in operations.
 
 Here, you hand the Security Reviewer run to Copilot cloud agent. The review runs on GitHub instead of on your machine, and comes back as a pull request that a human reviews.
 
@@ -2303,19 +2333,20 @@ The solution workflow `solutions\afternoon-2\.github\workflows\security-review-d
 - **Safe output:** `assign-to-agent` performs the assignment with `custom-agent: security-reviewer`, `target: triggering`, and `max: 1`. The `names: [security-review]` trigger filter is the label gate.
 - **Authentication:** assigning Copilot needs a fine-grained PAT stored as the `GH_AW_AGENT_TOKEN` secret. The PAT needs read access to metadata and write access to actions, contents, issues, and pull requests. The default `GITHUB_TOKEN` and GitHub App tokens are not accepted.
 
-Run from the repository root:
+Run from the repository root on a new branch; the APM rule now protects the default branch:
 
 ```powershell
+git switch -c security-review-delegation
 Copy-Item solutions\afternoon-2\.github\workflows\security-review-delegation.md .github\workflows\security-review-delegation.md
 gh aw compile
 gh label create security-review --description "Delegate a security review to Copilot cloud agent"
 gh secret set GH_AW_AGENT_TOKEN
 git add .github\workflows\security-review-delegation.md .github\workflows\security-review-delegation.lock.yml
 git commit -m "Add label-gated security review delegation"
-git push
+git push -u origin HEAD
 ```
 
-`gh secret set` prompts for the value, so the PAT does not end up in your shell history. Then create a new security review issue, as in Step 2, and add the `security-review` label to it.
+Open a pull request, wait for the required checks, and merge the workflow setup before using the label trigger. `gh secret set` prompts for the value, so the PAT does not end up in your shell history. Then create a new security review issue, as in Step 2, and add the `security-review` label to it.
 
 Expected result:
 - The workflow runs, and Copilot is assigned with Security Reviewer.
@@ -2333,9 +2364,19 @@ Expected result:
 
 ## Topic
 
+Review the delegated pull request against its issue and required checks, with help from the test-writer agent and Copilot code review. Then try the safe push-protection demonstration.
+
+**Why this level:** delegation still needs acceptance evidence. You decide what merges; the automated checks and reviewers support that decision.
+
+<details>
+<summary>How the reviewers and push protection complement each other</summary>
+
 You will review the pull request that Copilot cloud agent opened for the issue you delegated in Level 5. You will follow the agent session, approve and run the required checks, compare the change with the issue, ask your team's test-writer agent for missing tests, and request a Copilot code review. Then you will see how secret scanning push protection stops a leaked credential.
 
-**Why this level:** delegation only pays off when checking the work costs less than doing it. The contract you set in Level 5 (CI, the ruleset and the setup steps) and the reviewers in this level make that check fast and repeatable. A human still decides what merges.
+The contract you set in Level 5 (CI, the ruleset and the setup steps) and the reviewers in this level make the check repeatable. A passing check or generated review does not replace the human merge decision.
+
+</details>
+
 
 ![Copilot cloud agent pull request under review](assets/l6-cloud-agent-pr-review.png)
 
@@ -2555,7 +2596,7 @@ If you ran the extended tracks, you also worked in three roles: as a Product Man
 | Layer | What it did today | Governance point |
 | ----- | ----------------- | ---------------- |
 | DT Coach | Framed the capability and boundaries. | Humans accepted fixed decisions. |
-| PM agents (extended) | BRD Builder, PRD Builder, Functional Planner and Backlog Manager turned decisions into issues. | Planning is read-only; only a confirmed `/backlog-execute` writes to GitHub. |
+| PM agents (extended) | BRD Builder, PRD Builder, Functional Planner and Backlog Manager turned decisions into issues. | Planning is read-only; only a confirmed `/hve-core:backlog-execute` writes to GitHub. |
 | RPI Agent | Sequenced research, plan, implement, review. | Humans gate each phase; tests and commits verified progress. |
 | APM | Installed HVE-Core into the repo with a SHA pin. | `apm.lock.yaml` and policy audit made it reproducible. |
 | Plugin marketplace | Shared Music Catalog conventions. | Marketplace and settings made plugin enablement explicit. |
@@ -2583,8 +2624,8 @@ dotnet test
 
 Then run:
 
-```powershell
-cd src\front
+```bash
+cd src/front
 npm test
 ```
 

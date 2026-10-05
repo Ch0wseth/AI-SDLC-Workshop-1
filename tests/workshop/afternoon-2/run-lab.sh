@@ -91,16 +91,9 @@ tree_clean_check
 finish_step
 
 # ---------------------------------------------------------------- Level 2
-copilot_prompt l2-dt-start "Level 2" "Start the curated DT example (/dt-start-project)" dt-start 900 "--agent hve-core:dt-coach"
+copilot_prompt l2-dt-start "Level 2" "Start the curated DT example (/hve-core:dt-start-project.prompt)" dt-start 900 "--agent hve-core:dt-coach"
 finish_step
 dt_replay_ok=$STEP_CODE
-if [ "$dt_replay_ok" -eq 0 ]; then
-  copilot_prompt l2-dt-brief "Level 2" "Send the published DT project brief" dt-brief 900 "--continue --agent hve-core:dt-coach"
-  finish_step
-  dt_replay_ok=$STEP_CODE
-else
-  skip_step l2-dt-brief "Level 2" "Send the published DT project brief" "DT startup failed"
-fi
 for number in $(seq -w 1 9); do
   number=$(printf '%02d' "$((10#$number))")
   if [ "$dt_replay_ok" -eq 0 ]; then
@@ -174,10 +167,7 @@ skip_step l2-pm-track "Level 2" "Extended track: Product Manager (BRD, PRD, Func
   "BRD draft example replayed separately; PRD and backlog execution wait for human BRD sign-off; Meeting Analyst needs Microsoft 365 and WorkIQ"
 
 # ---------------------------------------------------------------- Level 3
-copilot_prompt l3-research-command "Level 3" "Activate RPI research" rpi-research-command 900
-finish_step
-[ "$STEP_CODE" -eq 0 ] || exit 1
-copilot_prompt l3-research "Level 3" "Send RPI research task" rpi-research 1800 --continue
+copilot_prompt l3-research "Level 3" "RPI research command and task" rpi-research 1800 "--agent hve-core:rpi-agent"
 if RPI_RESEARCH_PATH=$(resolve_rpi_artifact research "$RESULTS_DIR/steps/$STEP_ID.log"); then
   RPI_TASK_SLUG=$(basename "$RPI_RESEARCH_PATH" -research.md)
   export RPI_RESEARCH_PATH
@@ -189,10 +179,7 @@ tree_clean_check
 finish_step
 [ "$STEP_CODE" -eq 0 ] && [ -n "$RPI_RESEARCH_PATH" ] || exit 1
 
-copilot_prompt l3-plan-command "Level 3" "Activate RPI plan" rpi-plan-command 900 --continue
-finish_step
-[ "$STEP_CODE" -eq 0 ] || exit 1
-copilot_prompt l3-plan "Level 3" "Send RPI plan task" rpi-plan 1800 --continue
+copilot_prompt l3-plan "Level 3" "RPI plan command and task" rpi-plan 1800 "--continue --agent hve-core:rpi-agent"
 if RPI_PLAN_PATH=$(resolve_rpi_artifact plan "$RESULTS_DIR/steps/$STEP_ID.log" "$RPI_TASK_SLUG"); then
   export RPI_PLAN_PATH
   check "plan belongs to the research task" true "$RPI_PLAN_PATH"
@@ -206,10 +193,7 @@ finish_step
 [ "$STEP_CODE" -eq 0 ] && [ -n "$RPI_PLAN_PATH" ] || exit 1
 
 implementation_base=$(git rev-parse HEAD) || exit 1
-copilot_prompt l3-implement-command "Level 3" "Activate RPI implementation" rpi-implement-command 900 --continue
-finish_step
-[ "$STEP_CODE" -eq 0 ] || exit 1
-copilot_prompt l3-implement "Level 3" "Send RPI implementation task" rpi-implement 3600 --continue
+copilot_prompt l3-implement "Level 3" "RPI implement command and task" rpi-implement 3600 "--continue --agent hve-core:rpi-agent"
 if RPI_CHANGES_PATH=$(resolve_rpi_artifact changes "$RESULTS_DIR/steps/$STEP_ID.log" "$RPI_TASK_SLUG"); then
   export RPI_CHANGES_PATH
   check "changes record belongs to the approved plan" true "$RPI_CHANGES_PATH"
@@ -271,10 +255,7 @@ tree_clean_check
 finish_step
 
 review_base=$(git rev-parse HEAD) || exit 1
-copilot_prompt l3-review-command "Level 3" "Activate RPI review" rpi-review-command 900 --continue
-finish_step
-[ "$STEP_CODE" -eq 0 ] || exit 1
-copilot_prompt l3-review "Level 3" "Send RPI review task" rpi-review 2400 --continue
+copilot_prompt l3-review "Level 3" "RPI review command and task" rpi-review 2400 "--continue --agent hve-core:rpi-agent"
 if review_path=$(resolve_rpi_artifact review "$RESULTS_DIR/steps/$STEP_ID.log" "$RPI_TASK_SLUG"); then
   check "review belongs to the implemented task" true "$review_path"
 else
@@ -294,10 +275,6 @@ finish_step
 
 skip_step l3-tech-lead "Level 3" "Tech Lead extension (ADR Creator, Code Review agent, /git-commit)" \
   "extended track: human-gated agents that pause for scope and perspective confirmation"
-
-step break-status "Break" "Working tree clean before the break" literal 30 'git status'
-tree_clean_check
-finish_step
 
 # ---------------------------------------------------------------- Level 4
 step l4-copy-apm "Level 4" "Copy the solution manifest" translated 30 'cp solutions/afternoon-2/apm.yml ./apm.yml && cat apm.yml'
@@ -335,12 +312,18 @@ finish_step
 step l4-deny-audit "Level 4" "Policy audit fails with exit code 1" literal 1200 'apm audit --ci --policy apm-policy.yml'
 finish_step 1
 
-step l4-restore-policy "Level 4" "Restore the solution policy and audit again" translated 1200 \
-  'cp solutions/afternoon-2/apm-policy.yml ./apm-policy.yml && apm audit --ci --policy apm-policy.yml'
+step l4-restore-policy "Level 4" "Change the dependency deny rule back to allow and audit again" translated 1200 \
+  "sed -i 's/^  deny:/  allow:/' apm-policy.yml && apm audit --ci --policy apm-policy.yml"
+finish_step
+
+step l4-copy-apm-ci "Level 4" "Copy the PR audit workflow" literal 30 \
+  'mkdir -p .github/workflows && cp solutions/afternoon-2/.github/workflows/apm-audit.yml .github/workflows/apm-audit.yml'
+grep -q 'microsoft/apm-action@v1' .github/workflows/apm-audit.yml \
+  && check "PR audit uses the APM action" true || check "PR audit uses the APM action" false
 finish_step
 
 step l4-copy-marketplace "Level 4" "Copy marketplace files" translated 30 \
-  'mkdir -p .github/plugin .github/copilot && cp solutions/afternoon-2/.github/plugin/marketplace.json .github/plugin/marketplace.json && cp solutions/afternoon-2/.github/copilot/settings.json .github/copilot/settings.json && cp -R solutions/afternoon-2/plugins ./plugins'
+  'mkdir -p .github/plugin .github/copilot plugins && cp solutions/afternoon-2/.github/plugin/marketplace.json .github/plugin/marketplace.json && cp solutions/afternoon-2/.github/copilot/settings.json .github/copilot/settings.json && cp -R solutions/afternoon-2/plugins/. ./plugins/'
 grep -q 'music-catalog-marketplace' .github/plugin/marketplace.json && check "marketplace.json defines music-catalog-marketplace" true || check "marketplace.json defines music-catalog-marketplace" false
 [ -f plugins/music-catalog-conventions/plugin.json ] && check "local plugin.json present" true || check "local plugin.json present" false
 for f in agents/music-catalog-test-writer.agent.md skills/add-api-endpoint/SKILL.md; do
@@ -363,7 +346,7 @@ push_fallback() {
 }
 
 step l4-commit "Level 4" "Commit and push governed HVE and marketplace setup" translated 300 \
-  'git status; git add apm.yml apm.lock.yaml apm-policy.yml .github plugins/music-catalog-conventions && git commit -m "Add governed HVE and plugin marketplace setup" && git push'
+  'git status; git add apm.yml apm.lock.yaml apm-policy.yml .github .agents plugins/music-catalog-conventions && git commit -m "Add governed HVE and plugin marketplace setup" && git push'
 push_fallback l4-commit
 git ls-files --error-unmatch .github/workflows/daily-backlog.lock.yml >/dev/null 2>&1 \
   && check "no workflow lock files committed in Level 4" false || check "no workflow lock files committed in Level 4" true
@@ -522,6 +505,26 @@ grep -q 'dotnet build MusicCatalog.slnx --no-restore' .github/workflows/copilot-
   && check "setup steps build the API" true || check "setup steps build the API" false
 note "manual YAML edit replaced by an awk insertion after the npm ci step"
 finish_step
+
+step l5-apm-ci "Level 5" "Wait for the audit on the latest main commit" translated 600 "
+  expected_sha=\$(git rev-parse HEAD)
+  apm_run=''
+  for _ in \$(seq 1 30); do
+    apm_run=\$(gh run list -R '$SANDBOX_REPO' --workflow apm-audit.yml --branch main --limit 5 \
+      --json databaseId,headSha --jq \"[.[] | select(.headSha == \\\"\$expected_sha\\\")][0].databaseId // empty\")
+    [ -n \"\$apm_run\" ] && break
+    sleep 10
+  done
+  [ -n \"\$apm_run\" ] || { echo 'No APM Audit run found for the latest main commit'; exit 1; }
+  gh run watch \"\$apm_run\" -R '$SANDBOX_REPO' --exit-status
+"
+finish_step
+
+step l5-apm-gate-config "Level 5" "Verify the strict APM required-check rule" translated 30 \
+  'node -e '"'"'const fs=require("fs");const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const ok=r.target==="branch"&&r.enforcement==="active"&&r.bypass_actors.length===0&&r.conditions.ref_name.include.includes("~DEFAULT_BRANCH")&&r.rules.some(x=>x.type==="required_status_checks"&&x.parameters.required_status_checks.some(c=>c.context==="apm-audit"));process.exit(ok?0:1)'"'"' solutions/afternoon-2/rulesets/main-apm-audit-required.json'
+finish_step
+skip_step l5-apm-ruleset "Level 5" "Require the apm-audit check before delegation" \
+  "needs Administration permission; the strict solution JSON is checked, but live merge enforcement is not simulated"
 
 step l5-prereqs "Level 5" "Confirm default-branch prerequisites" translated 120 \
   "gh api repos/$SANDBOX_REPO/contents/.github/workflows/copilot-setup-steps.yml --jq .path; gh api repos/$SANDBOX_REPO/contents/.github/agents --jq '.[].name' || true"

@@ -68,6 +68,12 @@ After a DT or RPI handoff settles scope or product direction:
 
 Gate: the approved, necessary design direction is present in a reviewed, reader-facing repository document; raw working notes remain private; unresolved assumptions and questions are labeled as such. Treat HVE-Core as a reference source, not a contribution target; do not propose or create upstream HVE-Core work unless the user explicitly asks for an upstream contribution.
 
+## Lab authoring capability
+
+Before creating or restructuring attendee guides, activate `workshop-authoring` and read #file:../skills/workshop-authoring/SKILL.md. It owns the documented progressive-disclosure decision: concise introductions with optional depth, while the required learning path stays visible. Pass its acceptance criteria to the Lab content handoff rather than duplicating its rules in every prompt.
+
+If the skill cannot be loaded, stop content authoring and name the missing artifact. This does not block unrelated blueprint or delivery work.
+
 ## Guardrails
 
 Apply these to every artifact and pass them to every handoff:
@@ -119,7 +125,7 @@ Offer **Implement next phase with RPI** for the content, one session per pass. F
 
 For Codespaces, take network requirements from `gh api meta` (`.domains.codespaces`, plus `.domains.website` and `.domains.copilot` for Copilot) and the official allowlist and troubleshooting pages. Note that an organization IP allow list blocks Codespaces.
 
-Gate: the docs are merged, and the guides' prompts extract cleanly with the session's extraction script.
+Gate: the docs are merged, meet the `workshop-authoring` reading-path criteria, and the guides' prompts extract cleanly with the session's extraction script.
 
 ### 4. Prebuilt dev container image
 

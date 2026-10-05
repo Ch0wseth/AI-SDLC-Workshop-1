@@ -60,8 +60,8 @@ In the recap, walk the autonomy ladder explicitly and point out that the upstrea
 | 0:40 | Level 2 Curate what you commit | 10 | Reviewed delivery brief saved, curated files committed, `.copilot-tracking` ignored | Inspect the staged file tree; commit only reviewed planning documents |
 | 0:50 | Level 3 RPI, with context engineering and the duplicate-add decision | 65 | Playlist feature merged, tests green, decision debriefed | Share your finished branch; keep the 5-minute decision debrief |
 | 1:55 | Break | 10 | Implementation committed, tests pass | |
-| 2:05 | Level 4 APM, policy and marketplace | 30 | Lockfile committed and policy audited | Start `apm install` first, explain the lockfile and policy while it runs; demo the audit from recordings |
-| 2:35 | Level 5 Agentic workflows and delegation | 50 | Backlog summary issue created, CI and ruleset in place, one issue assigned to Copilot cloud agent | Show a prerecorded backlog run; assign the issue before anything else if time is short |
+| 2:05 | Level 4 APM, policy and marketplace | 30 | Lockfile and deployed skills committed; policy and PR audit workflow in place | Start `apm install` first, explain the lockfile and policy while it runs; demo the audit from recordings |
+| 2:35 | Level 5 Agentic workflows and delegation | 50 | Backlog summary issue created, `test` and `apm-audit` required, one issue assigned to Copilot cloud agent | Show a prerecorded backlog run; finish setup pushes before enabling the strict APM rule |
 | 3:25 | Level 6 Review the delegated work, code review and push protection | 20 | Delegated pull request reviewed with the test-writer agent and Copilot code review | Show a prerecorded pull request and review; always demo push protection yourself |
 | 3:45 | Recap and architect capstone | 15 | | Keep the recap to 5 minutes and run the capstone as a discussion |
 | 4:00 | End | | | |
@@ -135,5 +135,5 @@ Rules for the tracks:
 - Keep units distinct. Tokens, AI credits, legacy premium requests and external API cost are **different** units.
 - Never state that Auto, HydraFusion or harness choice is the cheapest option. Measure actual usage instead. This applies to the model decision guide in the architect capstone too.
 - Present HydraFusion as a **Research Preview** only.
-- Present `apm audit --policy` as **experimental**.
+- Policy auditing needs no `apm experimental enable` step. Upstream documentation labels `--policy` experimental; distinguish that maturity label from an activation requirement.
 - Present the import of HVE agents into gh-aw as a **workshop pattern**, not a product feature.

@@ -29,27 +29,26 @@ for (let i = 0; i < lines.length; i++) {
 
 const byFirstLine = (prefix) => blocks.find((b) => b.body.startsWith(prefix));
 const byLead = (lead) => blocks.find((b) => b.lead === lead);
-const taskAfterCommand = (command) => {
-  const index = blocks.findIndex((block) => block.body === command);
-  const task = blocks[index + 1];
-  return index >= 0 && task?.section === blocks[index].section && !task.body.startsWith('/') ? task : undefined;
-};
+
+for (const block of blocks.filter((b) => b.body.startsWith('/hve-core:'))) {
+  const invocation = block.body.match(/^(\/hve-core:[\w.-]+)(?:[ \t]+|\n)([\s\S]+)$/);
+  if (!invocation || !invocation[2].trim()) {
+    console.error(`HVE invocation must include its command and task in one block: ${block.body.split('\n')[0]}`);
+    process.exit(1);
+  }
+}
 
 const wanted = {
-  'dt-start': byFirstLine('/dt-start-project'),
-  'dt-method-next-command': byFirstLine('/hve-core:dt-method-next.prompt'),
-  'dt-brief': byFirstLine('Project name: Music Catalog listening experience'),
+  'dt-start': byFirstLine('/hve-core:dt-start-project.prompt'),
+  'dt-method-next': byFirstLine('/hve-core:dt-method-next.prompt'),
   'dt-summary': byFirstLine('Summarize the final decisions'),
   'dt-record': byFirstLine('Write a curated Design Thinking decision record'),
   'brd-start': byFirstLine('Create a business requirements document for the Music Catalog playlist slice.'),
-  'rpi-research-command': byFirstLine('/rpi-research'),
-  'rpi-research': taskAfterCommand('/rpi-research'),
-  'rpi-plan-command': byFirstLine('/rpi-plan'),
-  'rpi-plan': taskAfterCommand('/rpi-plan'),
-  'rpi-implement-command': byFirstLine('/rpi-implement'),
-  'rpi-implement': taskAfterCommand('/rpi-implement'),
-  'rpi-review-command': byFirstLine('/rpi-review'),
-  'rpi-review': taskAfterCommand('/rpi-review'),
+  'adr-author': byFirstLine('/hve-core:adr-author'),
+  'rpi-research': byFirstLine('/hve-core:rpi-research'),
+  'rpi-plan': byFirstLine('/hve-core:rpi-plan'),
+  'rpi-implement': byFirstLine('/hve-core:rpi-implement'),
+  'rpi-review': byFirstLine('/hve-core:rpi-review'),
   'issue-title': byLead('Title:'),
   'issue-problem': byLead('Problem statement:'),
   'issue-outcome': byLead('Expected outcome:'),

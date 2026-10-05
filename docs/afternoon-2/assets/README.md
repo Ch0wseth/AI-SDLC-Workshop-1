@@ -12,7 +12,9 @@ This folder intentionally contains placeholders referenced by `docs\afternoon-2\
 - `l2-sprint-planner.png` — Supplied workshop-run screenshot of sprint planning output: text-derived dependencies, implementation order, and parallel work waves. This is a captured example, not a placeholder or a required issue hierarchy.
 - `l3-rpi-agent-walkthrough.png` — RPI Agent output showing Research, Plan, Implement, and Review phases.
 - `l3-playlist-implemented.png` — Browser view of the implemented track list and playlist panel.
+- `l3-frontend-ports.png` — Supplied VS Code Ports screenshot showing the private forwarded API and frontend addresses. Open the frontend row's address for the current environment; the pictured URL is only an example.
 - `l4-apm-marketplace.png` — Terminal output for APM install or audit plus repository marketplace files.
+- `l4-duplicate-agent-entries.png` — Supplied VS Code Copilot Chat agent-picker screenshot showing duplicate HVE-Core names when both the plugin and repository custom agents are available. This is expected, not an installation failure.
 - `l4-vscode-agentplugins.png` — VS Code Extensions view filtered with `@agentPlugins @recommended`.
 - `l5-ghaw-compile.png` — Terminal output from `gh aw compile` generating lock files.
 - `l5-daily-backlog-issue.png` — GitHub issue created by the daily backlog workflow with recommended order and parallelizable work.

@@ -20,6 +20,7 @@ The attendee guides (`docs/afternoon-*/workshop.md`) only contain what attendees
 | `tests/workshop/afternoon-2/` | Workshop tester scripts that replay the AI SDLC lab |
 | `.github/devcontainer-image/` | Prebuilt devcontainer image definition |
 | `.github/agents/workshop-creator.agent.md` | Workshop Creator agent: reproduces this repository's creation path for a new workshop, with handoffs to the HVE-Core DT Coach, RPI Agent and PowerPoint Builder |
+| `.github/skills/workshop-authoring/SKILL.md` | Workshop Creator's progressive-disclosure rules for concise introductions, optional depth, and a visible hands-on path |
 
 ## MOAW conventions
 
@@ -34,6 +35,7 @@ The guides are published with [MOAW](https://github.com/microsoft/moaw/blob/main
 - Use MOAW boxes: `<div class="tip|info|warning|task" data-title="...">` with `>`-quoted content.
 - **No time codes in the attendee guides.** Put durations, start times and "if late" fallbacks in [docs/tutor.md](docs/tutor.md).
 - Keep facilitator-only and maintainer-only instructions out of the attendee guides.
+- Apply [Workshop Authoring](.github/skills/workshop-authoring/SKILL.md) when creating or restructuring introductions: keep the required path visible and make deeper explanations optional.
 - Follow the messaging guardrails in [docs/tutor.md](docs/tutor.md#messaging-guardrails): no prices or quotas, keep usage units distinct, HydraFusion is a Research Preview, `apm audit --policy` is experimental.
 - Use current product names (for example **Copilot cloud agent**, formerly Copilot coding agent) and link to official documentation rather than restating it.
 - Use synthetic data only.
