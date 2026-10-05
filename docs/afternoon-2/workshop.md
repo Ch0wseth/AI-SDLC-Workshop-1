@@ -496,23 +496,23 @@ If your instructions refer to `/agents`, check `/help` for the command supported
 
 Choose a listening situation you want to explore: a commute, focused work, a shared evening, or your own example. These are starting points, not personas or validated research. Set your own 10–15 minute timer; the coach cannot reliably enforce elapsed time.
 
-Copy paste the following prompt:
+First, invoke the project-start prompt and let DT Coach respond:
 
 ```text
 /dt-start-project
+```
 
+Then send this short project brief as a separate message:
+
+```text
 Project name: Music Catalog listening experience
 Starting question: How might we help someone choose music for a listening moment?
 Help me brainstorm and sample all nine HVE Design Thinking methods within a 10–15 minute learning exercise. I will manage the timer.
-Ask me first who I want to design for and in what situation. Do not choose the persona, problem, or solution for me.
-For each method, explain its purpose in one sentence, then give me one small activity or focused question. Wait for my answer before moving on.
-Let me contribute and challenge ideas; help me diverge before converging. Do not assume a playlist is the best solution.
-Keep responses short. If I say "next method", summarize what we learned and move on within this sampler. If I say "timebox", summarize the current method and give a brief guided preview of the remaining methods.
-For Design Research, use only observations I provide; label assumptions and fictional role-play explicitly. For prototyping, use a text sketch and a plan, not application code. For User Testing, use a peer walkthrough if available or write a test plan; do not invent results. For Iteration at Scale, propose what we would measure and revisit, not a rollout.
-Record each method as sampled, simulated, planned, or not reached. Do not claim that the full method gates passed.
-Expected output: my chosen problem framing, alternative ideas, a concept sketch, assumptions, a testing/iteration plan, and an honest nine-method coverage recap.
-You may create or update local working notes only under .copilot-tracking/. Do not create or modify files elsewhere, including application code, tests, or published documentation.
 ```
+
+**Now follow the chat for the next 10 minutes.** Read DT Coach's responses, answer its questions in your own words, contribute ideas, and ask follow-up questions. Do not just paste the brief and move to the next lab step: the conversation is the exercise. If time allows, continue up to 15 minutes, then use the recap in Step 4.
+
+You do not need to prescribe the coach's process. Keep any working-note edits limited to `.copilot-tracking/`; application code, tests, and published documentation stay unchanged during exploration.
 
 Expected result:
 - You supply the user/context and make choices rather than accepting a prewritten feature definition.
