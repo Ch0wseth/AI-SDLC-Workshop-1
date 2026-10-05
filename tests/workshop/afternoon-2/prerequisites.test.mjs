@@ -213,6 +213,11 @@ test('dev container provisions remote GitHub MCP while the lab retains authoriza
   assert.match(setup, /complete GitHub sign-in/);
   assert.match(setup, /without changing anything/);
   assert.match(setup, /cannot pre-authorize your account/);
+  assert.match(setup, /export COPILOT_GITHUB_TOKEN="\$GITHUB_TOKEN"/);
+  assert.match(setup, /same Bash terminal/);
+  assert.match(setup, /GitHub App user-to-server token/);
+  assert.match(setup, /Use the GitHub MCP tools to identify my signed-in GitHub account/);
+  assert.match(setup, /does \*\*not\*\* authenticate a separately configured VS Code HTTP MCP server/);
   assert.match(setup, /MCP: List Servers > github > Start Server/);
   assert.match(setup, /complete the browser authorization/);
   assert.match(setup, /Not automatically with this HTTP configuration/);

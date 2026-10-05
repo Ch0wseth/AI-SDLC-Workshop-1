@@ -779,6 +779,34 @@ copilot --enable-all-github-mcp-tools --model auto --auto-tier intelligence
 
 Run `/mcp` to check the GitHub server is enabled and connected. Complete Copilot sign-in if prompted. Enabling tools does not grant repository permissions: use the account that owns your workshop copy and confirm each proposed write.
 
+**Copilot CLI in a Codespace: reuse an existing terminal credential.** If `GITHUB_TOKEN` is already available in your terminal, you can explicitly pass it to Copilot without printing it or creating a token file. Run this from the repository root in **that same Bash terminal** (not PowerShell or a separate agent terminal):
+
+```bash
+(
+  : "${GITHUB_TOKEN:?GITHUB_TOKEN is not available in this terminal; use Copilot sign-in instead}"
+  export COPILOT_GITHUB_TOKEN="$GITHUB_TOKEN"
+  copilot --enable-all-github-mcp-tools --model auto --auto-tier intelligence
+)
+```
+
+The parentheses limit the exported override to this launch and its child processes. Terminals and already-running processes do not necessarily share environment changes. A `ghu_` prefix identifies a **GitHub App user-to-server token**, not proof that all required permissions are granted; there is no need to create a PAT merely to try this supported token type.
+
+In the new Copilot session, run:
+
+```text
+/mcp
+```
+
+Check that **`github-mcp-server`** (or the GitHub server name shown by your version) is enabled and connected. Then send:
+
+```text
+Use the GitHub MCP tools to identify my signed-in GitHub account.
+```
+
+Confirm that it reports the account that owns or can access your workshop repository, then perform the read-only open-issues check below. The built-in server remains available across conversation turns in this CLI session; for later launches, repeat the command from a terminal where `GITHUB_TOKEN` is available. This does **not** authenticate a separately configured VS Code HTTP MCP server.
+
+If startup, `/mcp`, or the account query fails, the connection is not verified. Share only the error message with credentials redacted—**never paste the token into chat**. A token may be expired, restricted, or unsuitable for the requested operation despite its supported type. Explicit `COPILOT_GITHUB_TOKEN` overrides stored sign-in; exit this launch and use the regular Copilot `/login` flow if that credential cannot authorize access. See [Copilot CLI authentication](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/authenticate-copilot-cli) for supported tokens and precedence.
+
 **VS Code in a Codespace or dev container:** this repository's `.devcontainer.json` declares the remote GitHub MCP server under `customizations.vscode.mcp`. VS Code provisions its configuration when the container is created; it is a remote service, not an executable installed in the container image. If your existing container predates this configuration, rebuild it or use the manual setup below.
 
 **VS Code with local tools, or if the server is missing:**
