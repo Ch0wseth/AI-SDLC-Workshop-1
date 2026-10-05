@@ -355,9 +355,9 @@ ISSUE_NUMBER=${ISSUE_URL##*/}
 [ -n "$ISSUE_NUMBER" ] && check "issue created" true "$ISSUE_URL" || check "issue created" false
 finish_step
 
-step l5-seed-issues "Level 5" "Turn deferred review findings into issues (fallback issues)" translated 120 \
+step l5-seed-issues "Level 5" "Turn deferred review findings into issues" translated 120 \
   "gh issue create -R $SANDBOX_REPO --title 'Show track count in the playlist panel' --body 'Display the number of tracks currently in the in-memory playlist.' && gh issue create -R $SANDBOX_REPO --title 'Add an API test for an unknown track id' --body 'Cover adding an unknown track id to the playlist with an xUnit test.'"
-note "-R added so gh targets the sandbox repository explicitly; the tester uses the lab's fallback issues instead of parsing the Level 3 review for a deferred finding"
+note "-R added so gh targets the sandbox repository explicitly; the tester creates two synthetic review-finding issues instead of parsing the Level 3 review for a deferred finding"
 seeded=$(gh issue list -R "$SANDBOX_REPO" --state open --json number --jq 'length' 2>/dev/null)
 [ "${seeded:-0}" -ge 3 ] && check "at least three open issues" true "open=$seeded" || check "at least three open issues" false "open=${seeded:-unknown}"
 finish_step

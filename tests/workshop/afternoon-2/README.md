@@ -118,7 +118,7 @@ See the official GitHub billing documentation for current rates; this repository
 - Level 0 Step 1 offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
 - Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Copilot cloud agent PR JSON, the Copilot code review JSON).
 - Level 5 delegation differs from the attendee path in three places:
-  - The feature request is created with `gh issue create` and the lab's field labels, and the deferred review finding is replaced by the lab's two fallback issues.
+  - The feature request is created with `gh issue create` and the lab's field labels, and the deferred review finding is replaced by two synthetic review-finding issues.
   - The branch ruleset (`l5-ruleset`) is always recorded as skipped, because the sandbox-scoped token has no Administration permission. The solution JSON is checked statically, and the CI run on `main` is checked live.
   - The issue is assigned whether or not the backlog summary lists it under **Can be developed in parallel**. The tester records where the summary placed it as a note.
 - In Level 6, approving the workflows on the Copilot pull request (`l6-approve-checks`) and the test-writer pass (`l6-test-writer`) are always recorded as skipped: both are interactive.

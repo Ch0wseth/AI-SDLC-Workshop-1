@@ -1825,13 +1825,6 @@ Open the Level 3 review output: the newest review file under `.copilot-tracking\
 gh issue create --title "Review finding: SHORT-TITLE" --body "Deferred from the Level 3 RPI review. Finding: WHAT-AND-WHERE. Smallest fix: SMALLEST-FIX."
 ```
 
-If your review deferred nothing, create these two issues instead. They are typical review findings for this slice:
-
-```powershell
-gh issue create --title "Show track count in the playlist panel" --body "Display the number of tracks currently in the in-memory playlist."
-gh issue create --title "Add an API test for an unknown track id" --body "Cover adding an unknown track id to the playlist with an xUnit test."
-```
-
 Expected result:
 - `gh issue list` shows at least two open issues, all traced to a decision or a review you made.
 - If you ran the Level 2 Product Manager track, its issues are in the backlog too. Any issues you closed from a commit are no longer open.
@@ -1893,10 +1886,7 @@ Before you delegate, two things must be true. The agent's work must be checked b
 
 ### Step 1: Choose the issue
 
-In the summary issue, look at **Can be developed in parallel**. The instructions in Step 5 are written for the **Remove a track from the playlist** issue.
-
-- If the summary lists it in a parallel group, choose it.
-- If the summary puts it under **Needs a human decision**, or after a dependency, read the reason. That is the workflow doing its job. If the reason is not a real blocker, delegate it anyway and tell your facilitator what the workflow said.
+In the summary issue, look at **Can be developed in parallel**. Choose the **Remove a track from the playlist** issue from the parallel group. The instructions in Step 5 are written for it.
 
 Expected result:
 - You know the number of the issue you will delegate, and why it can be developed in parallel.
@@ -1913,7 +1903,7 @@ git commit -m "Add CI for API and front-end tests"
 git push
 ```
 
-Open the **Actions** tab and wait for the **CI** run on `main` to pass. Then create a branch ruleset that requires its `test` job on the default branch. Creating a ruleset needs the admin role and your own login: in a Codespace, run `Remove-Item Env:GITHUB_TOKEN` (or `unset GITHUB_TOKEN` in bash) first, because the Codespace token cannot administer the repository.
+Open the **Actions** tab and wait for the **CI** run on `main` to pass. Then create a branch ruleset that requires its `test` job on the default branch.
 
 ```powershell
 gh api --method POST "repos/{owner}/{repo}/rulesets" --input solutions\afternoon-2\rulesets\main-tests-required.json
@@ -1926,7 +1916,7 @@ Expected result:
 
 <div class="warning" data-title="Workshop shortcut">
 
-> In a real team, keep the bypass list short and audited, and add required reviews. Rulesets on private repositories depend on your plan. If `gh api` returns 403 "Resource not accessible by integration", you are still using the Codespace token: clear it as shown above, or import the JSON file from **Settings > Rules > Rulesets > New ruleset > Import a ruleset**. If it reports that the feature is not available, watch the facilitator demo and continue: the CI run still reports on the pull request.
+> In a real team, keep the bypass list short and audited, and add required reviews.
 
 </div>
 
