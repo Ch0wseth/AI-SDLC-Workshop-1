@@ -257,7 +257,7 @@ Enterprise policies take precedence: if an enterprise owner has set a policy, th
 | --- | --- | --- | --- |
 | Copilot | Seats assigned to every attendee | A1, A2 | Required for all Copilot features |
 | Copilot | Copilot in the CLI enabled | A1 (Levels 8–9), A2 | Copilot CLI is used in both afternoons |
-| Copilot | **Copilot cloud agent** (formerly coding agent) enabled, and allowed on the attendees' repositories | A1 (Level 6), A2 (Level 6) | Delegating an issue to Copilot |
+| Copilot | **Copilot cloud agent** (formerly coding agent) enabled, and allowed on the attendees' repositories | A1 (Level 6), A2 (Levels 5 and 6) | Delegating an issue to Copilot |
 | Copilot | **Copilot code review** enabled in the Copilot policies | A2 (Level 6) | Reviewing the Copilot cloud agent pull request |
 | Copilot | Models policy reviewed: the models you plan to demonstrate are enabled | A1, A2 | Auto model selection only picks from models your policies allow |
 | Copilot | Preview features allowed, if you plan to demonstrate preview features | A2 | Some Afternoon 2 features are previews |
@@ -266,10 +266,11 @@ Enterprise policies take precedence: if an enterprise owner has set a policy, th
 | Codespaces | Codespaces enabled for the attendees on private repositories | A2 (and A1 if forks are private) | Option 1 |
 | Codespaces | Organization **IP allow list** not enabled (it disables codespace creation) | A1, A2 | Option 1; otherwise use Option 2 or 3 |
 | Codespaces | Billing ownership chosen (organization or user), spending limit set, and machine-type, idle-timeout and retention policies reviewed | A1, A2 | Avoid blocked Codespace creation on the day |
-| Actions | GitHub Actions enabled on attendee repositories | A2 | gh-aw workflows and the cloud agent setup steps |
+| Actions | GitHub Actions enabled on attendee repositories | A2 | gh-aw workflows, the CI workflow and the cloud agent setup steps |
 | Actions | Allowed actions include `actions/*` and `github/gh-aw-actions/*` (or all actions) | A2 | Used by the compiled `.lock.yml` workflows and by `copilot-setup-steps.yml` |
 | Actions | Workflow permissions allow the workflows to create issues and comments, or the workflow files declare them | A2 | gh-aw safe outputs |
 | Repositories | Members can create private repositories and can use template repositories; forking of public repositories allowed (A1) | A1, A2 | Fork for Afternoon 1, template copy for Afternoon 2 |
+| Repositories | Repository rulesets available on the attendees' private repositories, and attendees keep the admin role on their own copy | A2 (Level 5) | The branch ruleset that requires the `test` check before delegation; without it, the facilitator demos it |
 | Packages | Members can pull public images from `ghcr.io` | A2 | The prebuilt dev container image |
 | Code security | Optional: **GitHub Secret Protection** available for the attendees' private repositories, and repository administrators allowed to enable it and add custom patterns | A2 (Level 6) | Push protection demo; without it, the facilitator demos it |
 | Extended tracks | Optional: the MCP servers policy allows the GitHub MCP server, so attendees can create issues and sub-issues with Backlog Manager | A2 (Level 2 Product Manager track) | `/backlog-execute` writes issues through the GitHub MCP server |

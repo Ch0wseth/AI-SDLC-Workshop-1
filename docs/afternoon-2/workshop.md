@@ -3,12 +3,12 @@ published: false
 type: workshop
 title: 'AI SDLC with GitHub and GitHub Copilot'
 short_title: AI SDLC with GitHub Copilot
-description: Build a governed Music Catalog feature with HVE-Core, Design Thinking, RPI, APM, GitHub Copilot plugins, gh-aw workflows, and Coding Agent.
+description: Build a governed Music Catalog feature with HVE-Core, Design Thinking, RPI, APM, GitHub Copilot plugins, gh-aw workflows, and Copilot cloud agent.
 level: intermediate
 authors: [Julien Strebler]
 contacts: ['@justrebl']
 duration_minutes: 240
-tags: github copilot, hve-core, rpi, design thinking, apm, agentic workflows, coding agent, plugins, accessibility
+tags: github copilot, hve-core, rpi, design thinking, apm, agentic workflows, copilot cloud agent, plugins, accessibility
 banner_url: assets/banner.png
 navigation_levels: 3
 navigation_numbering: false
@@ -20,8 +20,8 @@ sections_title:
   - 'Level 3: RPI implementation loop'
   - 'Break'
   - 'Level 4: APM, policy and plugin marketplace'
-  - 'Level 5: Agentic workflows with gh-aw'
-  - 'Level 6: Coding Agent delegation'
+  - 'Level 5: Agentic workflows and delegation'
+  - 'Level 6: Review the delegated work'
   - 'Recap: Governed agentic SDLC'
   - 'Extra Credits 🪙'
 ---
@@ -32,14 +32,20 @@ sections_title:
 
 Welcome to this workshop. It follows **GitHub Copilot Zero to Hero**: there you used Copilot primitives one at a time. Here you combine them into a governed, AI-assisted software development lifecycle (SDLC) for a real repository.
 
-You will go from an idea to a merged change and then automate the work around it:
+You will go from an idea to a merged change and then automate the work around it. The afternoon tells one story in three acts:
 
-- frame a deliberately small capability with the HVE-Core **Design Thinking Coach**
-- implement it with the **RPI** workflow (Research, Plan, Implement, Review)
-- package and govern the rules with **APM** and a Copilot **plugin marketplace**
-- compare models, Auto, and harnesses using measured usage
-- automate backlog triage and accessibility reviews with **GitHub Agentic Workflows (gh-aw)**
-- delegate a follow-up issue to **Copilot cloud agent** (formerly Copilot coding agent)
+1. **Build the feature.**
+   - Frame a deliberately small capability with the HVE-Core **Design Thinking Coach**.
+   - Implement it with the **RPI** workflow (Research, Plan, Implement, Review), and make one real design decision at the review gate.
+2. **Scale the method that built it.**
+   - Make the method repository-owned and governed with **APM** and policy.
+   - Share team conventions through a Copilot **plugin marketplace**.
+   - Rank a backlog, seeded from your own review findings, with **GitHub Agentic Workflows (gh-aw)**.
+3. **Close the loop.**
+   - Delegate one parallelizable issue to **Copilot cloud agent** (formerly Copilot coding agent), behind a test contract.
+   - Review its pull request with required checks, Copilot code review and your team's test-writer agent.
+
+The recap turns this into an operating model, then looks at it as an architect would: org rollout, measuring impact, brownfield adoption, and choosing a method and a model.
 
 The shared application is the Music Catalog starter. It has a React + TypeScript + Vite front end in `src\front`, a .NET 10 minimal API in `src\api`, xUnit API tests in `tests\api`, and synthetic seed data in `src\api\Data\tracks.json`. The capability for today is fixed: **browse tracks and add tracks to a single in-memory playlist**. Duplicate adds are rejected. The empty playlist state is visible.
 
@@ -113,6 +119,14 @@ Principle: **context is the product**. The quality of an agent's output depends 
 - [Secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning) detects credentials in the Git history. [Push protection](https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection) blocks a push that contains a secret before it reaches the repository.
 - Both act on pull requests and pushes. They review agent output in the same way as human output.
 
+### Context, verification and trust
+
+Three ideas connect the levels. Each one gets a short segment where it matters.
+
+- **Context engineering** (Level 3): an agent only knows what is in its context window. Layered instructions, skills loaded on demand, and phase artifacts written to disk keep that context small and reviewable.
+- **Verification as contract** (Levels 5 and 6): tests, CI and branch rulesets define "done". The same checks apply to your commits and to an agent's pull request.
+- **Agentic threat model** (Levels 5 and 6): an agent that runs without you reads text that other people wrote. Read-only permissions, safe outputs, the agent firewall and narrow tokens limit what that text can make it do.
+
 ### Further reading
 
 - [Customize Copilot in VS Code (overview)](https://code.visualstudio.com/docs/copilot/customization/overview)
@@ -127,7 +141,7 @@ Principle: **context is the product**. The quality of an agent's output depends 
 To complete this lab, you need:
 
 - A GitHub account with a GitHub Copilot licence. Business or Enterprise is recommended. Copilot cloud agent, plugins, and gh-aw may need administrator enablement. See the [full prerequisites checklist](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/prerequisites.md) for the policy, licence, and administrator checks, or the checklist for your delivery option: [Codespaces](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-codespace.md), [local dev container](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-devcontainer.md) or [local tools](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/before-d-day-local.md).
-- **Your own repository** created from the workshop template. Level 4 pushes a marketplace, Level 5 runs workflows, and Level 6 assigns issues to Copilot cloud agent, so the repository must belong to you.
+- **Your own repository** created from the workshop template. Level 4 pushes a marketplace, Level 5 runs workflows and assigns an issue to Copilot cloud agent, and Level 6 reviews its pull request, so the repository must belong to you.
 
 Create your repository from the template: open [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop), select **Use this template** → **Create a new repository**, and choose a **private** repository under your account. [Learn more about template repositories](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template). Level 0 Step 1 gives the equivalent `gh` command and a fallback.
 
@@ -238,7 +252,7 @@ You will verify the starter repository, run both test suites, confirm that the p
 
 ### Step 1: Create your workshop repository
 
-You need a repository that you own: Level 4 pushes a marketplace, Level 5 runs workflows, and Level 6 assigns issues to Coding Agent. Skip this step if you already created your repository from the template in **🚀 Dev Environment Setup** (introduction page) and opened it.
+You need a repository that you own: Level 4 pushes a marketplace, Level 5 runs workflows and assigns an issue to Copilot cloud agent, and Level 6 reviews its pull request. Skip this step if you already created your repository from the template in **🚀 Dev Environment Setup** (introduction page) and opened it.
 
 Otherwise, create it from the template with GitHub CLI. Replace `my-music-catalog` with any name:
 
@@ -335,6 +349,8 @@ Expected result:
 
 You will install HVE-Core as a personal Copilot CLI plugin and identify the HVE agents used later: DT Coach, RPI Agent, Backlog Manager, Accessibility Reviewer, and Accessibility Planner. The extended tracks also use BRD Builder, PRD Builder, Functional Planner, Code Review, ADR Creator, and Security Reviewer.
 
+**Why this level:** in GitHub Copilot Zero to Hero, you wrote your own primitives. HVE-Core gives you a shared, opinionated method instead of a personal one. You install it for yourself first; Level 4 explains why that is not enough for a team.
+
 ![HVE-Core plugin installed in Copilot CLI](assets/l1-hve-plugin-installed.png)
 
 ## Understand HVE-Core
@@ -429,6 +445,8 @@ Expected result:
 ## Topic
 
 You will use HVE-Core DT Coach to frame the feature. To keep the room aligned, the inputs and decisions are fixed. The output should identify one capability: browse tracks and add a track to a single in-memory playlist. Duplicate adds are rejected. An empty-state is shown.
+
+**Why this level:** an agent builds exactly what you ask. Before you hand it work, decide what is worth asking and what is out of scope. The decisions you lock here become the boundaries of every prompt that follows.
 
 An extended Product Manager track then turns these decisions into a BRD, a PRD, and GitHub issues with the HVE-Core planning agents.
 
@@ -656,7 +674,7 @@ Do not assign anyone, including Copilot.
 Expected result:
 - Backlog Manager confirms GitHub and your repository, then hands the operations to its GitHub Backlog Executor subagent.
 - After you confirm, the parent issue and four sub-issues exist, linked as sub-issues.
-- No issue is assigned to Copilot. Delegation stays a human decision, which you make in Level 6.
+- No issue is assigned to Copilot. Delegation stays a human decision, which you make in Level 5.
 
 <div class="tip" data-title="Write tools missing">
 
@@ -852,6 +870,10 @@ You will use the RPI Agent to implement the playlist slice. The target behavior 
 - Front end: add buttons are accessible by role and name.
 - Tests: xUnit for API behavior and Vitest + Testing Library for UI behavior.
 
+One decision is deliberately left open: **how the user interface handles a duplicate add**. The API contract is fixed (`409 Conflict`), but whether the UI reports the conflict or prevents it is yours to decide at the plan gate. You compare choices with your neighbours at the review gate.
+
+**Why this level:** a single "build this" prompt mixes finding facts, making decisions and editing code, so you cannot tell where it went wrong. RPI separates them into phases that each leave an artifact you can review, and puts you at the gate between them.
+
 ![RPI Agent phase walkthrough](assets/l3-rpi-agent-walkthrough.png)
 
 ## Work as a developer
@@ -886,7 +908,27 @@ You can drive it in two ways:
 
 With `/rpi`, RPI Agent asks how much control you want, unless your request already says (for example, "use automatic mode"). It offers four choices: run end to end, keep going but check with you on unclear decisions, research and plan with you then stop before implementation, or work through each phase with you. In VS Code, the agent's **Full Auto** button starts the end-to-end choice. It still stops for safety confirmations and blockers. Use `/rpi continue=...` to resume a saved task, and `/rpi followUp=...` to start a new task from a review finding.
 
-This level drives the phases one at a time so you see each output. Level 6 hands the full loop to RPI Agent on Copilot cloud agent.
+This level drives the phases one at a time so you see each output. Level 5 hands the full loop to RPI Agent on Copilot cloud agent.
+
+### Context engineering: why RPI writes files
+
+An agent only knows what is in its **context window**: the instructions loaded for the session, the files and tool results it read, and the conversation so far. The window is finite. As it fills, older details get summarized or dropped, and the agent starts to drift. RPI is built around that limit.
+
+| Practice | Why it matters |
+| --- | --- |
+| Each phase writes its output to a file under `.copilot-tracking\` | The research and the plan become durable memory that you can read, correct and hand to the next phase, or to another session, without replaying the chat |
+| `/clear` between phases | The next phase starts from the files, not from a long history full of dead ends. Use it when the agent drifts or the context is full |
+| Phases with a narrow job | Research does not edit, plan does not edit, review does not refactor. A narrow job needs less context and is easier to check |
+| Instructions in layers | Copilot combines several instruction sources: personal instructions, repository-wide `.github\copilot-instructions.md`, path-specific `*.instructions.md` files that apply by file pattern, and organization instructions. Personal instructions take precedence over repository instructions, which take precedence over organization instructions. HVE-Core adds coding standards that activate by file type in the same way |
+| Skills and agents load on demand | A skill's full content enters the context only when the task matches its description, so the window holds what the current phase needs |
+
+See [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-engineering) in HVE-Core and [repository custom instructions](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions) on GitHub Docs.
+
+<div class="tip" data-title="Check it yourself">
+
+> After the research phase, open the newest research file under `.copilot-tracking\`. Ask yourself: could a colleague, or a fresh session after `/clear`, start the plan from this file alone? If not, the research is not done.
+
+</div>
 
 ## Research phase
 
@@ -921,7 +963,7 @@ Feature requirements:
 - Buttons must have accessible names.
 - No persistence, users, remove, reorder, search, or styling library.
 
-Expected research output: relevant files, implementation risks, tests to add, and open questions. Resolve open questions using the requirements above rather than asking me.
+Expected research output: relevant files, implementation risks, tests to add, and open questions. Resolve open questions using the requirements above rather than asking me, except the duplicate-add user experience in the front end: list it as an open decision for the plan.
 ```
 
 Expected result:
@@ -972,6 +1014,10 @@ The plan must include:
 - Endpoint behavior and status codes for GET /api/tracks, GET /api/playlist, POST /api/playlist/{trackId}.
 - xUnit test cases, including duplicate add returning 409.
 - React component state and rendering plan.
+- Two options for the duplicate-add user experience, with one trade-off each and your recommendation:
+  A. Keep every Add button enabled and show an accessible message when the API returns 409.
+  B. Show tracks already in the playlist with a disabled, labelled control, and still show an accessible message if the API returns 409.
+  Mark the choice as a decision for me to confirm.
 - Vitest test cases for loading tracks, empty playlist, adding a track, and duplicate feedback.
 - Validation commands.
 - A rollback strategy using git commits.
@@ -987,7 +1033,20 @@ Expected result:
 
 Review the plan manually. Reject any plan that adds persistence, creates multiple playlists, changes ports, adds libraries, or stores playlist state in `tracks.json`.
 
-### Step 3: Plan checkpoint
+### Step 3: Decide the duplicate-add experience
+
+Read the two options and the agent's recommendation. Pick one, and write down why in one sentence: for example, discoverability, fewer error states, or how a screen reader user learns that a track is already in the playlist. If you pick the option the agent did not recommend, tell it:
+
+```text
+Use option B for the duplicate-add user experience. Update the plan accordingly. Do not edit source files.
+```
+
+Replace `B` with your choice.
+
+Expected result:
+- The plan states one option, and you know why you chose it.
+
+### Step 4: Plan checkpoint
 
 Run:
 
@@ -1020,7 +1079,7 @@ Requirements:
 - Keep playlist state in memory only.
 - In the front end, render the catalog as a list with accessible Add buttons.
 - Render a playlist panel with the empty-state text: "Your playlist is empty. Add a track to get started."
-- Show a user-visible message when an add fails because the track is already in the playlist.
+- Implement the duplicate-add user experience approved in the plan. Whatever the option, a 409 from the API must show a user-visible, accessible message.
 - Add or update xUnit tests for the API endpoints.
 - Add or update Vitest + Testing Library tests for loading tracks, empty playlist, adding a track, and duplicate feedback.
 - Run dotnet test.
@@ -1080,7 +1139,7 @@ Expected result:
 - The browser shows the track catalog.
 - The playlist panel shows the empty-state message.
 - Adding a track moves or copies it into the playlist panel.
-- Adding the same track again shows a duplicate message.
+- A duplicate add is prevented or reported, as you decided at the plan gate.
 
 ### Step 5: Commit implementation checkpoint
 
@@ -1118,16 +1177,29 @@ Check:
 - Front-end Add buttons have accessible names.
 - Empty playlist state is visible with the exact text required.
 - Tests cover happy path, duplicate add, empty state, and visible feedback.
+- The duplicate-add user experience matches the option approved in the plan, and its message and controls are accessible.
 - dotnet test and npm test pass.
 
-Return a review with: pass/fail summary, findings, smallest fixes, and validation evidence. If you make fixes, keep them minimal and rerun the relevant tests.
+Return a review with: pass/fail summary, findings, smallest fixes, and validation evidence. If you make fixes, keep them minimal and rerun the relevant tests. List any finding you did not fix as a deferred finding.
 ```
 
 Expected result:
 - The review is tied to the fixed requirements.
 - Any fixes are small and directly related to the feature.
+- Deferred findings are listed separately. Keep one: in Level 5 it becomes an issue in your backlog.
 
-### Step 2: Validate after review
+### Step 2: Debrief the decision
+
+Compare your duplicate-add choice with your neighbours, or with the room if your facilitator runs a quick poll:
+
+- Which option did you pick, and why?
+- Did the agent recommend the same option? Did its tests follow your choice, or the recommendation?
+- Which option is easier to verify with Testing Library queries by role and name?
+
+Expected result:
+- You see that the same fixed prompts produced different, valid designs, because a human made a different call at the gate. That is where your judgement adds value.
+
+### Step 3: Validate after review
 
 Run both commands again:
 
@@ -1143,7 +1215,7 @@ npm test
 Expected result:
 - Both suites pass after review fixes.
 
-### Step 3: Commit review checkpoint
+### Step 4: Commit review checkpoint
 
 Run from the repository root. Check `git status` first: review notes stay in the ignored `.copilot-tracking\` folder.
 
@@ -1257,7 +1329,7 @@ Expected result:
 
 <div class="tip" data-title="After the break">
 
-> The next level shifts from implementing the feature to packaging and governing the agentic method. Keep the playlist implementation as-is unless a later validation command fails.
+> You have built the feature. The rest of the afternoon scales the method that built it, then closes the loop. Keep the playlist implementation as-is unless a later validation command fails.
 
 </div>
 
@@ -1268,6 +1340,14 @@ Expected result:
 ## Topic
 
 You will install HVE-Core as a repository-owned APM dependency pinned by commit SHA, audit it, inspect a policy failure, and add a team Copilot plugin marketplace containing local Music Catalog conventions.
+
+**Why this level:** the HVE-Core plugin you installed in Level 1 lives in **your** Copilot environment. Copilot cloud agent and agentic workflows run on GitHub, in a fresh environment built from the repository: they cannot see your personal plugins, settings or `.copilot-tracking\` notes. A colleague who clones the repository cannot see them either. If the method is going to run in Levels 5 and 6, and for the whole team, it has to live in the repository, at a pinned version, under a policy.
+
+| | Personal plugin (Level 1) | Repository dependency (this level) |
+| --- | --- | --- |
+| Who sees it | You, on your machine | Everyone who clones the repository, Copilot cloud agent, agentic workflows |
+| Version | Whatever you installed last | Pinned in `apm.yml` and recorded in `apm.lock.yaml` |
+| Governance | None | Policy and `apm audit` in CI |
 
 ![APM audit and plugin marketplace](assets/l4-apm-marketplace.png)
 
@@ -1506,7 +1586,7 @@ git push
 
 Expected result:
 - The APM manifest, lockfile, policy, marketplace, settings, and local plugin are committed.
-- The HVE-Core agents, prompts, and skills that APM deployed under `.github` are committed too. Level 5 imports `.github\agents\backlog-manager.agent.md` and Level 6 selects the RPI Agent from the default branch.
+- The HVE-Core agents, prompts, and skills that APM deployed under `.github` are committed too. Level 5 imports `.github\agents\backlog-manager.agent.md` and selects the RPI Agent from the default branch.
 - No generated workflow lock files are committed in this level.
 - `git status` is clean and your default branch on GitHub contains the marketplace.
 
@@ -1535,11 +1615,13 @@ Expected result:
 
 ---
 
-# Level 5: Agentic workflows with gh-aw
+# Level 5: Agentic workflows and delegation
 
 ## Topic
 
-You will install gh-aw, initialize the repository, copy two workflow source files, compile them to `.lock.yml`, and run the daily backlog workflow. You will then inspect the accessibility workflow pattern. An extended track shows how to delegate a security review to Copilot cloud agent with the HVE-Core Security Reviewer.
+You will install gh-aw, initialize the repository, copy two workflow source files, and compile them to `.lock.yml`. You will seed the backlog from your own Level 2 and Level 3 artifacts, run the daily backlog workflow, and read the threat model behind it. Then you will make the tests a required check, prepare the agent's environment, and delegate one parallelizable issue to Copilot cloud agent. While it works, you inspect the accessibility workflow pattern. An extended track shows how to delegate a security review to Copilot cloud agent with the HVE-Core Security Reviewer.
+
+**Why this level:** everything so far needed you at the keyboard to start a session. Agentic workflows run on a schedule or on events, and Copilot cloud agent works while you do something else. Both only work because Level 4 put the method in the repository, and both need guardrails because nobody watches them run.
 
 ![gh-aw workflow compilation](assets/l5-ghaw-compile.png)
 
@@ -1681,20 +1763,73 @@ Expected result:
 
 </div>
 
-### Step 3: Seed the backlog
+### Step 3: File a follow-up feature request
 
-The daily backlog workflow noops when your repository has no open issues. Create two small issues so it has something to rank:
+A backlog is only useful if it reflects real work. Seed it from two artifacts you already have: the scope you deferred in Level 2, and the findings you deferred in Level 3. The daily backlog workflow noops when your repository has no open issues.
 
-```powershell
-gh issue create --title "Show track count in the playlist panel" --body "Display the number of tracks currently in the in-memory playlist."
-gh issue create --title "Add an API test for an unknown track id" --body "Cover adding an unknown track id to the playlist with an xUnit test."
+The first issue is the short form of what the Product Manager track produces with Backlog Manager. If you ran that track, your backlog already holds issues in this shape.
+
+On GitHub, open **Issues > New issue > Feature request**. Use the repository issue form from `.github\ISSUE_TEMPLATE\feature.yml`.
+
+Copy paste the following fixed content into the form fields.
+
+Title:
+
+```text
+[Feature]: Remove a track from the playlist
+```
+
+Problem statement:
+
+```text
+Users can add tracks to the in-memory playlist, but they cannot remove a track if they added the wrong one.
+```
+
+Expected outcome:
+
+```text
+A user can remove an existing track from the in-memory playlist without refreshing the page.
+```
+
+Acceptance criteria:
+
+```text
+- [ ] API exposes a remove operation for an existing playlist track.
+- [ ] Removing an unknown or absent track returns a clear error status and JSON body.
+- [ ] Front end shows an accessible Remove button for each playlist item.
+- [ ] Removing a track updates the playlist panel and restores the empty state when the last item is removed.
+- [ ] xUnit and Vitest tests cover the behavior.
+```
+
+Area:
+
+```text
+both
+```
+
+Out of scope:
+
+```text
+Persistence, multiple playlists, users, reorder, search, and styling library changes.
 ```
 
 Expected result:
-- `gh issue list` shows at least two open issues.
+- A small follow-up issue exists, with acceptance criteria an agent can be checked against.
+- Remove was out of scope in Level 2. Deferred scope is a normal source of backlog items.
+
+### Step 4: Turn a deferred review finding into an issue
+
+Open the Level 3 review output: the newest review file under `.copilot-tracking\`, or the review in your chat history. Pick the deferred finding you kept. Create an issue for it, replacing the title and body with the finding:
+
+```powershell
+gh issue create --title "Review finding: SHORT-TITLE" --body "Deferred from the Level 3 RPI review. Finding: WHAT-AND-WHERE. Smallest fix: SMALLEST-FIX."
+```
+
+Expected result:
+- `gh issue list` shows at least two open issues, all traced to a decision or a review you made.
 - If you ran the Level 2 Product Manager track, its issues are in the backlog too. Any issues you closed from a commit are no longer open.
 
-### Step 4: Run daily backlog
+### Step 5: Run daily backlog
 
 Run:
 
@@ -1709,7 +1844,7 @@ Expected result:
 
 ![Daily backlog summary issue](assets/l5-daily-backlog-issue.png)
 
-### Step 5: Read the summary issue
+### Step 6: Read the summary issue
 
 Open the created issue. Look for:
 
@@ -1720,13 +1855,127 @@ Open the created issue. Look for:
 
 Expected result:
 - You can use the issue to decide what humans or agents should do next.
-- You do not treat the workflow as an automatic delegation system.
+- You do not treat the workflow as an automatic delegation system. It labels and recommends; you delegate.
 
 <div class="tip" data-title="Parallel work option">
 
-> Copilot CLI documents `/fleet` as an option for parallel sub-agents in supported versions. Use it only for bounded tasks with independent files, and verify the exact command behavior in your CLI version.
+> Each group under **Can be developed in parallel** is a candidate for a separate Copilot cloud agent session, or for `/fleet` sub-agents in Copilot CLI. Copilot CLI documents `/fleet` in supported versions. Use it only for bounded tasks with independent files, and verify the exact command behavior in your CLI version.
 
 </div>
+
+## Threat model: agents that run without you
+
+The daily backlog workflow runs on a schedule, with nobody watching, and reads text that other people wrote. Anyone who can open an issue can write instructions into it. That is **prompt injection**: text that the agent may treat as a command. Open `.github\workflows\daily-backlog.md` and find the line that limits each risk:
+
+| Risk | What limits it in `daily-backlog.md` |
+| --- | --- |
+| Injected text asks the agent to change code or settings | `permissions:` are read-only. The agent job cannot write to the repository |
+| Injected text asks for many issues, or for labels that trigger other automation | `safe-outputs:` declare the only writes allowed: one summary issue with a fixed title prefix, and labels from an `allowed` list, each with a `max` |
+| Injected text asks the agent to delegate work to another agent | The prompt forbids assignment, and no `assign-to-agent` safe output exists. Delegation stays a human decision |
+| The agent sends repository content to an outside host | gh-aw restricts the agent's network access through the `network` frontmatter. See [network permissions](https://github.github.com/gh-aw/) |
+| A leaked or over-broad token | `copilot-requests: write` lets the workflow call Copilot without a personal access token. Compare it with the extended security track, which needs a PAT for `assign-to-agent` |
+
+Expected result:
+- You can explain why the workflow can only **recommend**, and why that is a design choice, not a limitation.
+
+## Delegate one parallelizable issue
+
+You now hand one issue from the parallel group to Copilot cloud agent. You assign it **now**, so the agent works while you finish this level. You review its pull request in Level 6.
+
+Before you delegate, two things must be true. The agent's work must be checked by the same contract as yours, and the agent's environment must match yours.
+
+### Step 1: Choose the issue
+
+In the summary issue, look at **Can be developed in parallel**. Choose the **Remove a track from the playlist** issue from the parallel group. The instructions in Step 5 are written for it.
+
+Expected result:
+- You know the number of the issue you will delegate, and why it can be developed in parallel.
+
+### Step 2: Make the tests the contract
+
+Today, `dotnet test` and `npm test` run only when someone remembers to run them. Before an agent works on your repository, make them a check that every pull request must pass. Run from the repository root:
+
+```powershell
+New-Item -ItemType Directory -Force .github\workflows | Out-Null
+Copy-Item solutions\afternoon-2\.github\workflows\ci.yml .github\workflows\ci.yml
+git add .github\workflows\ci.yml
+git commit -m "Add CI for API and front-end tests"
+git push
+```
+
+Open the **Actions** tab and wait for the **CI** run on `main` to pass. Then create a branch ruleset that requires its `test` job on the default branch.
+
+```powershell
+gh api --method POST "repos/{owner}/{repo}/rulesets" --input solutions\afternoon-2\rulesets\main-tests-required.json
+```
+
+Expected result:
+- **Settings > Rules > Rulesets** shows the active ruleset **Tests must pass on main**, which requires the `test` status check.
+- Repository administrators are on the bypass list, so your own checkpoint pushes to `main` keep working.
+- A pull request, including the one Copilot opens, cannot merge until `test` passes. GitHub documents that Copilot cloud agent is subject to the repository's branch protections and required checks.
+
+<div class="warning" data-title="Workshop shortcut">
+
+> In a real team, keep the bypass list short and audited, and add required reviews.
+
+</div>
+
+### Step 3: Match the agent's environment to yours
+
+Copilot cloud agent starts in a fresh GitHub Actions environment. `.github\workflows\copilot-setup-steps.yml` prepares it before the agent starts: the job must be named `copilot-setup-steps`, and the file must be on the default branch. Anything the agent needs that is not installed here, it must download during the session, where the firewall may block it.
+
+Open `.github\workflows\copilot-setup-steps.yml`. After the **Install front-end dependencies** step, add a build step at the same indentation as the other steps:
+
+```yaml
+      - name: Build the API
+        run: dotnet build MusicCatalog.slnx --no-restore
+```
+
+Then run:
+
+```powershell
+git add .github\workflows\copilot-setup-steps.yml
+git commit -m "Build the API in Copilot setup steps"
+git push
+```
+
+Expected result:
+- The push runs the **Copilot Setup Steps** workflow, because the workflow triggers on changes to its own file. It passes in the **Actions** tab.
+- The agent starts from a solution that already builds. A broken build now fails here, before a session starts, instead of halfway through it.
+
+See [Customize the agent environment](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent).
+
+### Step 4: Confirm default branch prerequisites
+
+Copilot cloud agent reads custom agents and setup steps from the default branch.
+
+Check:
+- `.github\workflows\copilot-setup-steps.yml` is on the default branch, with your build step.
+- HVE-Core RPI Agent files from APM are committed, so they are available on the default branch before you select that custom agent.
+- `plugins\music-catalog-conventions` is committed. The agent cannot use your installed plugins, but it can read the plugin files in the repository.
+- Your organization allows Copilot cloud agent.
+
+<div class="warning" data-title="Policy-dependent feature">
+
+> Copilot cloud agent availability, custom agent selection, and network settings depend on licence and organization policy. If the UI is unavailable, watch the facilitator demo and keep your issue for manual implementation.
+
+</div>
+
+### Step 5: Assign the issue
+
+On the issue page, use **Assignees** or the Copilot task control to assign the issue to Copilot. If the UI lets you choose a custom agent, choose **RPI Agent**.
+
+![Assigning an issue to Copilot cloud agent](assets/l5-cloud-agent-assignment.png)
+
+Copy paste the following additional instructions:
+
+```text
+Use the RPI workflow. Research the current playlist implementation, plan the smallest remove-from-playlist change, implement it with tests, and review against the issue acceptance criteria. For the new API endpoint, follow the team skill in plugins/music-catalog-conventions/skills/add-api-endpoint/SKILL.md. Keep state in memory only. Do not add persistence, users, multiple playlists, reorder, search, or a styling library. Run dotnet test and npm test from src/front before opening the PR.
+```
+
+Expected result:
+- Copilot creates a branch and a draft pull request or task session, depending on current GitHub behavior.
+- You do not wait for it. Continue with the accessibility workflow while the agent works: this is what asynchronous delegation looks like.
 
 ## Accessibility workflow
 
@@ -1918,106 +2167,43 @@ Expected result:
 
 ---
 
-# Level 6: Coding Agent delegation
+# Level 6: Review the delegated work
 
 ## Topic
 
-You will create one follow-up issue from the feature form and assign it to GitHub Copilot Coding Agent using the RPI Agent custom agent if it is available on the default branch. Then you will review its pull request with Copilot code review and see how secret scanning push protection stops a leaked credential.
+You will review the pull request that Copilot cloud agent opened for the issue you delegated in Level 5. You will follow the agent session, approve and run the required checks, compare the change with the issue, ask your team's test-writer agent for missing tests, and request a Copilot code review. Then you will see how secret scanning push protection stops a leaked credential.
 
-![Assign issue to Coding Agent with custom agent](assets/l6-coding-agent-assignment.png)
+**Why this level:** delegation only pays off when checking the work costs less than doing it. The contract you set in Level 5 (CI, the ruleset and the setup steps) and the reviewers in this level make that check fast and repeatable. A human still decides what merges.
 
-## Create a follow-up issue
+![Copilot cloud agent pull request under review](assets/l6-cloud-agent-pr-review.png)
 
-### Step 1: Open the feature form
+## Review the pull request
 
-On GitHub, open **Issues > New issue > Feature request**. Use the repository issue form from `.github\ISSUE_TEMPLATE\feature.yml`.
+### Step 1: Follow the agent session
 
-### Step 2: Fill the form
-
-Copy paste the following fixed content into the form fields.
-
-Title:
-
-```text
-[Feature]: Remove a track from the playlist
-```
-
-Problem statement:
-
-```text
-Users can add tracks to the in-memory playlist, but they cannot remove a track if they added the wrong one.
-```
-
-Expected outcome:
-
-```text
-A user can remove an existing track from the in-memory playlist without refreshing the page.
-```
-
-Acceptance criteria:
-
-```text
-- [ ] API exposes a remove operation for an existing playlist track.
-- [ ] Removing an unknown or absent track returns a clear error status and JSON body.
-- [ ] Front end shows an accessible Remove button for each playlist item.
-- [ ] Removing a track updates the playlist panel and restores the empty state when the last item is removed.
-- [ ] xUnit and Vitest tests cover the behavior.
-```
-
-Area:
-
-```text
-both
-```
-
-Out of scope:
-
-```text
-Persistence, multiple playlists, users, reorder, search, and styling library changes.
-```
+Open the issue you delegated, then the linked pull request. Open the agent session from the pull request timeline.
 
 Expected result:
-- A small follow-up issue exists.
-- The issue is scoped enough for an agent.
+- The setup job prepared .NET 10 and Node 22 dependencies, and your **Build the API** step ran.
+- The session shows the RPI phases, or the steps the agent followed if no custom agent was available.
+- The pull request references the issue.
+- If the agent is still working, read the session log until it finishes. Use the time to finish the Level 5 accessibility workflow.
 
-## Assign to Coding Agent
+### Step 2: Approve and run the required checks
 
-### Step 1: Confirm default branch prerequisites
-
-Coding Agent custom agents and setup workflows must be present on the default branch to be used reliably.
-
-Check:
-- `.github\workflows\copilot-setup-steps.yml` is on the default branch.
-- HVE-Core RPI Agent files from APM are committed or otherwise available in the repository default branch before selecting that custom agent.
-- Your organization allows Coding Agent.
-
-<div class="warning" data-title="Policy-dependent feature">
-
-> Coding Agent availability, custom agent selection, and network settings depend on license and organization policy. If the UI is unavailable, watch the facilitator demo and keep your issue for manual implementation.
-
-</div>
-
-### Step 2: Assign the issue
-
-On the issue page, use **Assignees** or the Copilot task control to assign the issue to Copilot. If the UI lets you choose a custom agent, choose **RPI Agent**.
-
-Copy paste the following additional instructions:
-
-```text
-Use the RPI workflow. Research the current playlist implementation, plan the smallest remove-from-playlist change, implement it with tests, and review against the issue acceptance criteria. Keep state in memory only. Do not add persistence, users, multiple playlists, reorder, search, or a styling library. Run dotnet test and npm test from src/front before opening the PR.
-```
+By default, GitHub Actions workflows do not run on a pull request from Copilot cloud agent until a user with write access approves them. Workflows run code from the pull request, so read the diff first. Then click **Approve and run workflows**.
 
 Expected result:
-- Copilot creates a branch and a draft PR or task session, depending on current GitHub behavior.
-- The PR references the issue.
-- The setup job prepares .NET 10 and Node 22 dependencies.
+- The **CI** workflow runs on the pull request, and its `test` check is **Required**.
+- The merge button stays blocked until `test` passes. The rule is the same for the agent as for you.
 
-### Step 3: Review the PR
+### Step 3: Check the change against the issue
 
-When the PR is ready, check:
+When the pull request is ready, check:
 
 - The implementation stayed within the issue scope.
-- Tests ran and passed.
+- The new API endpoint follows the team `add-api-endpoint` skill: under `/api`, state in a singleton service, JSON bodies, and an xUnit test through `WebApplicationFactory<Program>`.
+- Tests ran and passed, in the session and in the `test` check.
 - The firewall did not block required dependency downloads.
 - The PR body lists any blocked network requests if they occurred.
 - The custom agent did not bypass human review.
@@ -2028,7 +2214,32 @@ When the PR is ready, check:
 
 </div>
 
-### Step 4: Request a Copilot code review
+### Step 4: Ask your team's test-writer for missing tests
+
+You installed the `music-catalog-conventions` plugin in Level 4. Use its test-writer agent as a second pair of eyes on the agent's tests. Run from the repository root, replacing `PR-NUMBER` with the pull request number:
+
+```powershell
+gh pr checkout PR-NUMBER
+copilot
+```
+
+In Copilot CLI, run `/agent` and select **music-catalog-test-writer**. Copy paste the following prompt:
+
+```text
+Review the tests on this branch against the acceptance criteria of the remove-from-playlist issue. For each behaviour, check the happy path, one validation failure, and one empty state. List missing test cases only. Do not edit files.
+```
+
+Expected result:
+- The test-writer lists missing cases, or confirms there are none, using the team conventions from its agent file.
+- Add any real gap as a review comment on the pull request, and start it with `@copilot` so the agent picks it up.
+
+Leave Copilot CLI with `/exit`, then return to `main`:
+
+```powershell
+git switch main
+```
+
+### Step 5: Request a Copilot code review
 
 On the pull request, under **Reviewers**, click **Request** next to **Copilot**.
 
@@ -2057,6 +2268,32 @@ Compare it with the review phase you ran in Level 3:
 > Each Copilot code review consumes **AI credits**. On private repositories it also uses **GitHub Actions minutes**. A manual request is attributed to the user who requests it. Check the current rates in [Copilot billing](https://docs.github.com/en/copilot/concepts/billing-and-usage) instead of relying on workshop material. A repository administrator can request a review on every pull request with the **Automatically request Copilot code review** branch ruleset rule. See [Configuring code review by GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-on-github/set-up-copilot/configure-code-review).
 
 </div>
+
+### Step 6: Decide
+
+Merge only when the `test` check passes, the issue acceptance criteria are met, and you have read the review comments. To ask for changes, mention `@copilot` in a pull request comment and describe the change.
+
+Expected result:
+- You merged the pull request, or asked for changes with a clear comment.
+- If you merged, update your local branch with `git pull`.
+
+## Threat model: the cloud agent
+
+In Level 5, you limited what an unattended workflow can write. Copilot cloud agent writes code, so GitHub adds more limits around it. Match each risk with what you saw in this level:
+
+| Risk | Mitigation documented by GitHub |
+| --- | --- |
+| Someone outside the team steers the agent | Only users with write access can assign the agent. Comments from users without write access are never passed to it |
+| Hidden instructions in an issue or comment | Hidden characters are filtered, for example text in an HTML comment is not passed to the agent |
+| The agent pushes where it should not | It pushes only to its own `copilot/` branch, cannot approve or merge, and is subject to branch protections and required checks |
+| The agent's code runs in your CI unreviewed | Workflows wait for **Approve and run workflows** from a user with write access |
+| The agent leaks code or secrets to the internet | The agent firewall limits internet access by default |
+| Nobody can tell who did what | Commits are authored by Copilot, co-authored by the person who assigned the work, and link to the session log |
+
+See [Risks and mitigations for Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/risks-and-mitigations).
+
+Expected result:
+- You can name the human decision points: writing the issue, assigning it, approving workflows, reviewing, and merging.
 
 ## Secret scanning and push protection
 
@@ -2131,7 +2368,7 @@ git status
 
 Expected result:
 - Local work remains clean.
-- The follow-up work is tracked in GitHub.
+- The delegated work is merged or tracked in its pull request, and the rest of the backlog is tracked in GitHub.
 
 ---
 
@@ -2139,11 +2376,15 @@ Expected result:
 
 ## Topic
 
-You will connect the afternoon into one operating model.
+You will connect the afternoon into one operating model, then look at it as an architect would: how to roll it out, measure it, apply it to existing code, and choose a method and a model.
 
 ## What you practiced
 
-You started with a clean starter app. You used DT Coach to constrain the problem. You used RPI Agent to research, plan, implement, and review a full-stack slice. You converted methodology into repository-owned dependencies with APM and a lockfile. You used policy to show how governance can block unapproved agent packages. You packaged team conventions as a Copilot plugin marketplace. You compiled gh-aw workflows for backlog triage and accessibility review. You created a follow-up issue for Coding Agent, reviewed its pull request with Copilot code review, and saw push protection block a leaked key.
+**Act 1, build the feature.** You started with a clean starter app. You used DT Coach to constrain the problem. You used RPI Agent to research, plan, implement, and review a full-stack slice, kept its context small with phase artifacts, and made one real design decision at the gate.
+
+**Act 2, scale the method.** You converted the method into repository-owned dependencies with APM and a lockfile. You used policy to show how governance can block unapproved agent packages. You packaged team conventions as a Copilot plugin marketplace. You compiled gh-aw workflows, seeded the backlog from your own deferred scope and review findings, and saw why an unattended workflow may only recommend.
+
+**Act 3, close the loop.** You made the tests a required check, prepared the agent's environment, and delegated one parallelizable issue to Copilot cloud agent while you kept working. You reviewed its pull request with required checks, your team's test-writer agent and Copilot code review, and saw push protection block a leaked key.
 
 If you ran the extended tracks, you also worked in three roles: as a Product Manager, you went from BRD to PRD to tracked GitHub issues; as a Tech Lead, you added an ADR and a multi-perspective code review; as a Security Architect, you delegated a report-only security review to Copilot cloud agent.
 
@@ -2153,12 +2394,14 @@ If you ran the extended tracks, you also worked in three roles: as a Product Man
 | ----- | ----------------- | ---------------- |
 | DT Coach | Framed the capability and boundaries. | Humans accepted fixed decisions. |
 | PM agents (extended) | BRD Builder, PRD Builder, Functional Planner and Backlog Manager turned decisions into issues. | Planning is read-only; only a confirmed `/backlog-execute` writes to GitHub. |
-| RPI Agent | Sequenced research, plan, implement, review. | Tests and commits verified progress. |
+| RPI Agent | Sequenced research, plan, implement, review. | Humans gate each phase; tests and commits verified progress. |
 | APM | Installed HVE-Core into the repo with a SHA pin. | `apm.lock.yaml` and policy audit made it reproducible. |
 | Plugin marketplace | Shared Music Catalog conventions. | Marketplace and settings made plugin enablement explicit. |
-| gh-aw | Ran backlog and accessibility workflows. | `safe-outputs` limited writes. |
+| gh-aw | Ranked a backlog seeded from your artifacts, and ran the accessibility workflow. | Read-only agent job; `safe-outputs` limited writes; no delegation. |
+| CI and ruleset | Made `dotnet test` and `npm test` a required check on the default branch. | The same contract for humans and agents; bypasses are audited. |
 | Security Reviewer (extended) | Ran a report-only security review in Copilot cloud agent. | A human labels or assigns, and a qualified person validates every finding. |
-| Coding Agent | Picked up one scoped follow-up issue. | Human issue, setup workflow, firewall, PR review. |
+| Copilot cloud agent | Picked up one parallelizable issue and followed the team skill. | Human issue and assignment, setup steps, firewall, workflow approval, required checks, PR review. |
+| Test-writer agent | Checked the agent's tests against team conventions. | Report only; a human decides what to ask for. |
 | Copilot code review | Reviewed the agent's PR against repository instructions. | Comments only; a human approves and merges. |
 | Secret scanning | Blocked a fake key at push time. | Push protection and audited bypasses (Secret Protection licence). |
 
@@ -2188,56 +2431,76 @@ Expected result:
 - Front-end tests pass.
 - Your repository has clean, reviewed commits for the playlist slice and governance setup.
 
+## Architect capstone
+
+Use this section as a short facilitated discussion, or read it on your own. Each part starts from what you did today and asks what changes at the scale of an organization.
+
+### Roll out across the organization
+
+| Today, in your repository | At organization or enterprise scale |
+| --- | --- |
+| You inherited the Copilot features, models and MCP access that your organization allows | Enterprise and organization **Copilot policies** decide which features, models, preview features and MCP servers are available. MCP access can be limited to servers from an [MCP registry](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-server-access) |
+| `.github\copilot-instructions.md` and `.github\agents` in one repository | Organization custom instructions, and [organization or enterprise custom agents](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-custom-agents) in a `.github` or `.github-private` repository |
+| `apm.yml` and `apm-policy.yml` in one repository | An organization or enterprise APM policy that repositories extend. APM policy inheritance is designed to tighten only: a repository can add restrictions but not relax its parent. Check the current [APM documentation](https://microsoft.github.io/apm/), because the policy schema is evolving |
+| One team marketplace registered in `.github\copilot\settings.json` | A curated organization marketplace repository, with plugins reviewed like any other dependency |
+| One repository ruleset | Organization rulesets that apply the same required checks and reviews to many repositories |
+
+### Measure the impact
+
+- Use [Copilot usage metrics](https://docs.github.com/en/copilot/concepts/copilot-usage-metrics/copilot-metrics) for adoption and engagement: who uses which features, and how often.
+- Adoption is not impact. Measure delivery outcomes that you already track, before and after: cycle time from issue to merge, review time, rework on pull requests, and change failure rate.
+- Compare agent pull requests with human ones: merge rate, number of review rounds, and how often the required checks fail. A rising rework rate is a sign that issues are not scoped well enough for delegation.
+- Keep usage units separate from outcome metrics. See **Choose a model and track usage** below.
+
+### Adopt it on existing code
+
+Today's starter was small and clean. Most of your repositories are not. A pattern that works on existing code:
+
+1. **Research first.** Run research-only RPI on the area you want to change. Do not plan or implement yet.
+2. **Write down what research found.** Turn the conventions it found into repository instructions, and into path-specific instructions for the riskiest folders.
+3. **Make verification the contract** before any delegation: CI, required checks, and the setup steps the agent needs.
+4. **Delegate low-risk work first:** tests, documentation, and small, well-scoped issues with clear acceptance criteria. Widen the scope as the review data in **Measure the impact** improves.
+
+### Choose a method
+
+RPI is one structured method among several. Choose by the kind of uncertainty you face:
+
+| Method | The source of truth | Use it when |
+| --- | --- | --- |
+| Agent mode or a single prompt | The conversation | The change is small, local and easy to verify |
+| RPI (today) | Research, plan and review artifacts for each task | The code is unfamiliar, or you need a human gate between understanding, deciding and changing |
+| Spec-driven development, for example [GitHub Spec Kit](https://github.com/github/spec-kit) | A specification that lives with the code, from which plans and tasks are derived | The requirements are the hard part, and several people or agents implement against the same spec |
+
+The methods combine: a spec can describe what to build, and RPI can carry out each task from it.
+
+### Choose a model and track usage
+
+| Task | A reasonable starting point |
+| --- | --- |
+| Routine edits, explanations, small fixes | **Auto**, or an efficiency-oriented model |
+| Research and planning on unfamiliar code, reviews | A stronger reasoning model |
+| Unattended workflows and delegated tasks | A model you choose explicitly, recorded for reproducibility |
+
+Auto model selection is documented in VS Code, Copilot CLI, the Copilot App, and GitHub.com surfaces. Its documented tiers are **Efficiency** (prioritizes cost, for fast, straightforward tasks), **Balance** (cost, quality and latency, for everyday work) and **Intelligence** (prioritizes quality, for complex tasks). Auto excludes models that are not in your plan, models blocked by administrator policy, and models blocked by data residency or FedRAMP constraints. Do not assume that Auto, or any model, is always the cheapest, fastest or best: measure it on your own tasks with the **Controlled measurement experiment** in the Extra Credits, and record the model actually selected when you need reproducibility.
+
+Different experiences consume different units. Keep them distinct when you report usage:
+
+| Experience | Usage unit to track | Notes |
+| ---------- | ------------------- | ----- |
+| VS Code Chat and Agent | AI credits under the current Copilot billing model | Code completions are not billed on paid plans. |
+| Copilot CLI | AI credits | Use `/usage` if your CLI version supports it. |
+| Copilot cloud agent | AI credits plus separate GitHub Actions runner consumption where applicable | Keep AI credits and runner minutes separate. |
+| Copilot code review | AI credits, plus GitHub Actions minutes on private repositories | See Level 6. |
+| gh-aw with the Copilot engine | AI credits for Copilot requests; GitHub Actions workflow execution for compute | `permissions: copilot-requests: write` enables Copilot requests from the workflow pattern used here. |
+| External APIs, MCP tools, or package registries | Provider-specific units | Do not blend third-party API fees with Copilot AI credits. |
+
+Check current rates in [Copilot billing and usage](https://docs.github.com/en/copilot/concepts/billing-and-usage) rather than in workshop material.
+
 ---
 
 # Extra Credits 🪙
 
-Use this section only if you finish early or as a facilitator-led discussion. Do not add unverified prices or unpublished claims.
-
-## Usage-unit matrix
-
-Different experiences can consume different units. Keep units distinct when reporting cost or usage.
-
-| Experience | Usage unit to track | Notes |
-| ---------- | ------------------- | ----- |
-| VS Code Chat and Agent | AI credits under the current Copilot billing model | Since June 1, 2026, documented Copilot billing uses AI credits; 1 credit = $0.01. Code completions are not billed on paid plans. |
-| Copilot CLI | AI credits | CLI model usage is billed through the same AI-credit model. Use `/usage` if your CLI version supports it; verify in your CLI version. |
-| Coding Agent | AI credits plus separate GitHub Actions runner consumption where applicable | The agent runs in a GitHub Actions-powered environment; keep AI credits and runner minutes separate. |
-| gh-aw with Copilot engine | AI credits for Copilot requests; GitHub Actions workflow execution for compute | `permissions: copilot-requests: write` enables Copilot requests from the workflow pattern used here. |
-| External APIs, MCP tools, or package registries | Provider-specific units | Do not blend third-party API fees with Copilot AI credits. |
-
-Official references to verify during delivery:
-- GitHub Copilot billing and usage: https://docs.github.com/en/copilot/concepts/billing-and-usage
-- GitHub Copilot CLI documentation: https://docs.github.com/en/copilot/how-tos/copilot-cli
-- Coding Agent customization: https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent
-
-<div class="warning" data-title="No invented prices">
-
-> This workshop states the documented AI-credit unit and avoids invented model prices. Premium requests are legacy for the current 2026 framing in the research notes. Code completions are not billed on paid plans under the documented AI-credit model.
-
-</div>
-
-## Auto model selection
-
-Auto model selection is a documented capability in GitHub Copilot experiences including VS Code, Copilot CLI, Copilot App, and GitHub.com surfaces. The documented tiers are:
-
-| Tier | Priority | Typical use |
-| ---- | -------- | ----------- |
-| Efficiency | Cost | Fast, straightforward tasks. |
-| Balance | Cost, quality and latency | Everyday work. |
-| Intelligence | Quality | Complex tasks. |
-
-Auto excludes models not in your plan, models blocked by administrator policy, and models blocked by data residency or FedRAMP constraints. Research verified a documented discount for paid-plan users, but do not claim Auto is always cheapest, fastest, or best. Record the model actually selected when you need reproducibility.
-
-Copy paste the following prompt when comparing model behavior:
-
-```text
-For this task, tell me which model was used or selected if the surface exposes it. Summarize why the task was routed that way if the product provides that explanation. Do not guess hidden routing details.
-```
-
-Expected result:
-- You collect reproducibility evidence when the surface exposes it.
-- You do not infer private routing or cost decisions.
+Use this section only if you finish early or as a facilitator-led discussion. Do not add unverified prices or unpublished claims. The model-choice guide and the usage-unit matrix are in the **Architect capstone** of the recap.
 
 ## HydraFusion research preview
 

@@ -64,7 +64,7 @@ Hardening: issue all three tokens from a dedicated bot account, not a personal a
 
 The tester account also needs:
 
-- A Copilot license with Copilot CLI, the Copilot Coding Agent and agentic workflows allowed by its organization policy.
+- A Copilot license with Copilot CLI, Copilot cloud agent and agentic workflows allowed by its organization policy.
 - Permission to create Codespaces billed to the sandbox owner.
 - The marketplace and APM sources used in the lab (`microsoft/hve-core`) reachable.
 
@@ -95,7 +95,7 @@ Residual risks:
 - The audit only sees traffic that honors the proxy variables. Node.js `fetch` honors them only with `NODE_USE_ENV_PROXY=1` (Node.js 24 and later), which `egress.sh` sets; other clients may bypass the audit unless the lock is on.
 - The lock needs passwordless `sudo` and `NET_ADMIN` in the dev container image. That is not verified for every image; a failure skips the lab rather than running it unguarded.
 - The lock may interrupt `gh codespace ssh` if the SSH agent shares the user id, which is why it is opt-in. Validate it with one manual run before enabling it.
-- Whether a fine-grained PAT can assign an issue to the Copilot cloud agent and push workflow files in every account setup is not yet verified by a live run. A failure appears in the Level 6 or workflow steps and is reported as an infrastructure failure.
+- Whether a fine-grained PAT can assign an issue to the Copilot cloud agent and push workflow files in every account setup is not yet verified by a live run. A failure appears in the Level 5 delegation steps (`l5-ci`, `l5-setup-steps`, `l5-assign`), the Level 6 pull request step, or the workflow steps, and is reported as an infrastructure failure.
 
 ## Cost and usage
 
@@ -104,8 +104,9 @@ Each run consumes several independent usage units. Do not add them up as one "co
 - **Codespaces compute and storage** for one Codespace, billed to the sandbox owner.
 - **Copilot CLI usage** for the DT and RPI prompts. The run saves a `usage/*.json` per prompt (`--usage-output-file`).
 - **Agentic workflow inference** for the sandbox `daily-backlog` and `a11y-review` runs and for this validator.
-- **One Copilot Coding Agent session** for the Level 6 issue.
-- **One Copilot code review** on the Coding Agent pull request (AI credits, plus Actions minutes on the private sandbox).
+- **One Copilot cloud agent session** for the issue delegated in Level 5.
+- **One Copilot code review** on the Copilot cloud agent pull request (AI credits, plus Actions minutes on the private sandbox).
+- **Actions minutes** for the CI workflow and the Copilot setup steps that Level 5 adds to the sandbox.
 - **Actions minutes** for the runner that orchestrates the run, up to 6 hours (the lab itself is capped at 4 hours by `LAB_TIMEOUT_S`).
 
 See the official GitHub billing documentation for current rates; this repository makes no price claims. Path filters (`docs/afternoon-2/**`, `solutions/afternoon-2/**`, `src/**`, `tests/**`, `.github/**` and the dev container) limit runs to relevant changes.
@@ -115,7 +116,12 @@ See the official GitHub billing documentation for current rates; this repository
 - Copilot CLI prompts are model output. The checks verify the lab's acceptance criteria (endpoints, status codes, tests, files), not identical code.
 - Whether `copilot -p` expands plugin prompts such as `/rpi-research`, and how `--continue` behaves with `-p`, depend on the Copilot CLI version. A failure there is reported as a tester limitation, not a lab defect.
 - Level 0 Step 1 offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
-- Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Coding Agent PR JSON, the Copilot code review JSON).
+- Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Copilot cloud agent PR JSON, the Copilot code review JSON).
+- Level 5 delegation differs from the attendee path in three places:
+  - The feature request is created with `gh issue create` and the lab's field labels, and the deferred review finding is replaced by two synthetic review-finding issues.
+  - The branch ruleset (`l5-ruleset`) is always recorded as skipped, because the sandbox-scoped token has no Administration permission. The solution JSON is checked statically, and the CI run on `main` is checked live.
+  - The issue is assigned whether or not the backlog summary lists it under **Can be developed in parallel**. The tester records where the summary placed it as a note.
+- In Level 6, approving the workflows on the Copilot pull request (`l6-approve-checks`) and the test-writer pass (`l6-test-writer`) are always recorded as skipped: both are interactive.
 - The Level 6 push protection demo is always recorded as skipped. It needs GitHub Secret Protection on the private sandbox, plus settings-UI steps (custom pattern and dry run) that the tester does not automate.
 - The extended tracks are always recorded as skipped:
   - **Level 2 Product Manager track:** multi-turn agent Q&A, and a human confirms before `/backlog-execute` writes issues.

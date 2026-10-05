@@ -16,7 +16,7 @@ The workshop runs over two 4-hour afternoons for a technical audience. Each afte
 
 | Afternoon | Focus | Source |
 | --- | --- | --- |
-| 1. GitHub Copilot Zero to Hero | Copilot primitives: completions, chat, instructions, prompts, agents, skills, MCP | Wraps [Philess/GHCopilotHoL](https://github.com/Philess/GHCopilotHoL) and adds Levels 7 to 9 |
+| 1. GitHub Copilot Zero to Hero | Copilot primitives: completions, chat, instructions, prompts, agents, skills, MCP, hooks | Wraps [Philess/GHCopilotHoL](https://github.com/Philess/GHCopilotHoL) and adds Levels 7 to 9 plus an advanced Deeper primitives page |
 | 2. AI SDLC with GitHub and GitHub Copilot | HVE principles, Design Thinking, RPI, APM and plugin marketplace, agentic workflows, Copilot cloud agent delegation | Original content in this repository |
 
 The [README crescendo](../README.md#the-crescendo) explains the order to attendees. Read it before you reorder modules.
@@ -29,25 +29,29 @@ These decisions shape the content. Changing one usually affects several modules,
 | --- | --- | --- |
 | D1 | Two 4-hour afternoons | Fits a customer's half-day slots and separates individual use (Afternoon 1) from team and SDLC use (Afternoon 2). |
 | D2 | Afternoon 1 follows GHCopilotHoL | Reuses a maintained lab instead of forking it. Upstream commits are pinned in [CONTRIBUTING.md](../CONTRIBUTING.md#upstream-pins). |
-| D3 | Afternoon 2 order: HVE principles → Design Thinking → RPI → APM and plugin marketplace → agentic workflows → Copilot cloud agent | Each step reuses the output of the previous one, ending with controlled delegation. |
+| D3 | Afternoon 2 runs in three acts: build the feature (HVE principles → Design Thinking → RPI), scale the method (APM, policy and plugin marketplace → agentic workflows), then close the loop (delegation to Copilot cloud agent and review) | Each step reuses the output of the previous one. The README crescendo and the "Why this level" lines say what each level adds and why the previous one was not enough. |
 | D4 | Hands-on first, demos as fallback | Attendees keep working assets. The tutor guide lists the demo fallbacks. |
 | D5 | Environment setup happens before the day | Setup failures should not consume workshop time. See [prerequisites.md](prerequisites.md) and the `before-d-day-*.md` checklists. |
 | D6 | One application for all of Afternoon 2: the Music Catalog (`src/front` React 19 + TypeScript + Vite, `src/api` .NET 10 minimal API) | One shared context keeps prompts, reviews and workflows comparable across the room. |
 | D7 | Attendees start from a hello-world starter | Keeps the slice small enough to finish. |
 | D8 | One feature: browse tracks and add a track to a playlist | Small enough for one RPI loop, rich enough for review findings. |
 | D9 | Exactly one in-memory playlist: no persistence, no users, no playlist creation or reordering | Avoids databases and authentication, which add setup without teaching the method. |
-| D10 | Duplicate handling and the empty-playlist state are left open | They give attendees real decisions at the RPI review gate. |
+| D10 | One decision stays truly open: the duplicate-add experience (option A, keep Add enabled and announce the 409; option B, disable Add with a label and a message). The API contract (409) and the empty-state text are fixed | Attendees choose at the plan gate and debrief their choices after the review. Fixing the rest keeps the workshop tester and the debriefs comparable. |
 | D11 | Every Design Thinking and RPI step has a fixed copy-paste prompt | Keeps the room in step and makes debriefs comparable. The workshop tester extracts these prompts. |
-| D12 | Design Thinking plus RPI takes 2 hours or less | Leaves time for APM, workflows and delegation. |
+| D12 | Design Thinking plus RPI takes under 2 hours, including the context engineering segment and the decision debrief | Leaves time for APM, workflows, delegation and the architect capstone. |
 | D13 | HVE-Core is installed through APM inside the application repository | Copilot cloud agent and agentic workflows only see what is in the repository, so a local plugin is not enough. |
 | D14–D15 | Agentic workflows: daily backlog management, accessibility review, and security-review delegation | Shows recurring automation that feeds issues back to people and agents. |
-| D16 | A generated issue is delegated to Copilot cloud agent | Closes the loop from backlog to pull request under human review. |
+| D16 | Level 5 seeds the backlog from real artifacts (a follow-up feature request and a deferred Level 3 review finding), then delegates one issue from the backlog summary's parallel group to Copilot cloud agent. Level 6 reviews the pull request | Closes the loop from backlog to pull request under human review. Assigning in Level 5 lets the agent work while attendees run the accessibility workflow, which shows asynchronous, parallel work. |
+| D18 | Verification as contract: a CI workflow and a branch ruleset with a required `test` check are added before delegation, and `copilot-setup-steps.yml` is extended with a build step | The agent's pull request is judged by the same checks as a human's. Solutions: `solutions/afternoon-2/.github/workflows/ci.yml` and `solutions/afternoon-2/rulesets/main-tests-required.json`. |
+| D19 | Afternoon 1 fast track for advanced audiences: upstream Levels 1 to 4 become pre-work or a demo, and the time goes to the Deeper primitives page (instruction layering, a guardrail hook, MCP governance) | Advanced developers and architects need layering and limits, not another pass on completions. Timing is in [tutor.md](tutor.md). |
+| D20 | Afternoon 2 ends with an architect capstone: org rollout, measuring impact, brownfield adoption, choosing a method, and a model decision guide | Architects leave with the decisions they must take to scale the method. Model and usage guidance lives here, without prices. |
 | D17 | Reference for agentic workflow layout: [CoffeesoftDotDev/accessibility-copilot](https://github.com/CoffeesoftDotDev/accessibility-copilot) | A working `.md` plus compiled `.lock.yml` example. It also showed that workflows can open repeated failure issues, so the solutions limit and deduplicate their outputs. |
 
 Later additions follow the same pattern:
 
 - **Role tracks.** These are the product manager, developer (RPI) and security tracks, based on the [HVE-Core role guides](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tpm).
-- **Level 6.** This adds code review and secret scanning.
+- **Level 6.** This adds code review and secret scanning. It now reviews the pull request delegated in Level 5, including a pass with the marketplace test-writer agent.
+- **Threat model sidebars.** Levels 5 and 6 each list the agentic risks (prompt injection, safe outputs, firewall, token scope) and the control that answers each one.
 - **RPI Agent.** A section explains that RPI Agent runs the `/rpi-*` phases.
 - **Workshop Creator agent.** Defined in `.github/agents/workshop-creator.agent.md`, it reproduces this repository's creation path for a new workshop.
 
@@ -57,7 +61,7 @@ Keep these out of the attendee path unless the design decisions above change:
 
 - No database, file writes or external services in the Music Catalog. State stays in memory.
 - No additional front-end state-management or UI libraries.
-- Cost, Auto model selection and HydraFusion are optional extension content only. HydraFusion is a Research Preview. No prices or quotas appear anywhere.
+- Cost and Auto model selection appear only as a short decision guide in the architect capstone. HydraFusion stays in Extra Credits as a Research Preview. No prices or quotas appear anywhere.
 - No real customer or personal data. Use synthetic data only.
 
 ## Verified facts and how they were checked
@@ -78,9 +82,11 @@ When a fact cannot be confirmed in official documentation, label it as preview, 
 
 | Item | Status | Impact |
 | --- | --- | --- |
-| Customer licences cover Copilot CLI, the Copilot App, Copilot cloud agent and agentic workflows | Unverified per customer. Check on the [kick-off call](kick-off-call-checklist.md) | High |
+| Customer licences cover Copilot CLI, Copilot cloud agent and agentic workflows | Unverified per customer. Check on the [kick-off call](kick-off-call-checklist.md) | High |
 | The customer organization allows plugin marketplaces, APM sources and the required network hosts | Unverified per customer. See [prerequisites.md](prerequisites.md) | High |
 | Design Thinking plus RPI fits in 2 hours with scripted prompts | Not yet measured in a dry run | High |
+| Attendees can create the branch ruleset with `gh api` | Needs the admin role on the repository, and a plan that supports rulesets on private repositories. The bypass actor uses the repository admin role (`actor_id` 5); not tested live | Medium |
+| The delegated pull request is ready by Level 6 | Depends on the agent run time; not measured in a dry run | Medium |
 | Scripted prompts give similar enough outputs for group debriefs | Assumed | Medium |
 | The three solution workflows (`daily-backlog.md`, `a11y-review.md`, `security-review-delegation.md`) compile and run in a real repository | Not compiled in this repository. Run `gh aw compile` in a test repository before delivery | Medium |
 | The sample plugin marketplace installs from this repository | Not tested live | Medium |

@@ -8,11 +8,11 @@ This page tracks what the workshop design assumes. Entries that also appear in t
 | --- | --- | --- |
 | Design Thinking plus RPI fits in 2 hours with scripted prompts | Open, see the handbook | Time a full dry run |
 | Scripted prompts give similar enough outputs for group debriefs | Open, see the handbook | Compare outputs from the dry run |
-| Licences cover Copilot CLI, the Copilot App, Copilot cloud agent and agentic workflows | Open, see the handbook | Ask on the [kick-off call](../kick-off-call-checklist.md) |
+| Licences cover Copilot CLI, Copilot cloud agent and agentic workflows | Open, see the handbook | Ask on the [kick-off call](../kick-off-call-checklist.md) |
 | The organization allows plugin marketplaces, APM sources and the required hosts | Open, see the handbook | Ask on the kick-off call and run the [prerequisites](../prerequisites.md) |
 | Attendees can review RPI output without prior HVE-Core experience | To validate | Watch the review gates during the dry run |
 | A synthetic track dataset is acceptable | Confirmed | `src/api/Data/tracks.json` is synthetic |
-| Cost, model selection and HydraFusion stay optional | Confirmed | See the handbook's scope limits |
+| Cost and model selection stay a short decision guide without prices, and HydraFusion stays optional | Confirmed | See the handbook's scope limits |
 | The React front end renders enough for an accessibility review to find issues | To validate | Run the accessibility workflow on the finished feature |
 
 ## Workshop tester

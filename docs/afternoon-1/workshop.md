@@ -3,12 +3,12 @@ published: false
 type: workshop
 title: 'GitHub Copilot Zero to Hero'
 short_title: Copilot Zero to Hero
-description: Run the official GitHub Copilot hands-on lab, then extend it with Agent Skills, Copilot CLI, and Agent Plugins before moving to agentic SDLC workflows.
+description: Run the official GitHub Copilot hands-on lab, then extend it with Agent Skills, Copilot CLI, deeper primitives (instruction layering, hooks, MCP governance), and Agent Plugins before moving to agentic SDLC workflows.
 level: beginner
 authors: [Julien Strebler]
 contacts: ['@justrebl']
 duration_minutes: 240
-tags: github copilot, code completion, copilot chat, agent mode, custom instructions, prompt files, mcp, coding agent, agent skills, copilot cli, plugins
+tags: github copilot, code completion, copilot chat, agent mode, custom instructions, prompt files, mcp, copilot cloud agent, agent skills, copilot cli, hooks, plugins
 banner_url: assets/banner.png
 navigation_levels: 3
 navigation_numbering: false
@@ -20,6 +20,7 @@ sections_title:
   - 'Part 2: GitHub Copilot hands-on lab, Levels 5 and 6'
   - 'Level 7: Agent Skills'
   - 'Level 8: Copilot CLI'
+  - 'Advanced track: Deeper primitives'
   - 'Level 9: Agent Plugins and marketplaces'
   - 'Recap: Choose the right primitive'
 ---
@@ -41,6 +42,7 @@ During this lab you will:
 - Delegate a task to Copilot cloud agent on github.com.
 - Package task knowledge as an Agent Skill.
 - Drive the same primitives from the terminal with Copilot CLI.
+- On the advanced track, layer instructions, add a guardrail hook, and review how MCP servers are governed.
 - Install, inspect, and remove a plugin from a marketplace.
 
 <div class="warning" data-title="Product evolution">
@@ -97,6 +99,15 @@ You will work in two browser tabs:
 2. **The upstream lab**: the step-by-step content for Levels 1 to 6.
 
 When a section below says **Open upstream Level N**, switch to the lab tab, complete that level, then come back here for the next section.
+
+### Choose your track
+
+| Track | For | Upstream Levels 1 to 4 | Extra time goes to |
+| --- | --- | --- | --- |
+| **Standard** | Developers new to Copilot, or using only completions and Chat | Hands-on, in the session | Levels 7 to 9 |
+| **Fast track** | Advanced developers and architects who already use agent mode daily | Self-paced pre-work before the session, or a short facilitator demo | The **Advanced track: Deeper primitives** page, between Level 8 and Level 9 |
+
+Both tracks do upstream Levels 5 and 6 and Levels 7 to 9. On the standard track, the Deeper primitives page is optional for early finishers. Your facilitator tells you which track the session runs.
 
 | Upstream level | Link |
 | -------------- | ---- |
@@ -221,6 +232,12 @@ Expected result:
 ## Topic
 
 You will learn completions, Chat, agent mode, and the plan-then-implement loop using the upstream lab.
+
+<div class="tip" data-title="Fast track">
+
+> On the fast track, complete these four levels as pre-work or watch the facilitator demo, then make sure your fork has the commit checkpoint below. Check one thing before you move on: you can explain why a plan reviewed before implementation is cheaper than a diff reviewed after it. Every later level builds on that idea.
+
+</div>
 
 ## Open upstream Level 1: Code Completion
 
@@ -585,6 +602,170 @@ git add -A; git commit -m "Add artist filter endpoint from Copilot CLI"
 
 ---
 
+# Advanced track: Deeper primitives
+
+## Topic
+
+On the fast track, this page uses the time saved on upstream Levels 1 to 4. On the standard track, it is optional for early finishers. You will look at three things that matter once you roll Copilot out to a team: how instructions are **layered**, how a **hook** can stop a tool call, and how **MCP servers** are governed. Official docs:
+- https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions
+- https://docs.github.com/en/copilot/concepts/agents/hooks
+- https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-server-access
+
+Why this page: up to now, each primitive added context. Real teams also need to know which context wins when several files apply, and how to limit what an agent can do, not only what it knows.
+
+## Layer instructions
+
+### What gets loaded, and from where
+
+Copilot can combine several instruction sources in one request:
+
+| Layer | Where it lives | Applies when |
+| --- | --- | --- |
+| Personal | Your own settings, for example VS Code user instructions or `~/.copilot` for Copilot CLI | Every request you make, in any repository |
+| Repository-wide | `.github\copilot-instructions.md` | Every request in this repository |
+| Path-specific | `.github\instructions\*.instructions.md`, with an `applyTo` glob | Only when the files involved match the glob |
+| Organization | Organization settings on github.com | Requests on supported github.com surfaces, for members of the organization |
+
+When instructions conflict, personal instructions take precedence over repository instructions, and repository instructions take precedence over organization instructions. All the relevant layers are still sent, so the best fix for a conflict is to remove it, not to rely on the order.
+
+### Step 1: Add a path-specific instruction
+
+Create `.github\instructions\albums-api.instructions.md` with this content:
+
+```markdown
+---
+applyTo: "albums-api/**"
+---
+
+- Add an XML documentation comment (`/// <summary>`) to every public controller action you add or change in albums-api.
+- Keep the existing controller style. Do not add a database.
+```
+
+### Step 2: Check that the layer applies
+
+Open Copilot Chat in **Agent** mode, or start `copilot` from the repository root. Copy paste the following prompt:
+
+```text
+Add a GET endpoint to albums-api that returns the albums released in a given year. Follow the repository conventions.
+```
+
+Expected result:
+- The new controller action has a `/// <summary>` comment.
+- In VS Code, the references of the response list `albums-api.instructions.md` next to the repository-wide instructions and the `albums-api-endpoint` skill from Level 7.
+
+Then ask for a small change in `album-viewer`, such as a new label text. The `albums-api` instruction is not in the references, because its `applyTo` glob does not match.
+
+<div class="tip" data-title="Context engineering">
+
+> Each layer costs context. Keep repository-wide instructions short and stable, push folder-specific rules into path-specific files, and keep step-by-step procedures in skills that load only when the task matches. **AI SDLC with GitHub and GitHub Copilot** applies the same idea to the Research, Plan, Implement, Review workflow, where each phase writes a file instead of relying on a long chat history.
+
+</div>
+
+## Add a guardrail hook
+
+A **hook** is a command that runs at a fixed point in an agent session. A `preToolUse` hook runs before each tool call and can deny it. Repository hooks live in `.github\hooks\*.json` and apply to Copilot CLI and Copilot cloud agent in this repository.
+
+### Step 1: Create the hook scripts
+
+Create `.github\hooks\scripts\deny-push.sh` with this content:
+
+```bash
+#!/usr/bin/env bash
+# Denies any shell command that runs git push. Other tool calls follow the normal approval flow.
+input=$(cat)
+if printf '%s' "$input" | grep -Eq 'git[[:space:]]+push'; then
+  echo '{"permissionDecision":"deny","permissionDecisionReason":"Pushing is a human decision in this repository."}'
+fi
+```
+
+Create `.github\hooks\scripts\deny-push.ps1` with this content:
+
+```powershell
+# Denies any shell command that runs git push. Other tool calls follow the normal approval flow.
+$hookInput = [Console]::In.ReadToEnd()
+if ($hookInput -match 'git\s+push') {
+  '{"permissionDecision":"deny","permissionDecisionReason":"Pushing is a human decision in this repository."}'
+}
+```
+
+The hook reads the tool call as JSON on its standard input. When it prints nothing, Copilot follows its normal approval flow.
+
+### Step 2: Register the hook
+
+Create `.github\hooks\guardrails.json` with this content:
+
+```json
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "bash ./.github/hooks/scripts/deny-push.sh",
+        "powershell": "./.github/hooks/scripts/deny-push.ps1",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
+```
+
+### Step 3: Test the hook
+
+Start `copilot` from the repository root and copy paste the following prompt:
+
+```text
+Run git push --dry-run and show me the output.
+```
+
+Expected result:
+- The CLI reports that the tool call was denied, with the reason "Pushing is a human decision in this repository."
+- A prompt such as "Run git status" still works.
+
+<div class="warning" data-title="A guardrail, not a security boundary">
+
+> This hook matches text. A command such as `git -C . push` does not match the pattern, and a hook that times out lets the call through. Use hooks to catch mistakes and to log what agents do. Use branch rulesets, token permissions, and the cloud agent firewall for the limits that must hold. **AI SDLC with GitHub and GitHub Copilot** builds on those controls.
+
+</div>
+
+## Review MCP governance
+
+### Step 1: Inventory your MCP servers
+
+Open Copilot Chat in **Ask** mode, or start `copilot`. Copy paste the following prompt:
+
+```text
+Read the MCP configuration in this repository, such as .vscode/mcp.json. For each server, list whether it runs as a local process or a remote URL, which credentials or environment variables it receives, and which tools it exposes. Then say what could go wrong if untrusted text from an issue or a web page reached that server. Do not start servers or edit files.
+```
+
+Expected result:
+- A short table, one row per MCP server you added in upstream Level 5.
+
+### Step 2: Narrow the tools
+
+In VS Code Chat, open **Configure Tools** and turn off the MCP tools that this repository does not need. Fewer tools means less context for the model and fewer actions that a misleading prompt can trigger. Some servers also offer narrower modes. For example, the GitHub MCP server can run with selected toolsets or in read-only mode.
+
+### Step 3: Know the organization controls
+
+| Control | Who sets it | What it does |
+| --- | --- | --- |
+| **MCP servers in Copilot** policy | Enterprise or organization owner | Turns MCP use on or off for members |
+| MCP registry URL, with an allowlist option | Enterprise or organization owner | Points Copilot to an approved list of servers, and can limit use to that list where your editor supports it |
+| Repository MCP configuration | Repository maintainers | Shares a reviewed set of servers with the team: `.vscode\mcp.json` through pull requests for VS Code, and the repository's Copilot settings for Copilot cloud agent |
+
+See [Configure MCP server access](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-server-access) for the current options. In **AI SDLC with GitHub and GitHub Copilot**, an APM policy file adds another check: it blocks MCP servers that a package defines on its own.
+
+## Commit checkpoint
+
+Review the diff, then run:
+
+```powershell
+git status
+git add -A; git commit -m "Add path-specific instructions and a guardrail hook"
+```
+
+---
+
 # Level 9: Agent Plugins and marketplaces
 
 ## Topic
@@ -690,6 +871,25 @@ Expected result:
 
 Today you used GitHub Copilot as a layered toolchain rather than one feature. You started with completions and Chat, moved to agent mode and plan-then-implement, stored durable guidance in instructions and prompt files, connected tools through MCP, delegated to Copilot cloud agent, packaged know-how as an Agent Skill, reused it from the CLI, and inspected how plugins bundle everything for sharing.
 
+## The autonomy ladder
+
+Each rung hands Copilot more autonomy, so each rung needs a stronger review step:
+
+| Rung | Who decides each step | Your review step | Covered in |
+| --- | --- | --- | --- |
+| 1. Code completion | You, line by line | Accept or reject each suggestion | Upstream Level 1 |
+| 2. Chat | You, answer by answer | Read the answer before you use it | Upstream Level 2 |
+| 3. Agent mode | The agent, inside your editor | Approve tools, review the diff | Upstream Level 3 |
+| 4. Plan, then implement | The agent, after you approve a plan | Review the plan before any change, then the diff | Upstream Level 4 |
+| 5. Copilot CLI | The agent, in your terminal and scripts | Approve tools and paths, keep allow flags narrow | Level 8 |
+| 6. Copilot cloud agent | The agent, in GitHub Actions, without you | Review the pull request, its checks, and its session log | Upstream Level 6 |
+
+<div class="info" data-title="Why the cloud agent came before the CLI">
+
+> The upstream lab reaches the top rung in Level 6, before this guide adds Copilot CLI in Level 8. Read the ladder by autonomy, not by level number: the CLI still runs on your machine, under your eyes, while Copilot cloud agent works on its own and you see only the result. Levels 7 to 9 and the Deeper primitives page add the primitives that make the top rung safe: skills for repeatable procedures, hooks for guardrails, and plugins for shared, reviewed setups.
+
+</div>
+
 ## Primitive selection table
 
 | Primitive | Where it lives | When to use | Covered in |
@@ -704,6 +904,8 @@ Today you used GitHub Copilot as a layered toolchain rather than one feature. Yo
 | Copilot cloud agent and custom agents | github.com | Asynchronous delegated work | Upstream Level 6 |
 | Agent Skills | `.github\skills` | Procedures loaded on demand | Level 7 |
 | Copilot CLI | Terminal | Repository work without leaving the shell | Level 8 |
+| Path-specific instructions | `.github\instructions` | Rules for one part of the code base | Upstream Level 5, Deeper primitives |
+| Hooks | `.github\hooks` | Guardrails and audit logs around tool calls | Deeper primitives |
 | Agent Plugins | CLI or VS Code | Sharing bundles of customizations | Level 9 |
 
 <div class="important" data-title="The operating model">
