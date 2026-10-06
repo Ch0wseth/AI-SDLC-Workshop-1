@@ -20,7 +20,7 @@ process.stdin.on("end", () => {
     if (row) {
       if (row.managed === true) throw new Error("Managed HVE requires administrator help");
       if (row.marketplace === "hve-core") state = "upstream";
-      else if (row.marketplace === "music-catalog-marketplace") state = "curated";
+      else if (row.marketplace === "contoso-plugin-marketplace") state = "curated";
       else throw new Error("Unknown HVE source; stop before mutation");
       if (state === "curated" && (row.version !== "3.2.2" || typeof row.enabled !== "boolean")) {
         throw new Error("Curated HVE must report version 3.2.2 and boolean activation");
@@ -54,7 +54,7 @@ curated_hve_install() {
   }
   # The sandbox is disposable; this is not consent to replace a learner install.
   copilot plugin marketplace add "$repo" || return
-  copilot plugin marketplace browse music-catalog-marketplace || return
+  copilot plugin marketplace browse contoso-plugin-marketplace || return
   state=$(hve_state) || return
   if [ "$state" = upstream ]; then
     copilot plugin uninstall hve-core@hve-core || return
@@ -62,7 +62,7 @@ curated_hve_install() {
     state=absent
   fi
   if [ "$state" = absent ]; then
-    copilot plugin install hve-core@music-catalog-marketplace || return
+    copilot plugin install hve-core@contoso-plugin-marketplace || return
   fi
   hve_state enabled
 }
@@ -71,6 +71,6 @@ curated_hve_disable() {
   test -f .github/agents/rpi-agent.agent.md || return
   test -f .github/agents/backlog-manager.agent.md || return
   hve_state enabled || return
-  copilot plugin disable hve-core@music-catalog-marketplace || return
+  copilot plugin disable hve-core@contoso-plugin-marketplace || return
   hve_state disabled
 }

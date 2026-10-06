@@ -107,7 +107,7 @@ three as browse examples; no tenant setup or runtime promises.
 Watch `copilot plugin list --json` before and after the transition. Accept only the
 known Level 1 identity or the sole curated identity; stop for duplicates/unknown
 sources. The learner consents before uninstalling `hve-core@hve-core`, confirms
-absence, then installs `hve-core@music-catalog-marketplace`. Failures/managed
+absence, then installs `hve-core@contoso-plugin-marketplace`. Failures/managed
 restrictions are incomplete readiness, never an invitation to force a replacement.
 
 For the GitHub Copilot app, demonstrate registering this same attendee-owned catalog

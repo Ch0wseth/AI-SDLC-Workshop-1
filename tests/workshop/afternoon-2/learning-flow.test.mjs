@@ -45,6 +45,21 @@ test('visible commands have purpose-led introductions across both workshop guide
   }
 });
 
+test('Level 3 planning waits for an actual learner choice before critique and approval', () => {
+  const planning = level(3).split('## Plan phase')[1].split('## Implement phase')[0];
+  const decision = planning.split('### Step 2: Review the plan and decide')[1];
+  assert.match(planning, /critique may run only after you answer/);
+  assert.match(decision, /Make a choice from the options the planner just presented/);
+  assert.match(decision, /illustrative options, not a prescribed list/);
+  assert.match(decision, /For D1, I choose B:[\s\S]*because[\s\S]*Do not implement yet/);
+  assert.match(decision, /recommendation alone is not your approval/);
+  assert.match(decision, /UI work and tests follow that choice/);
+  assert.match(decision, /Approval accepts the plan; it does not start implementation/);
+  assert.doesNotMatch(decision, /<chosen approach>|<reason>/);
+  assert.ok(decision.indexOf('Reply in the same conversation') <
+    decision.indexOf('Then review the completed plan'));
+});
+
 test('APM executable governance is explained before the command and checked through files and output', () => {
   const l4 = level(4);
   const section = l4.slice(l4.indexOf('### Step 1: Set the allowed sources'),

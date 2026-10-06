@@ -112,7 +112,7 @@ test('Level 4 demonstrates a temporary deny without widening the original allowl
 test('Level 4 restores curated registration and install before the APM transition', () => {
   const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
   assert.match(level4, /copilot plugin marketplace add OWNER\/REPO/);
-  assert.match(level4, /copilot plugin install hve-core@music-catalog-marketplace/);
+  assert.match(level4, /copilot plugin install hve-core@contoso-plugin-marketplace/);
   assert.ok(level4.indexOf('copilot plugin install') < level4.indexOf('apm install --target copilot'));
   assert.match(level4, /No Java runtime or Microsoft 365 account is required/);
   assert.doesNotMatch(level4, /cp -R solutions\/afternoon-2\/plugins/);
@@ -126,12 +126,12 @@ test('Level 4 verifies repository agents before disabling the personal plugin', 
   const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
   const disable = level4.indexOf('copilot plugin disable hve-core');
   assert.ok(level4.indexOf('.github/agents/rpi-agent.agent.md') < disable);
-  assert.match(level4, /copilot plugin disable hve-core@music-catalog-marketplace\ncopilot plugin list --json/);
+  assert.match(level4, /copilot plugin disable hve-core@contoso-plugin-marketplace\ncopilot plugin list --json/);
   assert.match(level4, /Managed settings may prevent local disabling/);
   assert.match(level4, /does not disable a separate VS Code extension or plugin/);
   const transition = readFileSync(new URL('./marketplace.sh', import.meta.url), 'utf8');
   assert.ok(transition.indexOf('test -f .github/agents/rpi-agent.agent.md') <
-    transition.indexOf('copilot plugin disable hve-core@music-catalog-marketplace'));
+    transition.indexOf('copilot plugin disable hve-core@contoso-plugin-marketplace'));
   const image = readFileSync(new URL('../../../docs/afternoon-2/assets/l4-duplicate-agent-entries.png', import.meta.url));
   assert.deepEqual([...image.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
   const inventory = readFileSync(new URL('../../../docs/afternoon-2/assets/README.md', import.meta.url), 'utf8');

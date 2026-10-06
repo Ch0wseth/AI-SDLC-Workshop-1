@@ -1308,18 +1308,31 @@ Keep the scope workshop-sized. Explain the duplicate-feedback options and their 
 
 Success Criteria:
 - A saved plan connects the requirements to implementation work and validation.
-- The critique record identifies any blocking readiness findings and their resolution status.
+- If the planner is waiting for your decision, it names the open question and presents options with trade-offs. The plan is not yet implementation-ready; the critique may run only after you answer.
 - The plan presents duplicate-feedback alternatives and leaves the choice pending until your decision is recorded.
 
 ### Step 2: Review the plan and decide
 
-Open the plan and critique at the returned paths. Check that the scope still matches the reviewed requirements and that blocking findings are resolved. Read the duplicate-feedback alternatives, choose an approach, and explain why. For example:
+**Make a choice from the options the planner just presented.** Planning can pause with a message such as "Waiting on your decision D1". This is your turn to decide, not a request to start implementation. Read the options, their pros and cons, and the agent's recommendation. You may follow that recommendation or choose another option based on the trade-off you prefer.
+
+For example, the planner might offer **A: an inline message next to the track**, **B: one page-level status region**, or **C: disable add buttons, with a message if a duplicate request still occurs**. These are illustrative options, not a prescribed list: use the labels and descriptions in your own planner's response. The API must still reject duplicate adds with HTTP 409; your choice concerns how the UI communicates that rejection.
+
+Reply in the same conversation with your choice and a short reason. If your planner offered the example options above and you prefer one shared status region, you could send:
 
 ```text
-Use <chosen approach> for duplicate feedback because <reason>. Update the plan with this decision.
+For D1, I choose B: one page-level status region, because I want one place for success and error messages. Include the track name so the duplicate message is clear, and announce it accessibly. Record this choice and rationale in the plan, then finish planning and its critique. Do not implement yet.
 ```
 
-Replace the placeholders with your actual choice and reasoning. Once the plan reflects your decision and is implementation-ready, approve it before moving on. Keep its path for Implement; application files remain unchanged during planning.
+Do not copy this example unchanged unless it matches your decision. If an option or its consequences are unclear, ask the planner to explain before choosing. Answer any other explicit decision questions it raises; a recommendation alone is not your approval.
+
+**Then review the completed plan.** Open the plan and critique at the returned paths once the planner has recorded your answers and finished its readiness checks. Confirm that the scope matches the reviewed requirements, your selected feedback approach and rationale are recorded, the UI work and tests follow that choice, and no blocking critique findings remain. Ask for corrections if any of these checks fail.
+
+Only when these checks pass, explicitly approve the plan in the conversation. Approval accepts the plan; it does not start implementation. Keep its exact path for the Implement request in the next section. Application files remain unchanged during planning.
+
+Success Criteria:
+- The plan records your decision and rationale, rather than merely the agent's recommendation.
+- The completed critique reports no unresolved blocking findings, and the plan is implementation-ready.
+- You have explicitly approved the reviewed plan without starting implementation.
 
 ## Implement phase
 
@@ -1452,7 +1465,9 @@ Success Criteria:
 
 <div class="tip" data-title="Reference fallback">
 
-> If the agent drifts outside scope, pause and return to the reviewed requirements and approved plan. Ask for a correction to the affected work rather than replacing the plan with another long implementation prompt.
+> **Scope drift** means the work no longer matches what you approved: for example, adding database persistence when the plan requires in-memory storage, or implementing a different duplicate-feedback design from your recorded choice. Pause acceptance and publication of the affected work, not the whole project.
+>
+> During **Review**, ask the agent to record the mismatch, affected files and unmet acceptance criteria without changing application files. In a subsequent **Implement** pass, point to that finding and the approved plan, request a correction limited to the affected work, and rerun its validation. Do not discard the implementation or rewrite the plan unless you actually intend to change the requirements.
 
 </div>
 
@@ -1648,7 +1663,7 @@ For other harnesses, [`apm compile`](https://microsoft.github.io/apm/producer/co
 
 Open `.github/plugin/marketplace.json` at the repository root. It already ships
 with your template copy: do not copy the solution or create another plugin.
-Its name is `music-catalog-marketplace`; its four entries refer to upstream
+Its name is `contoso-plugin-marketplace`; its four entries refer to upstream
 repositories rather than files inside your workshop repository.
 
 **Install only HVE-Core in this exercise.** The Java entries illustrate curation:
@@ -1662,7 +1677,7 @@ then browse the catalog. Run these commands from the repository root in Bash:
 
 ```bash
 copilot plugin marketplace add OWNER/REPO
-copilot plugin marketplace browse music-catalog-marketplace
+copilot plugin marketplace browse contoso-plugin-marketplace
 ```
 
 **Success Criteria:** the registered catalog points to your repository and lists
@@ -1681,7 +1696,7 @@ copilot plugin list --json
 
 Look for rows with `name: "hve-core"` and their `marketplace`, `source`, `version`
 and `enabled` values. Continue only with no HVE entry, one `hve-core@hve-core`
-entry, or one `hve-core@music-catalog-marketplace` entry. Duplicate, direct-source,
+entry, or one `hve-core@contoso-plugin-marketplace` entry. Duplicate, direct-source,
 unknown or managed installations need tutor/admin help before continuing.
 
 If the only entry is the Level 1 `hve-core@hve-core` and you agree to replace that
@@ -1702,11 +1717,11 @@ installation and check its version/enabled state instead.
 Install the reviewed HVE package from your catalog, then inspect its provenance:
 
 ```bash
-copilot plugin install hve-core@music-catalog-marketplace
+copilot plugin install hve-core@contoso-plugin-marketplace
 copilot plugin list --json
 ```
 
-**Success Criteria:** exactly one HVE row comes from `music-catalog-marketplace`,
+**Success Criteria:** exactly one HVE row comes from `contoso-plugin-marketplace`,
 reports `3.2.2`, and is enabled. Start a fresh CLI session and confirm **DT Coach**
 and **RPI Agent** are available. If the install, provenance or agent check fails,
 stop before the APM transition.
@@ -1725,7 +1740,7 @@ other entries. This is an illustrative value; replace the repository placeholder
 ```
 
 Open Extensions and search `@agentPlugins`, choose **HVE-Core** from
-`music-catalog-marketplace`, select **Install**, and review the trust prompt.
+`contoso-plugin-marketplace`, select **Install**, and review the trust prompt.
 If VS Code already discovers the CLI-installed copy, verify it instead of adding
 another. It can discover CLI packages only when it can access the same installed
 plugin filesystem; a host profile and a remote container/WSL profile may differ.
@@ -1758,9 +1773,9 @@ not lock your personal plugins.
 A maintainer reviews the upstream package, updates the source SHA and matching
 version metadata in a PR, validates the catalog, and bumps the catalog version.
 Attendees then refresh discovery with
-`copilot plugin marketplace update music-catalog-marketplace` and explicitly
+`copilot plugin marketplace update contoso-plugin-marketplace` and explicitly
 update the installed package with
-`copilot plugin update hve-core@music-catalog-marketplace`. VS Code uses
+`copilot plugin update hve-core@contoso-plugin-marketplace`. VS Code uses
 **Extensions: Check for Extension Updates**. No version bump or live update is
 required today. A pinned source remains pinned until the reviewed entry changes.
 Custom marketplace auto-update is separate user/managed configuration, not enabled
@@ -1801,14 +1816,14 @@ appear in the agent picker. After verifying the repository files, exit the curre
 CLI session and disable the exact curated personal copy from your terminal:
 
 ```bash
-copilot plugin disable hve-core@music-catalog-marketplace
+copilot plugin disable hve-core@contoso-plugin-marketplace
 copilot plugin list --json
 ```
 
 Verify the curated row is disabled, then start `copilot` again from the repository
 root and check the agent picker. **RPI Agent** and **Backlog Manager** should remain
 available from the repository. Disable preserves the personal install;
-`copilot plugin enable hve-core@music-catalog-marketplace` restores it later.
+`copilot plugin enable hve-core@contoso-plugin-marketplace` restores it later.
 
 <div class="warning" data-title="Managed plugins and VS Code">
 
@@ -2325,7 +2340,7 @@ Before delegation, record the task you chose and verify each item:
 | --- | --- |
 | Planning | The original Level 2 agreement and follow-up brief are committed on the default branch through the reviewed setup PR. |
 | Selection | A person selected or confirmed one feature issue after checking the summary's recommendation and blockers. |
-| Issue contract | The issue links both planning documents, retains all five acceptance criteria and exclusions, and is open; missing evidence stays visible. |
+| Issue contract | The issue links both planning documents, retains all acceptance criteria and exclusions from the selected later-slice brief, and is open; missing evidence stays visible. |
 | Authority | `backlog-managed` is an explicit per-issue opt-in. A person assigns Copilot and sets intermediate Project status; the workflow does neither. |
 
 ## Delegate after the verification handoff
@@ -2342,10 +2357,14 @@ On the feature issue, use **Assignees** or the Copilot task control to choose Co
 
 ![Assigning an issue to Copilot cloud agent](assets/l5-cloud-agent-assignment.png)
 
-Send these additional instructions with the issue:
+Send these additional instructions with the issue. The default path is your
+reviewed DT decision; **only if you selected the Remove a track fallback**, replace
+`docs/project-planning/dt-later-slice.md` with
+`docs/project-planning/remove-playlist-track.md`. Verify the selected brief exists
+on your repository's default branch before assignment:
 
 ```text
-Use the RPI workflow. Work end to end in automatic mode on this issue, using docs/project-planning/remove-playlist-track.md and the repository instructions as context. Keep the implementation within the issue acceptance criteria and exclusions. Preserve in-memory state and add API and UI tests. Run dotnet test from the repository root and npm test from src/front. Review the change against the issue before returning the PR. Link this issue and the fixing commit; use a closing keyword only if the PR fully resolves it. Do not merge or modify the backlog workflow.
+Use the RPI workflow. Work end to end in automatic mode on this issue, using docs/project-planning/dt-later-slice.md and the repository instructions as context. Keep the implementation within the issue acceptance criteria and exclusions. Preserve in-memory state and add API and UI tests. Run dotnet test from the repository root and npm test from src/front. Review the change against the issue before returning the PR. Link this issue and the fixing commit; use a closing keyword only if the PR fully resolves it. Do not merge or modify the backlog workflow.
 ```
 
 **What to expect:** a linked task session and draft PR on the issue. If RPI Agent is unavailable, record that limitation; the default agent can follow the task, but it is not evidence that HVE orchestration ran.
