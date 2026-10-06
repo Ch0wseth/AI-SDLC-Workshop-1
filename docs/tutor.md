@@ -60,13 +60,77 @@ In the recap, walk the autonomy ladder explicitly and point out that the upstrea
 | 0:40 | Level 2 Curate what you commit | 10 | Reviewed delivery brief saved, curated files committed, `.copilot-tracking` ignored | Inspect the staged file tree; commit only reviewed planning documents |
 | 0:50 | Level 3 RPI, with context engineering and the duplicate-add decision | 65 | Playlist feature merged, tests green, decision debriefed | Share your finished branch; keep the 5-minute decision debrief |
 | 1:55 | Break | 10 | Implementation committed, tests pass | |
-| 2:05 | Level 4 APM, policy and marketplace | 30 | Lockfile and deployed skills committed; policy and PR audit workflow in place | Start `apm install` first, explain the lockfile and policy while it runs; demo the audit from recordings |
-| 2:35 | Level 5 Agentic workflows and delegation | 50 | Backlog summary issue created, `test` and `apm-audit` required, one issue assigned to Copilot cloud agent | Show a prerecorded backlog run; finish setup pushes before enabling the strict APM rule |
-| 3:25 | Level 6 Review the delegated work, code review and push protection | 20 | Delegated pull request reviewed with the test-writer agent and Copilot code review | Show a prerecorded pull request and review; always demo push protection yourself |
+| 2:05 | Level 4 Trusted repository agents with APM | 30 | Personal CLI plugin disabled; repository agents, lockfile and audit published; marketplace orientation shown | Begin installation early; use recorded audits without claiming blocked installs passed |
+| 2:35 | Level 5 Reconcile, delegate, and track | 50 | Managed issue has planning evidence; `test` and `apm-audit` required; RPI cloud task visible on the issue/Project; separate accessibility demo | Show a prepared reconciliation; finish setup pushes before the strict audit rule |
+| 3:25 | Level 6 Independently review and accept | 20 | Copilot review posted on the RPI PR; human decision and issue/Project outcome recorded | Use a prepared PR/review; demo push protection yourself |
 | 3:45 | Recap and architect capstone | 15 | | Keep the recap to 5 minutes and run the capstone as a discussion |
 | 4:00 | End | | | |
 
-Level 3 and the break together form a 75-minute block. Stop the room at the plan gate for the duplicate-feedback decision, then run a 5-minute debrief after Review: ask attendees with contrasting choices to explain the trade-off. Do not prescribe two options before the planner explores them. In Level 5, make sure every attendee assigns the issue to Copilot cloud agent as soon as the ruleset step is done: the agent works for 10 to 20 minutes while attendees run the accessibility workflow, and the pull request is ready for Level 6. The Extra Credits page is optional: use it only for early finishers or as a facilitator-led discussion.
+Level 3 and the break together form a 75-minute block. Stop the room at the plan gate for the duplicate-feedback decision, then run a 5-minute debrief after Review: ask attendees with contrasting choices to explain the trade-off. Do not prescribe two options before the planner explores them. In Level 5, assign the issue as soon as setup and ruleset checks are complete. While it runs, follow issue/Project progress and show the separate accessibility demo. Agent latency is variable; keep a completed PR ready for Level 6. The Extra Credits page is optional.
+
+### Level 4 proctor flow
+
+Use the question **"What must travel with the repository before a teammate or cloud agent can use this method?"** Keep the hands-on work in the existing Music Catalog repository.
+
+| Minutes | Activity |
+| --- | --- |
+| 0-3 | Personal context versus repository-owned capabilities |
+| 3-6 | Brief plugin/marketplace orientation and shared-agent comparison |
+| 6-9 | Private company marketplace demonstration |
+| 9-16 | APM manifest, install, actual agent files, resolved commit |
+| 16-18 | Disable the personal HVE-Core CLI plugin; reopen the repository agent picker |
+| 18-23 | Policy status, audit, deny-and-restore |
+| 23-27 | Audit workflow, staged-diff review, commit and push |
+| 27-30 | Verify default-branch files and audit; connect to cloud delegation |
+
+The organization-sharing comparison must use the documented **`.github-private`** name, not the `.copilot-private` shorthand used in the early discussion. Explain enterprise-wide governance as an Enterprise Owner route. Do not label every organization-level custom agent Enterprise-only or claim that standalone prompts/skills automatically distribute through this repository.
+
+For portability, distinguish `apm compile` (instructions/context files) from `apm install` (agents, skills, and other supported primitives). Native whole-plugin loading is version-dependent; it is an explanation, not a second live installation in this exercise.
+
+#### Private plugin marketplace: 2-3 minute demo
+
+Use [the supplied catalog capture](afternoon-2/assets/l4-private-marketplace.png) or your authorized view of [CoffeesoftDotDev/Plugin-Marketplace](https://github.com/CoffeesoftDotDev/Plugin-Marketplace). Attendees do not need membership.
+
+1. Point out read access and the `coffeesoft` catalog with one `mslearn` entry.
+2. Explain registration versus discovery. In a prepared proctor profile only:
+
+   ```powershell
+   copilot plugin marketplace add CoffeesoftDotDev/Plugin-Marketplace
+   copilot plugin marketplace browse coffeesoft
+   ```
+
+3. Point to the README's installation command without asking the room to run it. Show package metadata and the marketplace entry if you have live access.
+4. Explain the publishing path: PR, manifest validation, and code-owner approval. Credentials do not belong in `mcp.json`.
+5. Bridge back to APM: catalog discovery is not an approved-source rule. Separately, enterprise-managed `strictKnownMarketplaces` and `enabledPlugins` govern client plugin access.
+
+Do not add another personal HVE-Core copy after attendees have disabled it. Keep the existing [duplicate-agent screenshot](afternoon-2/assets/l4-duplicate-agent-entries.png) as a troubleshooting visual for VS Code/managed plugins.
+
+### Level 5 proctor flow
+
+Demonstrate a real issue linked to the committed Level 2 brief and remove-feature follow-up. Explain each state change by its evidence, not by an agent's conclusion.
+
+Before delivery, prepare three examples: a planning-only issue that remains open, an open PR that produces a progress comment, and a fully resolving merged PR with fixing-commit/check evidence. Add `backlog-managed` explicitly; keep an unlabelled control issue unchanged. Rerun once with unchanged evidence to check duplicate suppression. Do not seed fake defects merely to make the report busy.
+
+For the dashboard, prepare a shared Project and its actual Status choices. Use people to set intermediate states and the built-in **Item closed** transition for Done. Keep status-to-issue closure off. This avoids treating a board move as acceptance and avoids a privileged Project token in the attendee workflow. ProjectOps with separate read/write credentials is an optional organizational extension, not part of this lab.
+
+#### Accessibility: separate 5-minute demo while the coding task runs
+
+Use prepared output from the private
+[CoffeeSoft scheduled audit](https://github.com/CoffeesoftDotDev/accessibility-copilot/blob/main/.github/workflows/a11y-scheduled-audit.md),
+its [repository conventions](https://github.com/CoffeesoftDotDev/accessibility-copilot/blob/main/.github/copilot-instructions.md),
+and [Awesome Copilot](https://github.com/github/awesome-copilot). Do not ask attendees to access the private repository, compile its workflow, configure MCP, or run an audit.
+
+Show [the supplied repository MCP capture](afternoon-2/assets/l5-playwright-mcp.png). Its settings apply to cloud agent/code review; they do not configure local CLI/IDEs or the scheduled gh-aw job. The screenshot notes default Playwright availability: check the effective tool list before adding another server. The pictured `@latest` is demonstration configuration, not a pinned team standard.
+
+Contrast it with the scheduled source's own `tools: playwright: mode: cli`. A browser tool still needs a reachable application. In your prepared run, show a keyboard/focus or accessible-name observation, its evidence, and the corresponding tracked issue. Do not call source-only checks or a browser snapshot a real screen-reader test.
+
+Close with the audit-only boundary, explicit untested coverage, and finding deduplication. Explain `fix(a11y): ...` as a remediation convention, not enforcement: branch/workflow conditions prevent recursive runs, and builds/tests must still run for fixes. Keep cognitive-design heuristics separate from normative criteria and avoid compliance-certification language.
+
+### Level 6 proctor checkpoints
+
+Verify that **Copilot code review actually posted** on the delegated RPI implementation PR. A coding session's self-review is not that review. After substantial fixes, request another review and inspect the latest checks.
+
+Keep workflow approval and merge as human decisions. After a fully resolving merge, show the issue's PR/commit link and Project Done transition. For a partial fix, show the remaining criteria and keep the issue open. The daily reconciliation can clean up mismatches but must not equate any merged PR with completion.
 
 For Level 2, allocate 10–15 minutes to the learner-led nine-method sampler and the remaining time to the debrief, shared implementation handoff, and saved-note inspection. Encourage different listening contexts and concepts; do not distribute the six playlist decisions as the brainstorming answer. Use the native Method Next prompt to show state-based recommendations, not to force progress past missing evidence. Prioritize learner contributions in Methods 1–6 and preview Methods 7–9 if time runs short. Tell attendees when the timebox ends; model latency makes this a pacing target, not a guaranteed duration. Never mark simulated research or planned testing as completed evidence.
 
@@ -97,13 +161,13 @@ Rules for the tracks:
    1. Create the copy using the introduction's **Dev Environment Setup** instructions and complete **Starter readiness (prerequisite)**.
    2. Run `copilot plugin marketplace add microsoft/hve-core` and `copilot plugin install hve-core@hve-core`.
    3. Run `apm install` with the pinned `apm.yml`, then `apm policy status --policy-source apm-policy.yml`.
-   4. Run `gh aw compile` and `gh aw run daily-backlog`, and confirm the summary issue is created.
+   4. Publish the follow-up brief and link it from an opted-in `backlog-managed` issue. Run `gh aw compile` and `gh aw run daily-backlog`, then confirm the evidence comment and summary. No delivered fix means the issue stays open.
    5. Copy `solutions/afternoon-2/.github/workflows/ci.yml`, push it, and confirm the `test` check passes. Create the ruleset from `solutions/afternoon-2/rulesets/main-tests-required.json` and confirm it appears under **Settings** > **Rules** > **Rulesets**.
    6. Assign a test issue to Copilot and confirm a pull request opens and the `test` check runs after you approve the workflows.
 2. Compare the upstream repositories with the pinned commits listed in [CONTRIBUTING.md](../CONTRIBUTING.md#upstream-pins), and adjust the timings above if levels changed.
-3. Record these fallback artifacts: a passing `apm audit --ci --policy apm-policy.yml`, a failing audit with the deny rule, a daily-backlog issue, an a11y-review issue, a Copilot cloud agent pull request with its Copilot code review, and a push rejected by push protection with the workshop custom pattern.
+3. Record these fallback artifacts: passing and failing policy audits, a planning-evidence backlog update, an open-PR update, a verified completed fix, the private accessibility demo output, a cloud-agent PR with completed Copilot review, and a push rejected by the workshop custom pattern.
 4. Check that the HVE-Core commit pinned in `solutions/afternoon-2/apm.yml` still resolves. If you bump it, update the workshop text as well.
-5. Validate the plugin marketplace from a clean profile: `copilot plugin marketplace add <your-org>/<your-repo>`, `copilot plugin marketplace browse music-catalog-marketplace`, then `copilot plugin install music-catalog-conventions@music-catalog-marketplace`.
+5. Prepare the private `coffeesoft` marketplace visuals and browser-supported accessibility report in your proctor environment. Attendees do not install either demo's plugin or tools. Confirm disabling the personal HVE-Core CLI plugin leaves the repository agents visible.
 6. Capture the screenshots listed in each `assets/README.md`.
 7. Check the latest [workshop tester](../tests/workshop/afternoon-2/README.md) run. It replays the whole lab on every change to `main`, and an open `[Workshop tester]` issue lists the steps that currently fail.
 
@@ -126,6 +190,10 @@ Rules for the tracks:
 | Attendees chose different duplicate-add approaches | Debrief at the review gate | Compare each approach with the shared acceptance criteria and accessibility needs; differing conformant designs are valid |
 | Copilot is missing from **Reviewers** | Copilot code review policy disabled, or the attendee has no licence that includes it | Enable the **Copilot code review** policy, or demo the review yourself |
 | **Advanced Security** shows no Secret Protection or custom patterns | No GitHub Secret Protection licence for private repositories | Demo push protection from a licensed repository |
+| Backlog reconciliation cannot read checks | Run reports missing criterion evidence | Verify `actions: read` and the Actions toolset; keep the issue open rather than infer success |
+| Backlog run leaves an issue unchanged | No evidence update | Check `backlog-managed`, actual planning/PR links, unchanged evidence, operation caps, and safe-output logs |
+| Managed plugin cannot be disabled | CLI rejects the toggle | Explain enterprise-managed activation and distinguish the repository entries; do not bypass managed settings |
+| Project status stays unchanged | Issue comment exists but card did not move | Expected for intermediate states: people set them. Verify the configured closed-item workflow for Done |
 | Backlog Executor cannot create issues | The PM track stops at `/backlog-execute` | Restart Copilot CLI with `--enable-all-github-mcp-tools`, or sign in to the GitHub MCP server in VS Code; fallback: `gh issue create` from `handoff.md` |
 | Security Reviewer missing for Copilot cloud agent | The custom agent is not listed, or the assignment ignores it | Check that `.github\agents\security-reviewer.agent.md` is on the default branch; otherwise assign without a custom agent |
 | Security delegation workflow does nothing | The label was added but no assignment happened | Check the `GH_AW_AGENT_TOKEN` secret and that the issue still has the `security-review` label |

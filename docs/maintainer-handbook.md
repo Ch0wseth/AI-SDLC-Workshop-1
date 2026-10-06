@@ -41,7 +41,7 @@ These decisions shape the content. Changing one usually affects several modules,
 | D12 | Design Thinking plus RPI takes under 2 hours, including the context engineering segment and the decision debrief | Leaves time for APM, workflows, delegation and the architect capstone. |
 | D13 | HVE-Core is installed through APM inside the application repository | Copilot cloud agent and agentic workflows only see what is in the repository, so a local plugin is not enough. |
 | D14–D15 | Agentic workflows: daily backlog management, accessibility review, and security-review delegation | Shows recurring automation that feeds issues back to people and agents. |
-| D16 | Level 5 seeds the backlog from a follow-up feature request and any genuine residual Level 3 findings, then delegates one issue from the summary's parallel group to Copilot cloud agent. Level 6 reviews the pull request | A clean review needs no invented finding. Closes the loop under human review while the agent works asynchronously alongside attendees. |
+| D16 | Level 5 reconciles opted-in issues with committed planning and linked delivery evidence, then delegates a bounded RPI issue to Copilot cloud agent. Level 6 explicitly requests Copilot review and verifies issue/Project progress | See the [Level 4-6 learning-flow decisions](project-planning/levels-4-6-learning-flow.md). No invented findings, automatic assignment, or closure from merge alone. |
 | D18 | Verification as contract: required `test` and `apm-audit` checks are added before delegation, and `copilot-setup-steps.yml` is extended with a build step | Level 4 copies the audit-only `apm-audit.yml`; Level 5 enables its no-bypass ruleset after setup pushes. The agent's pull request is judged by the same checks as a human's. Solutions: `solutions/afternoon-2/.github/workflows/{ci,apm-audit}.yml` and `solutions/afternoon-2/rulesets/{main-tests-required,main-apm-audit-required}.json`. |
 | D19 | Afternoon 1 fast track for advanced audiences: upstream Levels 1 to 4 become pre-work or a demo, and the time goes to the Deeper primitives page (instruction layering, a guardrail hook, MCP governance) | Advanced developers and architects need layering and limits, not another pass on completions. Timing is in [tutor.md](tutor.md). |
 | D20 | Afternoon 2 ends with an architect capstone: org rollout, measuring impact, brownfield adoption, choosing a method, and a model decision guide | Architects leave with the decisions they must take to scale the method. Model and usage guidance lives here, without prices. |
@@ -51,7 +51,7 @@ These decisions shape the content. Changing one usually affects several modules,
 Later additions follow the same pattern:
 
 - **Role tracks.** These are the product manager, developer (RPI) and security tracks, based on the [HVE-Core role guides](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tpm).
-- **Level 6.** This adds code review and secret scanning. It now reviews the pull request delegated in Level 5, including a pass with the marketplace test-writer agent.
+- **Levels 4-6.** APM is the participant installation exercise; private marketplace and accessibility examples are separate proctor demos. Level 6 independently reviews the cloud agent's RPI PR. The old marketplace test-writer exercise is no longer on the core path.
 - **Threat model sidebars.** Levels 5 and 6 each list the agentic risks (prompt injection, safe outputs, firewall, token scope) and the control that answers each one.
 - **RPI Agent.** A section explains that RPI Agent runs the `/rpi-*` phases.
 - **Workshop Creator agent.** Defined in `.github/agents/workshop-creator.agent.md`, it reproduces this repository's creation path for a new workshop.
@@ -90,7 +90,7 @@ When a fact cannot be confirmed in official documentation, label it as preview, 
 | The delegated pull request is ready by Level 6 | Depends on the agent run time; not measured in a dry run | Medium |
 | Shared acceptance criteria give comparable outcomes despite different agent questions and design choices | Assumed; live delivery not measured | Medium |
 | The three solution workflows (`daily-backlog.md`, `a11y-review.md`, `security-review-delegation.md`) compile and run in a real repository | Not compiled in this repository. Run `gh aw compile` in a test repository before delivery | Medium |
-| The sample plugin marketplace installs from this repository | Not tested live | Medium |
+| Private marketplace and accessibility demos are available to attendees | Attendee access is not required; proctor uses the supplied captures and prepared output | Low |
 
 ## Current status
 
