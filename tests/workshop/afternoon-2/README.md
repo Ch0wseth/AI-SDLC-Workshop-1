@@ -44,7 +44,14 @@ Interactive learners select the HVE command with Tab and add their task before s
 
 Level 3 captures `HEAD` before implementation and compares the approved source/test paths afterward, including untracked files. Implementation commits count as edits even when the working tree is clean. The checkpoint commits only a nonempty index; staging or commit errors still fail the step. Run the local regression fixtures with `bash tests/workshop/afternoon-2/git-checkpoint.test.sh`.
 
-Run the guide structure, progressive-disclosure, creator-skill, and report regression checks with `node --test tests/workshop/afternoon-2/prerequisites.test.mjs tests/workshop/afternoon-2/progressive-disclosure.test.mjs tests/workshop/afternoon-2/report.test.mjs`.
+Run the guide structure, progressive-disclosure, learning-flow, creator-skill, and report regression checks with `node --test tests/workshop/afternoon-2/prerequisites.test.mjs tests/workshop/afternoon-2/progressive-disclosure.test.mjs tests/workshop/afternoon-2/learning-flow.test.mjs tests/workshop/afternoon-2/report.test.mjs`.
+
+The learning-flow checks cover the opt-in task mutation filters/caps, revision-bound
+closure contract, visible commands and gates, proctor-only demos, and committed
+planning context. They do not prove an agent's judgment or live workflow behavior.
+The tester verifies an initial planning-evidence comment and an open issue; repeated
+PR reconciliation and post-merge closure require prepared integration cases and a
+human merge decision. The tester never claims to have exercised those gates.
 
 Run the APM PR gate regression checks with `node --test tests/workshop/afternoon-2/apm-ci.test.mjs`. The failure-propagation cases use a Bash mock, not an APM installation or network request.
 
@@ -119,7 +126,7 @@ Each run consumes several independent usage units. Do not add them up as one "co
 
 - **Codespaces compute and storage** for one Codespace, billed to the sandbox owner.
 - **Copilot CLI usage** for the DT and RPI prompts. The run saves a `usage/*.json` per prompt (`--usage-output-file`).
-- **Agentic workflow inference** for the sandbox `daily-backlog` and `a11y-review` runs and for this validator.
+- **Agentic workflow inference** for the sandbox `daily-backlog` run and for this validator. The accessibility demonstration is not run by the attendee replay.
 - **One Copilot cloud agent session** for the issue delegated in Level 5.
 - **One Copilot code review** on the Copilot cloud agent pull request (AI credits, plus Actions minutes on the private sandbox).
 - **Actions minutes** for the Level 4 APM audit workflow, the Level 5 CI workflow, and Copilot setup steps.
@@ -139,7 +146,10 @@ See the official GitHub billing documentation for current rates; this repository
   - The branch ruleset (`l5-ruleset`) is always recorded as skipped, because the sandbox-scoped token has no Administration permission. The solution JSON is checked statically, and the CI run on `main` is checked live.
   - The APM workflow is copied in Level 4. After the setup-step push, `l5-apm-ci` checks the audit on the exact latest main commit. Its no-bypass rule is validated locally, but applying it (`l5-apm-ruleset`) remains an explicit administration-dependent skip; a successful audit is not claimed as live merge enforcement.
   - The issue is assigned whether or not the backlog summary lists it under **Can be developed in parallel**. The tester records where the summary placed it as a note.
-- In Level 6, approving the workflows on the Copilot pull request (`l6-approve-checks`) and the test-writer pass (`l6-test-writer`) are always recorded as skipped: both are interactive.
+- The Level 4 private marketplace and Level 5 accessibility examples are proctor-only demonstrations, recorded as skipped. The tester does not install the team plugin or run `a11y-review`.
+- The tester disables the personal HVE-Core CLI plugin only after repository agent files exist. Managed-policy rejection remains a failure/limitation; fresh interactive picker verification is not simulated.
+- The shared Project configuration and intermediate fields (`l5-project-progress`) are skipped. The repository token does not grant Project access.
+- In Level 6, workflow approval (`l6-approve-checks`) and acceptance/merge plus post-merge reconciliation (`l6-accept-and-reconcile`) are recorded as skipped. A completed Copilot review does not stand in for those human decisions.
 - The Level 6 push protection demo is always recorded as skipped. It needs GitHub Secret Protection on the private sandbox, plus settings-UI steps (custom pattern and dry run) that the tester does not automate.
 - The extended tracks are always recorded as skipped:
   - **Level 2 Product Manager track:** multi-turn agent Q&A, and a human confirms before `/backlog-execute` writes issues.

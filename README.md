@@ -64,9 +64,9 @@ Attendees build one capability in a small music catalog app (**browse tracks and
 | 1 | HVE-Core CLI plugin | Install HVE-Core into Copilot CLI and explore its agents | Afternoon 1 primitives were your own; HVE-Core brings a shared method |
 | 2 | Design Thinking coach | Turn the playlist request into a scoped problem statement | Agents build exactly what you ask; first decide what is worth asking |
 | 3 | RPI loop | Research, plan, implement and review the playlist feature, with context engineering and one real decision at the review gate | A single prompt mixes facts, decisions and edits; RPI separates them into reviewable artifacts |
-| 4 | APM, policy and marketplace | Make HVE-Core a versioned, locked, policy-checked repository dependency and share team conventions | Your personal plugin is invisible to the cloud agent and to agentic workflows; the method must live in the repository |
-| 5 | Agentic workflows and delegation | Rank a backlog seeded from your own artifacts, then delegate one parallelizable issue to the Copilot cloud agent behind a test contract | A human must start every local session; workflows run on events, and delegation runs while you keep working |
-| 6 | Review the delegated work | Review the agent's pull request with required checks, Copilot code review and your team's test-writer agent, and see push protection | Delegated work is only useful if it is verified; review closes the loop |
+| 4 | APM, policy and marketplace | Install pinned repository agents, audit their source/content, and compare marketplace discovery | Personal setup does not travel with the code; repository practices need reproducibility and a trust rule |
+| 5 | Agentic workflows and delegation | Reconcile opted-in issues with committed plans and delivery evidence, then delegate a scoped RPI task | The backlog should reflect reality; people select work while automation records evidence |
+| 6 | Review the delegated work | Request Copilot review on the RPI PR, inspect required checks, and verify issue/Project closure after human acceptance | The coding agent's self-review is not independent review or a merge decision |
 | Recap | | Operating model, then an architect capstone: org rollout, measuring impact, brownfield adoption, method and model choice | |
 | Extra Credits | | Model and harness measurement, HydraFusion (Research Preview) | |
 
@@ -81,8 +81,7 @@ flowchart LR
   end
   subgraph Scale["Act 2: scale the method"]
     C[Repository-owned with APM] --> D[Governed by policy]
-    D --> E[Shared through a marketplace]
-    E --> F[Automated with gh-aw]
+    D --> F[Backlog evidence with gh-aw]
   end
   subgraph Close["Act 3: close the loop"]
     G[Delegate to the cloud agent] --> H[Verify and review]
@@ -92,7 +91,7 @@ flowchart LR
   H -. findings feed the backlog .-> F
 ```
 
-Each step reuses what the previous one produced: the Design Thinking decisions scope RPI, the RPI review findings seed the backlog, the backlog chooses what to delegate, and the team conventions from the marketplace guide the delegated work.
+Each step reuses the previous output: Design Thinking decisions scope RPI, committed planning and PR evidence keep the backlog current, and a human selects the next cloud-agent task. Marketplace discovery and browser-supported accessibility review are separate proctor demonstrations.
 
 ## Delivery options
 

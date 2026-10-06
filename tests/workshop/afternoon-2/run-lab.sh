@@ -288,7 +288,9 @@ grep -q 'resolved_commit' apm.lock.yaml 2>/dev/null && check "lockfile records r
   || check "lockfile records resolved_commit" false
 finish_step
 
-step l4-apm-audit "Level 4" "Audit in CI mode" literal 1200 'apm audit --ci'
+step l4-plugin-disable "Level 4" "Disable personal HVE-Core after verifying repository agents" translated 300 \
+  'test -f .github/agents/rpi-agent.agent.md && test -f .github/agents/backlog-manager.agent.md && copilot plugin disable hve-core && copilot plugin list'
+note "repository profile presence is checked before disabling; fresh interactive agent-picker verification is not emulated"
 finish_step
 
 step l4-copy-policy "Level 4" "Copy the policy" translated 30 'cp solutions/afternoon-2/apm-policy.yml ./apm-policy.yml'
@@ -306,34 +308,20 @@ step l4-policy-audit "Level 4" "Audit with policy" literal 1200 'apm audit --ci 
 finish_step
 
 step l4-deny-edit "Level 4" "Temporarily deny microsoft/hve-core in the policy" translated 30 \
-  'awk '"'"'BEGIN{skip=0} /^dependencies:/{print "dependencies:\n  deny:\n    - \"microsoft/hve-core\"\n  require_pinned_constraint: true"; skip=1; next} skip && /^[^ #]/{skip=0} !skip{print}'"'"' apm-policy.yml > apm-policy.tmp && mv apm-policy.tmp apm-policy.yml && cat apm-policy.yml'
+  'cp apm-policy.yml "$RESULTS_DIR/policy-before-deny.yml" && awk '"'"'/^  require_pinned_constraint:/{print "  deny:\n    - \"microsoft/hve-core\""} {print}'"'"' apm-policy.yml > apm-policy.tmp && mv apm-policy.tmp apm-policy.yml && cat apm-policy.yml'
 finish_step
 
 step l4-deny-audit "Level 4" "Policy audit fails with exit code 1" literal 1200 'apm audit --ci --policy apm-policy.yml'
 finish_step 1
 
-step l4-restore-policy "Level 4" "Change the dependency deny rule back to allow and audit again" translated 1200 \
-  "sed -i 's/^  deny:/  allow:/' apm-policy.yml && apm audit --ci --policy apm-policy.yml"
+step l4-restore-policy "Level 4" "Remove the temporary deny entry and audit the original policy" translated 1200 \
+  'cp "$RESULTS_DIR/policy-before-deny.yml" apm-policy.yml && apm audit --ci --policy apm-policy.yml'
 finish_step
 
 step l4-copy-apm-ci "Level 4" "Copy the PR audit workflow" literal 30 \
   'mkdir -p .github/workflows && cp solutions/afternoon-2/.github/workflows/apm-audit.yml .github/workflows/apm-audit.yml'
 grep -q 'microsoft/apm-action@v1' .github/workflows/apm-audit.yml \
   && check "PR audit uses the APM action" true || check "PR audit uses the APM action" false
-finish_step
-
-step l4-copy-marketplace "Level 4" "Copy marketplace files" translated 30 \
-  'mkdir -p .github/plugin .github/copilot plugins && cp solutions/afternoon-2/.github/plugin/marketplace.json .github/plugin/marketplace.json && cp solutions/afternoon-2/.github/copilot/settings.json .github/copilot/settings.json && cp -R solutions/afternoon-2/plugins/. ./plugins/'
-grep -q 'music-catalog-marketplace' .github/plugin/marketplace.json && check "marketplace.json defines music-catalog-marketplace" true || check "marketplace.json defines music-catalog-marketplace" false
-[ -f plugins/music-catalog-conventions/plugin.json ] && check "local plugin.json present" true || check "local plugin.json present" false
-for f in agents/music-catalog-test-writer.agent.md skills/add-api-endpoint/SKILL.md; do
-  [ -f "plugins/music-catalog-conventions/$f" ] && check "plugin file $f present" true || check "plugin file $f present" false
-done
-finish_step
-
-step l4-settings-repo "Level 4" "Replace YOUR-ORG/YOUR-REPO in settings.json" translated 30 \
-  "sed -i 's#YOUR-ORG/YOUR-REPO#$SANDBOX_REPO#g' .github/copilot/settings.json && cat .github/copilot/settings.json"
-grep -q "$SANDBOX_REPO" .github/copilot/settings.json && check "settings.json points to the sandbox repository" true || check "settings.json points to the sandbox repository" false
 finish_step
 
 # push_fallback <step-id>: retry a rejected push with the sandbox-scoped tester token so later levels can still run.
@@ -345,24 +333,19 @@ push_fallback() {
   fi
 }
 
-step l4-commit "Level 4" "Commit and push governed HVE and marketplace setup" translated 300 \
-  'git status; git add apm.yml apm.lock.yaml apm-policy.yml .github .agents plugins/music-catalog-conventions && git commit -m "Add governed HVE and plugin marketplace setup" && git push'
+step l4-commit "Level 4" "Commit and push governed repository agents and audit" translated 300 \
+  'git status; git add apm.yml apm.lock.yaml apm-policy.yml .github .agents && git diff --cached --stat && git commit -m "Add governed repository agents and APM audit" && git push'
 push_fallback l4-commit
 git ls-files --error-unmatch .github/workflows/daily-backlog.lock.yml >/dev/null 2>&1 \
   && check "no workflow lock files committed in Level 4" false || check "no workflow lock files committed in Level 4" true
-gh api "repos/$SANDBOX_REPO/contents/.github/plugin/marketplace.json" --jq .path >/dev/null 2>&1 \
-  && check "marketplace.json is on the default branch" true || check "marketplace.json is on the default branch" false
+gh api "repos/$SANDBOX_REPO/contents/.github/agents/rpi-agent.agent.md" --jq .path >/dev/null 2>&1 \
+  && check "RPI Agent is on the default branch" true || check "RPI Agent is on the default branch" false
 untracked=$(git status --porcelain | head -n 30)
 [ -n "$untracked" ] && note "left uncommitted after Level 4: $(echo "$untracked" | tr '\n' ' ')"
 finish_step
 
-step l4-marketplace-add "Level 4" "Register the team marketplace" literal 300 \
-  "copilot plugin marketplace add $SANDBOX_REPO"
-finish_step
-step l4-marketplace-browse "Level 4" "Browse the team marketplace" literal 300 'copilot plugin marketplace browse music-catalog-marketplace'
-finish_step
-step l4-plugin-install "Level 4" "Install music-catalog-conventions" literal 300 'copilot plugin install music-catalog-conventions@music-catalog-marketplace'
-finish_step
+skip_step l4-marketplace-demo "Level 4" "Private company marketplace orientation" \
+  "proctor-only screenshot/demo; no participant plugin installation"
 
 # ---------------------------------------------------------------- Level 5
 step l5-ghaw-install "Level 5" "Install the gh-aw extension" literal 300 'gh extension install github/gh-aw'
@@ -373,29 +356,23 @@ finish_step
 step l5-ghaw-init "Level 5" "Initialize the repository (gh aw init)" literal 300 'gh aw init'
 finish_step
 
-step l5-copy-workflows "Level 5" "Copy the solution workflows" translated 30 \
-  'cp solutions/afternoon-2/.github/workflows/daily-backlog.md .github/workflows/daily-backlog.md && cp solutions/afternoon-2/.github/workflows/a11y-review.md .github/workflows/a11y-review.md'
-agent_imports=$(grep -Ec '^[[:space:]]*-[[:space:]]+\.github/agents/[^[:space:]]+\.agent\.md[[:space:]]*$' .github/workflows/a11y-review.md || true)
-if [ "$agent_imports" -eq 1 ] && grep -Eq '^[[:space:]]*-[[:space:]]+\.github/agents/accessibility-reviewer\.agent\.md[[:space:]]*$' .github/workflows/a11y-review.md; then
-  check "a11y-review imports only the Accessibility Reviewer" true
-else
-  check "a11y-review imports only the Accessibility Reviewer" false "agent imports=$agent_imports"
-fi
+step l5-copy-workflows "Level 5" "Copy the bounded backlog workflow" translated 30 \
+  'cp solutions/afternoon-2/.github/workflows/daily-backlog.md .github/workflows/daily-backlog.md'
 finish_step
 
 step l5-compile "Level 5" "Compile workflows (gh aw compile)" literal 600 'gh aw compile'
-for w in daily-backlog a11y-review; do
+for w in daily-backlog; do
   [ -f ".github/workflows/$w.lock.yml" ] && check "$w.lock.yml generated" true || check "$w.lock.yml generated" false
 done
 finish_step
 
 step l5-review-diff "Level 5" "Review generated files without editing" translated 60 \
-  'git status; git diff -- .github/workflows/daily-backlog.md .github/workflows/a11y-review.md'
+  'git status; git diff -- .github/workflows/daily-backlog.md'
 finish_step
 
 step l5-commit "Level 5" "Commit workflow sources and locks" translated 60 \
-  'git status; git add -A && git commit -m "Add agentic backlog and accessibility workflows"'
-for w in daily-backlog a11y-review; do
+  'git status; git add -A && git diff --cached --stat && git commit -m "Add bounded daily backlog reconciliation"'
+for w in daily-backlog; do
   git ls-files --error-unmatch ".github/workflows/$w.lock.yml" >/dev/null 2>&1 \
     && check "$w.lock.yml committed" true || check "$w.lock.yml committed" false
 done
@@ -403,6 +380,11 @@ finish_step
 
 step l5-push "Level 5" "Push your branch (Codespace credentials)" literal 300 'git push'
 push_fallback l5-push
+finish_step
+
+step l5-planning-follow-up "Level 5" "Publish the remove-from-playlist follow-up brief" translated 300 \
+  'test -f docs/project-planning/playlist-design-decisions.md && cp solutions/afternoon-2/docs/project-planning/remove-playlist-track.md docs/project-planning/remove-playlist-track.md && git add docs/project-planning/remove-playlist-track.md && git commit -m "Plan the remove-from-playlist follow-up" && git push'
+push_fallback l5-planning-follow-up
 finish_step
 
 P=$RESULTS_DIR/prompts
@@ -413,6 +395,14 @@ ISSUE_URL=$(grep -Eo 'https://github.com/[^ ]+/issues/[0-9]+' "$RESULTS_DIR/step
 ISSUE_NUMBER=${ISSUE_URL##*/}
 [ -n "$ISSUE_NUMBER" ] && check "issue created" true "$ISSUE_URL" || check "issue created" false
 finish_step
+
+if [ -n "${ISSUE_NUMBER:-}" ]; then
+  step l5-managed-issue "Level 5" "Link committed plans and opt the issue into reconciliation" emulated 120 \
+    "gh label create backlog-managed --description 'Allow bounded backlog evidence updates and verified closure' &&
+     gh issue edit '$ISSUE_NUMBER' -R '$SANDBOX_REPO' --add-label backlog-managed &&
+     gh issue comment '$ISSUE_NUMBER' -R '$SANDBOX_REPO' --body 'Source planning: https://github.com/$SANDBOX_REPO/blob/main/docs/project-planning/playlist-design-decisions.md and https://github.com/$SANDBOX_REPO/blob/main/docs/project-planning/remove-playlist-track.md'"
+  finish_step
+fi
 
 skip_step l5-seed-issues "Level 5" "Turn deferred review findings into issues" \
   "requires a genuine residual finding and a human decision to defer it; do not create synthetic review findings"
@@ -458,6 +448,7 @@ for _ in 1 2 3 4 5 6; do
 done
 if [ -n "$issue" ] && [ "$issue" != null ]; then
   echo "$issue" > "$RESULTS_DIR/daily-backlog-issue.json"
+  echo "$issue" | grep -q 'Evidence and progress' && check "summary has ## Evidence and progress" true || check "summary has ## Evidence and progress" false
   echo "$issue" | grep -q 'Recommended implementation order' && check "summary has ## Recommended implementation order" true || check "summary has ## Recommended implementation order" false
   echo "$issue" | grep -q 'Can be developed in parallel' && check "summary has ## Can be developed in parallel" true || check "summary has ## Can be developed in parallel" false
   if [ -n "${ISSUE_NUMBER:-}" ]; then
@@ -465,13 +456,23 @@ if [ -n "$issue" ] && [ "$issue" != null ]; then
     if echo "$parallel" | grep -qE "#$ISSUE_NUMBER([^0-9]|$)|Remove a track"; then
       note "the feature issue #$ISSUE_NUMBER is listed under Can be developed in parallel"
     else
-      note "the feature issue #$ISSUE_NUMBER is not in the parallel group; the lab tells attendees to read the reason and delegate it anyway when it is not a real blocker"
+      note "the feature issue #$ISSUE_NUMBER is not in the parallel group; human dependency inspection is not simulated"
     fi
   fi
 else
   open=$(grep -o '"number"' "$RESULTS_DIR/issues-before-daily-backlog.json" 2>/dev/null | wc -l)
   note "no [Daily backlog] issue created; open issues before the run: $open (the workflow is designed to noop when there are none)"
   [ "$open" -eq 0 ] && check "noop expected because the sandbox had no open issues" true || check "[Daily backlog] issue created" false
+fi
+if [ -n "${ISSUE_NUMBER:-}" ]; then
+  gh issue view "$ISSUE_NUMBER" -R "$SANDBOX_REPO" --json state,comments > "$RESULTS_DIR/backlog-managed-issue.json"
+  node -e '
+    const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
+    const progress=x.comments.filter(c=>c.body.includes("Evidence key:"));
+    process.exit(x.state==="OPEN" && progress.some(c=>c.body.includes("remove-playlist-track.md")) ? 0 : 1);
+  ' "$RESULTS_DIR/backlog-managed-issue.json" \
+    && check "managed issue stays open with committed planning evidence" true \
+    || check "managed issue stays open with committed planning evidence" false
 fi
 finish_step
 
@@ -553,10 +554,10 @@ else
   finish_step
 fi
 
-wait_aw_run l5-run-a11y a11y-review "Run the accessibility workflow (gh aw run a11y-review)"
-a11y=$(gh issue list -R "$SANDBOX_REPO" --state open --label accessibility --json number,title --jq 'length' 2>/dev/null)
-note "accessibility issues open after the run: ${a11y:-unknown} (one issue or a noop are both expected)"
-finish_step
+skip_step l5-project-progress "Level 5" "Follow task progress on a shared Project" \
+  "needs a selected Project and human field/automation configuration; issue comments are not Project field updates"
+skip_step l5-accessibility-demo "Level 5" "Browser-supported accessibility review demonstration" \
+  "proctor-only private repository example; no attendee audit or MCP configuration"
 
 step l5-git-status "Level 5" "Commit checkpoint: git status" literal 30 'git status'
 tree_clean_check
@@ -595,9 +596,6 @@ if [ -n "${ISSUE_NUMBER:-}" ]; then
 
   skip_step l6-approve-checks "Level 6" "Approve and run workflows on the Copilot PR, then wait for the test check" \
     "settings-UI approval by a human; the PR checks are saved to coding-agent-pr-checks.txt"
-  skip_step l6-test-writer "Level 6" "Ask the music-catalog-test-writer agent for missing tests on the PR branch" \
-    "interactive /agent selection in Copilot CLI; the plugin install is covered by l4-plugin-install"
-
   if [ -z "$PR" ]; then
     skip_step l6-code-review "Level 6" "Request a Copilot code review on the PR" "no Copilot PR to review"
   else
@@ -622,6 +620,9 @@ if [ -n "${ISSUE_NUMBER:-}" ]; then
     finish_step
   fi
 fi
+
+skip_step l6-accept-and-reconcile "Level 6" "Accept delivery and verify issue/Project closure evidence" \
+  "requires a human merge decision; automated tester does not merge or claim acceptance"
 
 skip_step l6-push-protection "Level 6" "Secret scanning push protection with a workshop custom pattern" \
   "facilitator demo: needs GitHub Secret Protection on the private sandbox and settings-UI steps (custom pattern, dry run)"

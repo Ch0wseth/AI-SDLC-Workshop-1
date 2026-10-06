@@ -32,40 +32,39 @@ test('Level 4 preserves the pinned installation without maintainer verification 
   assert.match(level4, /apm install --target copilot/);
 });
 
-test('Level 4 copies the policy with Linux syntax and restores success by changing deny to allow', () => {
+test('Level 4 demonstrates a temporary deny without widening the original allowlist', () => {
   const policy = workshop.slice(workshop.indexOf('## Apply repository policy'),
-    workshop.indexOf('### Step 5: Add the PR audit workflow'));
+    workshop.indexOf('## Publish the method and its audit'));
   assert.match(policy, /```bash\ncp solutions\/afternoon-2\/apm-policy\.yml \.\/apm-policy\.yml\n```/);
-  const demonstration = policy.slice(policy.indexOf('### Step 4:'));
-  assert.match(demonstration, /change `deny:` back to `allow:`/);
-  assert.match(demonstration, /```bash\napm audit --ci --policy apm-policy\.yml\n```/);
-  assert.doesNotMatch(demonstration, /cp solutions\/|Restore the solution policy/);
-  assert.match(runner, /sed -i '.*deny:.*allow:.*' apm-policy\.yml && apm audit --ci --policy apm-policy\.yml/);
+  const demonstration = policy.slice(policy.indexOf('### Step 3:'));
+  assert.match(demonstration, /allow:\n    - "microsoft\/\*\*"\n  deny:\n    - "microsoft\/hve-core"/);
+  assert.match(demonstration, /Remove only the temporary `deny` entry/);
+  assert.match(demonstration, /Restore a passing audit before committing/);
+  assert.match(runner, /policy-before-deny\.yml/);
+  assert.doesNotMatch(runner, /sed -i '.*deny:.*allow:/);
   assert.doesNotMatch(policy, /Copy-Item/);
   assert.match(policy, /no `apm experimental enable` command is needed/);
   assert.doesNotMatch(policy, /validated command used the experimental policy path/);
 });
 
-test('Level 4 marketplace copying and inspection use Linux paths without nesting plugins on rerun', () => {
-  const marketplace = workshop.slice(workshop.indexOf('## Add a team plugin marketplace'),
-    workshop.indexOf('### Step 4: VS Code Agent Plugins view'));
-  assert.match(marketplace, /```bash\nmkdir -p \.github\/plugin \.github\/copilot plugins/);
-  assert.match(marketplace, /cp -R solutions\/afternoon-2\/plugins\/\. \.\/plugins\//);
-  assert.match(marketplace, /plugins\/music-catalog-conventions\/agents\/music-catalog-test-writer\.agent\.md/);
-  assert.match(marketplace, /plugins\/music-catalog-conventions\/skills\/add-api-endpoint\/SKILL\.md/);
-  assert.doesNotMatch(marketplace, /New-Item|Copy-Item|\\/);
-  assert.match(runner, /cp -R solutions\/afternoon-2\/plugins\/\. \.\/plugins\//);
+test('Level 4 keeps marketplace discovery a demo rather than a second participant install', () => {
+  const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
+  assert.match(level4, /marketplace orientation is a facilitator demo/);
+  assert.match(level4, /sample \[CoffeeSoft catalog\].*is private/);
+  assert.doesNotMatch(level4, /copilot plugin install|cp -R solutions\/afternoon-2\/plugins/);
+  const replay = runner.slice(runner.indexOf('# ---------------------------------------------------------------- Level 4'));
+  assert.match(replay, /skip_step l4-marketplace-demo/);
+  assert.doesNotMatch(replay, /step l4-plugin-install|step l4-marketplace-add/);
 });
 
-test('Level 4 explains duplicate agent entries and shows the supplied screenshot after APM installation', () => {
+test('Level 4 verifies repository agents before disabling the personal plugin', () => {
   const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
-  const install = level4.slice(level4.indexOf('### Step 2: Install the APM dependency'),
-    level4.indexOf('### Step 3: Inspect the lockfile'));
-  assert.match(install, /class="warning" data-title="Duplicate agent entries are expected"/);
-  assert.match(install, /\*\*Copilot CLI\*\*.*\*\*VS Code Copilot Chat\*\*/);
-  assert.match(install, /plugin installed in Level 1.*custom agents now living in your repository/);
-  assert.match(install, /Duplicate entries do not mean the installation failed/);
-  assert.match(install, /!\[VS Code Copilot Chat agent picker showing duplicate HVE-Core agent entries\]\(assets\/l4-duplicate-agent-entries\.png\)/);
+  const disable = level4.indexOf('copilot plugin disable hve-core');
+  assert.ok(level4.indexOf('.github/agents/rpi-agent.agent.md') < disable);
+  assert.match(level4, /copilot plugin disable hve-core\ncopilot plugin list/);
+  assert.match(level4, /Managed settings may prevent local disabling/);
+  assert.match(level4, /does not disable a separate VS Code extension or plugin/);
+  assert.match(runner, /test -f \.github\/agents\/rpi-agent\.agent\.md.*copilot plugin disable hve-core/);
   const image = readFileSync(new URL('../../../docs/afternoon-2/assets/l4-duplicate-agent-entries.png', import.meta.url));
   assert.deepEqual([...image.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
   const inventory = readFileSync(new URL('../../../docs/afternoon-2/assets/README.md', import.meta.url), 'utf8');
@@ -441,7 +440,7 @@ test('tester fails extraction when a curated solution message disappears', () =>
 test('interactive agent changes provide direct CLI commands alongside VS Code selection', () => {
   for (const name of [
     'dt-coach', 'documentation', 'meeting-analyst', 'brd-builder', 'prd-builder', 'functional-planner',
-    'backlog-manager', 'rpi-agent', 'adr-creation', 'code-review', 'music-catalog-test-writer',
+    'backlog-manager', 'rpi-agent', 'adr-creation', 'code-review',
   ]) assert.ok(workshop.includes(`/agent ${name}`), name);
   assert.match(workshop, /direct name is not recognized/);
   assert.match(workshop, /use the agent picker instead/);

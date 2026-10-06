@@ -15,8 +15,10 @@ This folder intentionally contains placeholders referenced by `docs\afternoon-2\
 - `l3-frontend-ports.png` — Supplied VS Code Ports screenshot showing the private forwarded API and frontend addresses. Open the frontend row's address for the current environment; the pictured URL is only an example.
 - `l4-apm-marketplace.png` — Terminal output for APM install or audit plus repository marketplace files.
 - `l4-duplicate-agent-entries.png` — Supplied VS Code Copilot Chat agent-picker screenshot showing duplicate HVE-Core names when both the plugin and repository custom agents are available. This is expected, not an installation failure.
+- `l4-private-marketplace.png` — Supplied private CoffeeSoft catalog README, cropped to omit the contributor sidebar. Proctor orientation only; attendees need no private repository access.
 - `l4-vscode-agentplugins.png` — VS Code Extensions view filtered with `@agentPlugins @recommended`.
 - `l5-ghaw-compile.png` — Terminal output from `gh aw compile` generating lock files.
 - `l5-daily-backlog-issue.png` — GitHub issue created by the daily backlog workflow with recommended order and parallelizable work.
 - `l5-cloud-agent-assignment.png` — GitHub issue assignment UI showing Copilot cloud agent and custom-agent selection, for the issue taken from the backlog summary's parallel group.
+- `l5-playwright-mcp.png` — Supplied repository MCP settings screenshot for cloud agent/code review. Proctor demonstration only; not gh-aw or local client configuration.
 - `l6-cloud-agent-pr-review.png` — Pull request opened by Copilot cloud agent, with the session log link, the required `test` check and a Copilot code review.

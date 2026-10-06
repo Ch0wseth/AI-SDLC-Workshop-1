@@ -1,11 +1,12 @@
 # Levels 4-6: agreed learning-flow decisions
 
 **Decision date:** 2026-10-06  
-**Status:** Agreed direction; guide and workflow implementation pending.
+**Status:** Applied to the guide and solution workflow; live delivery validation remains separate.
 
 This document records the agreed redesign of the
-[Afternoon 2 workshop](../afternoon-2/workshop.md). It does not change the lab,
-publish workflows, configure repository settings, or execute GitHub operations.
+[Afternoon 2 workshop](../afternoon-2/workshop.md) and the implementation
+clarifications below. Local guide, solution, and tester changes do not publish
+workflows, configure repository settings, or execute GitHub operations.
 
 ## Audience, timebox, and teaching approach
 
@@ -100,13 +101,13 @@ GitHub rule that makes the audit mandatory across selected repositories.
 Demonstrations of organization-wide enforcement depend on the supported APM
 version, policy distribution, GitHub plan, and administrator permissions.
 
-The requested orientation describes the organization-private distribution route
-as a GitHub Enterprise company capability, not as requiring Copilot Enterprise
-seats for every participant. Before publishing that comparison, verify the exact
-repository convention and entitlement: the discussion used `.copilot-private`,
-while GitHub's enterprise-managed-settings documentation uses `.github-private`.
-Do not substitute one for the other or assert blanket eligibility without
-checking the specific asset-distribution feature.
+Source verification resolved the earlier `.copilot-private` shorthand to
+GitHub's documented `.github-private` convention. The guide distinguishes
+organization-level shared agents from enterprise-wide governance configured by
+an Enterprise Owner; it does not assert that every shared organization agent is
+Enterprise-only or automatically distributes standalone prompts/skills.
+See [organization custom agents](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-organization/prepare-for-custom-agents)
+and [enterprise governance](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-agents/create-github-private-repo).
 
 ### Proctor plugin marketplace demo
 
@@ -127,9 +128,10 @@ deploying loose agent files. Native plugin registration and loading depend on
 APM/client versions; verify support against the workshop's pinned tooling before
 adding a live example.
 
-APM can compile packages for different target harnesses, but the primitives must
-be compatible with each target. Compilation is not automatic conversion of every
-Copilot-specific tool or agent behavior into another harness.
+APM's compile command specifically compiles instructions into target context
+files. Other primitives are deployed by install. Their formats and tools must
+still be compatible with the selected harness; compilation is not automatic
+conversion of every Copilot-specific agent behavior.
 
 References:
 
@@ -177,15 +179,19 @@ remain explicit gates.
 
 Show a specific task's progress in a shared GitHub Issue/Project team dashboard:
 planned, in progress with linked PR, review pending, and done after verified
-delivery. Project access, field mappings, and bounded write permissions must be
-configured explicitly. Issue updates alone do not guarantee Project field updates.
+delivery. The implemented lab uses human-set intermediate Status values and
+GitHub Project's configured closed-item transition to Done. This avoids a
+privileged Project token in the core exercise. Keep status-to-issue closure off;
+moving a card is not acceptance evidence. Issue comments alone do not change
+Project fields. Agent-driven ProjectOps remains an optional organizational extension.
 
-**Implementation gap:** the current
+The updated
 [`daily-backlog.md`](../../solutions/afternoon-2/.github/workflows/daily-backlog.md)
-only creates a summary and applies labels. Comments, updates, closure, committed
-planning reconciliation, and Project integration need implementation with
-supported bounded outputs and least-privilege access. They are agreed requirements,
-not existing behavior.
+adds bounded comments and verified closure for explicitly `backlog-managed`
+issues, reads committed planning and revision-bound PR/check evidence, and
+retains human assignment. It does not rewrite issue requirements or write
+Project fields. Live closure and repeated-run behavior must still be observed
+in an authorized test repository; a static prompt check is not runtime proof.
 
 ### Separate proctor-only accessibility demonstration
 
@@ -242,16 +248,18 @@ After merge to `main`, verify the fixing PR/commit links, issue closure or remai
 criteria, and the shared Project state. The next backlog run reconciles partial
 delivery rather than declaring every merged change complete.
 
-## Delivery readiness before updating the lab
+## Delivery readiness
 
-- Verify the organization-private repository convention and feature eligibility.
-- Verify APM compile/plugin behavior against the pinned workshop release.
-- Implement and validate bounded backlog reconciliation and Project integration.
+- Use the verified `.github-private` convention and feature-specific eligibility.
+- Verify any live whole-plugin example against the pinned APM/client releases.
+- Dry-run bounded reconciliation, repeated-run deduplication, and verified closure.
+- Configure the selected shared Project's closed-item workflow and Status choices.
 - Prepare representative issues, planning changes, and PR evidence for the demo.
 - Confirm required checks, cloud-agent setup, and Copilot code-review availability.
 - Prepare private-repository screenshots and output for the proctor demos.
-- Update the guide and related workshop checks without changing its safety gates.
+- Run the guide and related workshop checks without changing its safety gates.
 
-The workshop guide and workflow implementations remain unchanged by this decision
-record. No GitHub issues, Projects, repository settings, or workflow runs were
-modified as part of documenting these decisions.
+The guide and solution workflow now implement this direction. No live GitHub
+issues, Projects, repository settings, or workflow runs are modified by these
+local changes. Marketplace/accessibility demo steps and all timing live in
+[the tutor guide](../tutor.md), not as participant setup exercises.
