@@ -11,6 +11,7 @@ This folder intentionally contains placeholders referenced by `docs\afternoon-2\
 - `l2-dt-decisions.png` — Exploration recap and clearly separated shared playlist implementation handoff, including duplicate rejection and empty-state decisions.
 - `l2-sprint-planner.png` — Supplied workshop-run screenshot of sprint planning output: text-derived dependencies, implementation order, and parallel work waves. This is a captured example, not a placeholder or a required issue hierarchy.
 - `l3-rpi-agent-walkthrough.png` — RPI Agent output showing Research, Plan, Implement, and Review phases.
+- `l3-rpi-implement-start.png` — Supplied Copilot CLI screenshot of the start of `/hve-core:rpi-implement`: the plan is ready with no blockers, work starts with tasks P01-T01 and P01-T02, and RPI creates the changes record. This is a captured example; plan paths, task IDs and commands vary by run.
 - `l3-playlist-implemented.png` — Browser view of the implemented track list and playlist panel.
 - `l3-frontend-ports.png` — Supplied VS Code Ports screenshot showing the private forwarded API and frontend addresses. Open the frontend row's address for the current environment; the pictured URL is only an example.
 - `l4-apm-marketplace.png` — Terminal output for APM install or audit plus repository marketplace files.

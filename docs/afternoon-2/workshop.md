@@ -1380,6 +1380,10 @@ Type `/rpi-implement`, select the HVE-Core entry, and press **Tab**. Replace `<p
 Implement the approved plan at <plan-path>.
 ```
 
+In the example below, `<plan-path>` is `.copilot-tracking/plans/2026-10-06/music-catalog-playlist-slice-plan.md`. Before changing source files, RPI checks that the plan is ready, names the first tasks and creates the changes record. Your plan path, task IDs and commands will differ.
+
+![Example Copilot CLI run of /hve-core:rpi-implement: RPI reports that the plan is ready with no blockers, starts with tasks P01-T01 and P01-T02, and creates the changes record](assets/l3-rpi-implement-start.png)
+
 Success Criteria:
 - The source and test diff matches the approved plan; any material departure has a recorded decision.
 - The changes record exists at the returned path and reports completed tasks and API/front-end test results.
