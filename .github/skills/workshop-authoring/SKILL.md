@@ -1,6 +1,6 @@
 ---
 name: workshop-authoring
-description: "Apply progressive disclosure to hands-on workshop guides. Use when Workshop Creator creates or restructures level introductions and supporting explanations."
+description: "Use when Workshop Creator creates or restructures the content of a workshop, also through introductions and supporting explanations. Apply progressive disclosure to hands-on workshop guides. "
 user-invocable: true
 ---
 
