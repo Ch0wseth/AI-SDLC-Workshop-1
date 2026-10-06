@@ -127,15 +127,15 @@ test('Level 5a establishes verification before the reviewed 5b delegation handof
   assert.deepEqual(apmRule.rules[0].parameters.required_status_checks.map(({ context }) => context), ['apm-audit']);
 
   const stage5bPositions = [
-    stage5b.indexOf('git switch -c feature/level-5b-backlog'),
+    stage5b.indexOf('Create and switch to feature/level-5b-backlog'),
     stage5b.indexOf('Copy-Item solutions\\afternoon-2\\.github\\workflows\\daily-backlog.md'),
     stage5b.indexOf('**Decision check:** Which committed planning paths does the job read'),
     stage5b.indexOf('Open your committed `docs/project-planning/dt-later-slice.md`'),
     stage5b.indexOf('**Decision check:** Does this brief revise the original agreement'),
-    stage5b.indexOf('gh pr create --title "Add the Stage 5b backlog setup"'),
+    stage5b.indexOf('Create a PR titled "Add the Stage 5b backlog setup"'),
     stage5b.indexOf('Wait for both required checks, `test` and `apm-audit`'),
     stage5b.indexOf('A human reviews and merges the PR'),
-    stage5b.indexOf('git switch main'),
+    stage5b.indexOf('Verify the Stage 5b setup PR is merged'),
   ];
   assert.ok(stage5bPositions.every((position, index) =>
     position >= 0 && (index === 0 || position > stage5bPositions[index - 1])),
@@ -302,7 +302,7 @@ test('proctor demos are not replayed as participant runs', () => {
 test('the follow-up issue has committed planning evidence before delegation', () => {
   const l5 = level(5);
   const planningCopy = l5.indexOf('Open your committed `docs/project-planning/dt-later-slice.md`');
-  const setupPr = l5.indexOf('gh pr create --title "Add the Stage 5b backlog setup"');
+  const setupPr = l5.indexOf('Create a PR titled "Add the Stage 5b backlog setup"');
   const issue = l5.indexOf('### Step 3: Create a scoped feature issue');
   assert.ok(planningCopy >= 0 && planningCopy < setupPr && setupPr < issue);
   assert.match(l5, /Wait for both required checks, `test` and `apm-audit`/);

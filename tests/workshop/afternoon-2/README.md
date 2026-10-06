@@ -57,6 +57,14 @@ Level 3's already-committed/clean-tree case remains a no-op. Post-APM commit pro
 discovery must still be verified in a live client. The template/import prerequisite
 provides an existing `HEAD`; no learner bootstrap raw commit is prescribed.
 
+The lab's remaining Git operations are scoped Copilot requests, not copy-paste
+Git commands. The extractor retains all 22 inspection, branch, publication and
+sync/cleanup requests as `git-*.txt`, including three HVE pull-request requests.
+The runner's deterministic Git operations are sandbox translations, not evidence
+these requests ran. Level 3's native PR publication confirmation is explicitly
+skipped before the sandbox push/PR translation. Live prompt execution, learner
+publication approval and facilitator cleanup consent remain unverified.
+
 Run all guide, catalog, source-transition, APM gate and report regression checks
 with `node --test tests/workshop/afternoon-2/*.test.mjs`.
 

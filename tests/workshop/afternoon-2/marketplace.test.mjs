@@ -55,7 +55,7 @@ test('visible Level 4 path keeps source gates, Linux prerequisites and revised t
 test('all lab commits use scoped HVE requests while clean-tree and approval checks remain visible', () => {
   const guide = read('../../../docs/afternoon-2/workshop.md');
   const shellBlocks = [...guide.matchAll(/```(?:bash|powershell|cmd)\n([\s\S]*?)\n```/g)];
-  for (const [, body] of shellBlocks) assert.doesNotMatch(body, /\bgit (?:commit|add)\b/);
+  for (const [, body] of shellBlocks) assert.doesNotMatch(body, /\bgit\s/);
   const requests = [...guide.matchAll(/```text\n(\/hve-core:git-commit\.prompt\n[\s\S]*?)\n```/g)];
   assert.equal(requests.length, 10);
   for (const [, body] of requests) {
@@ -66,7 +66,8 @@ test('all lab commits use scoped HVE requests while clean-tree and approval chec
   }
   const checkpoint = guide.slice(guide.indexOf('### Step 3: Commit implementation checkpoint'),
     guide.indexOf('## Review phase'));
-  assert.match(checkpoint, /git status\ngit log -3 --stat/);
+  assert.match(checkpoint, /inventories pending paths before asking you/);
+  assert.doesNotMatch(checkpoint, /```text\n(?!\/hve-core:git-commit\.prompt)/);
   assert.match(checkpoint, /already committed[\s\S]*?without creating[\s\S]*?empty commit/);
   assert.match(checkpoint, /real staging or commit error must be resolved/);
   assert.match(checkpoint, /partly staged or unrelated initially staged/);
@@ -92,6 +93,13 @@ test('extractor keeps all ten commit tasks and rejects a missing scoped request'
     assert.match(assignment, /using docs\/project-planning\/dt-later-slice\.md/);
     assert.doesNotMatch(assignment, /remove-playlist-track/);
     assert.equal(readdirSync(work).filter(name => name.startsWith('commit-')).length, 10);
+    assert.equal(readdirSync(work).filter(name => name.startsWith('git-')).length, 22);
+    const pr = readFileSync(join(work, 'git-l3-pr.txt'), 'utf8');
+    assert.match(pr, /^\/hve-core:pull-request\n/);
+    assert.match(pr, /After I confirm, push only the/);
+    assert.match(pr, /Do not push to the default branch, merge or bypass branch rules/);
+    assert.match(readFileSync(join(work, 'git-l3-sync.txt'), 'utf8'), /fast-forward only/);
+    assert.match(readFileSync(join(work, 'git-demo-cleanup.txt'), 'utf8'), /confirmation before deleting anything/);
     for (const name of readdirSync(work).filter(name => name.startsWith('commit-'))) {
       assert.match(readFileSync(join(work, name), 'utf8'), /^\/hve-core:git-commit\.prompt\n/);
     }

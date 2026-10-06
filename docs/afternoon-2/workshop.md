@@ -171,14 +171,15 @@ repository. Importing preserves existing commits, so the later HVE commit prompt
 has a valid `HEAD`; do not delete `.git` and make an unborn repository.
 If your policy also blocks import, ask the tutor for an approved prepared copy.
 
-Clone your imported repository, replacing `OWNER` with your account:
+Ask Copilot in your local workspace to clone your imported repository, replacing `OWNER` with your account. This is a repository setup request, not a commit request:
 
-```bash
-git clone https://github.com/OWNER/my-music-catalog my-music-catalog
-cd my-music-catalog
+```text
+Clone https://github.com/OWNER/my-music-catalog into a new my-music-catalog folder.
+Stop if that destination already exists; do not overwrite it. Verify the origin
+and default branch, then tell me which folder to open. Do not create a commit or push.
 ```
 
-`gh repo view` should show your own repository with a `main` branch. If the push is rejected for missing the `workflow` scope, follow the tip in Level 5 "Push your branch", then run `git push -u origin main`.
+`gh repo view` should show your own repository with a `main` branch. If a later publication is rejected for missing the `workflow` scope, follow the Level 5 "Push rejected for workflow files" tip, then retry the same scoped publication request.
 
 </details>
 
@@ -252,7 +253,6 @@ If **Confirm folder trust** appears, check that the displayed path is your works
 Check the installed tool versions before starting the exercises. These commands report availability; they do not install or update anything:
 
 ```bash
-git --version
 node --version
 dotnet --version
 gh --version
@@ -281,13 +281,27 @@ From the repository root, check both test suites and the working tree:
 ```powershell
 dotnet test
 npm --prefix src/front test
-git status
+```
+
+Ask Copilot to inspect repository readiness without making changes:
+
+```text
+Verify Git is installed and report its version. Inspect the current branch and working-tree state. Report any staged, unstaged
+or untracked paths and whether HEAD exists. Do not stage, commit, discard or publish anything.
 ```
 
 Success Criteria:
 - xUnit and Vitest pass.
 - The working tree is clean before agents edit the repository. A fresh template copy already has an initial commit; no extra baseline commit is needed.
 - The starter only serves and displays `/api/hello`. The 12 synthetic tracks in `src\api\Data\tracks.json` are not exposed by an endpoint yet, and the playlist capability is not implemented.
+
+**Git operations in this lab:** send the task-specific requests below to Copilot
+instead of running Git recipes yourself. Use `/hve-core:git-commit.prompt` only
+for local commits: it asks for whole-path selection and exact staged-set
+confirmation, and does not push. Use `/hve-core:pull-request` for PR publication,
+and ordinary scoped Copilot requests for inspection, branching and synchronization.
+Review publication targets before authorizing writes. No request authorizes
+discarding your work, bypassing protection or replacing human PR review.
 
 The application lives in `src\api` and `src\front`, with API tests in `tests\api` and reference solutions in `solutions\afternoon-2`. If a check fails, resolve it using your [delivery-option prerequisites](https://github.com/Justrebl/AI-SDLC-Workshop/blob/main/docs/prerequisites.md) before starting Level 1.
 
@@ -409,10 +423,11 @@ Success Criteria:
 
 ## Commit checkpoint
 
-No repository file should change in this level. Run:
+No repository file should change in this level. Ask Copilot to verify that checkpoint:
 
-```powershell
-git status
+```text
+Check whether the working tree is still clean after Level 1. Report changed paths
+without modifying the index or files. Do not create a commit or push.
 ```
 
 Success Criteria:
@@ -1340,14 +1355,17 @@ Success Criteria:
 
 ### Before Step 1: Create a feature branch
 
-Keep the playlist work separate from the Level 2 default-branch baseline. From the repository root, create the feature branch before asking RPI to implement:
+Keep the playlist work separate from the Level 2 default-branch baseline. Ask Copilot to create the feature branch before asking RPI to implement:
 
-```powershell
-git switch -c feature/playlist-slice
+```text
+Verify that the current branch is the repository's reviewed default branch and
+the working tree is clean. Create and switch to feature/playlist-slice from that
+baseline. Stop if the branch already exists or the baseline is not ready.
+Do not edit files, commit or push.
 ```
 
 Success Criteria:
-- `git branch --show-current` reports `feature/playlist-slice`.
+- The reported current branch is `feature/playlist-slice`.
 - The branch starts from the reviewed default-branch baseline.
 
 ### Step 1: Ask RPI to implement
@@ -1400,19 +1418,15 @@ Success Criteria:
 
 ### Step 3: Commit implementation checkpoint
 
-Run from the repository root. Inspect the implementation before committing:
-pending changes should be limited to approved source, tests and necessary test
-setup files, never `.copilot-tracking/`. If RPI already committed the implementation
-and the working tree is clean, inspect those commits and continue without creating
-an empty commit:
+Use the HVE commit prompt from the repository root; no separate Git commands or
+inspection request are needed. It inventories pending paths before asking you
+which whole paths to commit. Review the approved implementation in Source Control:
+include only approved source, tests and necessary test setup files, never
+`.copilot-tracking/`. If RPI already committed the implementation and the working
+tree is clean, continue without creating an empty commit.
 
-```bash
-git status
-git log -3 --stat
-```
-
-For pending approved changes, type `/git-commit`, select
-`/hve-core:git-commit.prompt`, press **Tab**, and add this task before sending:
+Type `/git-commit`, select `/hve-core:git-commit.prompt`, press **Tab**, and add
+this task before sending:
 
 ```text
 /hve-core:git-commit.prompt
@@ -1571,7 +1585,7 @@ files. Ask me to select whole paths and confirm their exact staged set before co
 ```
 
 Success Criteria:
-- The agent stages your changes and proposes a conventional commit message for you to accept or edit.
+- You select whole paths and confirm the exact staged set; the agent creates the local commit with a Conventional Commit message.
 
 <div class="tip" data-title="Close the PM backlog from a commit">
 
@@ -1579,41 +1593,43 @@ Success Criteria:
 
 </div>
 
-### Step 4: Draft the pull request with `/hve-core:pull-request`
+### Step 4: Publish the pull request with `/hve-core:pull-request`
 
-Type `/pull-request`, select the HVE-Core entry, and press **Tab**. Add the preparation-only request before sending:
+Type `/pull-request`, select the HVE-Core entry, and press **Tab**. Ask it to publish the committed feature branch and open the PR. Review the title, description, target and publication action before confirming:
 
 ```text
 /hve-core:pull-request
 
-Prepare a pull request title and description for the committed changes. Do not publish a pull request or push the branch.
+Create a pull request for the committed Level 3 playlist implementation on
+feature/playlist-slice, targeting this repository's default branch. Include the
+local test and RPI review evidence, without publishing private tracking artifacts.
+Check the changed areas and show me the title, description, target and any needed
+push before asking for publication approval. After I confirm, push only the
+feature branch and open the PR, or report an existing matching PR instead of
+creating a duplicate. Do not push to the default branch, merge or bypass branch rules.
 ```
 
 Success Criteria:
 - The agent reads the committed diff of your feature branch, runs quick checks on the changed areas, and shows you a pull request title and description.
-- This prompt only prepares the description; nothing is written to GitHub until you publish the pull request in the next steps.
+- Nothing is published until you confirm the push and PR creation.
 
-Push the feature branch so GitHub can compare it with the default branch. The command publishes only `feature/playlist-slice`, not the default branch:
-
-```powershell
-git push -u origin feature/playlist-slice
-```
-
-Open a pull request in GitHub with the prepared title and description. Target the repository's default branch and request review from a teammate or facilitator. Keep the change on the feature branch; do not push directly to the default branch or bypass branch rules.
+Open the returned PR in GitHub and request review from a teammate or facilitator. Keep the change on the feature branch; do not push directly to the default branch or bypass branch rules.
 
 Success Criteria:
 - The pull request compares `feature/playlist-slice` with the repository's default branch and contains the Level 3 implementation and its local test and RPI review evidence.
 - A human reviewer inspects and approves the change, then merges the pull request through the normal repository workflow. If required checks or review are pending, wait; do not bypass them.
 
-After the pull request is merged, return to the updated default branch before starting Level 4. Replace `main` below if your repository uses a different default branch:
+After the pull request is merged, ask Copilot to return to the updated default branch before starting Level 4:
 
-```powershell
-git switch main
-git pull --ff-only
+```text
+Verify that the Level 3 PR is merged and the working tree is clean. Switch to this
+repository's actual default branch and update it by fast-forward only. Stop if
+local changes or divergent history prevent this; do not discard work, reset,
+rebase or force-push. Confirm that the merged playlist implementation is present.
 ```
 
 Success Criteria:
-- `git branch --show-current` reports the default branch, and `git status` shows a clean working tree.
+- Copilot reports the default branch as current and a clean working tree.
 - The default branch includes the merged Level 3 pull request.
 
 ---
@@ -1933,14 +1949,16 @@ Open `.github/workflows/apm-audit.yml`. It sets up APM **without reinstalling yo
 
 ### Step 2: Commit and push the verified setup
 
-Review `git status` and the staged diff. Include the deployed agents and shared skills, not just the manifest: a fresh cloud environment cannot read your personal plugin or private tracking notes.
+Review the pending paths and their diffs. Include the deployed agents and shared skills, not just the manifest: a fresh cloud environment cannot read your personal plugin or private tracking notes.
 
 Check pending paths first; verify `/git-commit` still offers the HVE commit prompt
 from the repository deployment after personal HVE is disabled. If it is missing,
 stop and ask the tutor to resolve the deployment rather than using a raw commit.
 
-```bash
-git status
+```text
+Inspect the pending repository setup paths and their diffs. Identify deployed
+agents and shared skills as well as the APM manifest, lock and policy. Report
+unrelated or partly staged files; do not stage, commit, discard or push anything.
 ```
 
 Select `/hve-core:git-commit.prompt` with **Tab**, then give it the governed scope.
@@ -1956,8 +1974,11 @@ and unrelated files. Ask me to select whole paths and confirm the exact staged s
 Once the local commit succeeds, publish it separately. A failed or missing commit
 is not permission to continue:
 
-```bash
-git push
+```text
+Publish the committed Level 4 repository setup to the current branch's upstream
+after showing me the remote, branch and commits and obtaining my confirmation.
+Stop if branch rules reject the push; use a reviewed setup PR instead, without
+bypassing protection or force-pushing. Do not create another commit.
 ```
 
 ### Step 3: Confirm readiness on GitHub
@@ -2016,8 +2037,10 @@ Ask me to select the whole path and confirm its exact staged set; exclude tracki
 
 After successful local commit, publish to the default branch before requiring the check:
 
-```bash
-git push
+```text
+Show me the remote, branch and committed CI workflow change, then ask for
+confirmation to publish it. Stop if branch rules require a reviewed PR; do not
+bypass them or force-push. Do not stage files or create another commit.
 ```
 
 Wait for **CI** on `main` to pass. Then make its `test` job a required check using the supplied ruleset:
@@ -2048,8 +2071,10 @@ Ask me to select the whole path and confirm its exact staged set; exclude tracki
 
 Publish only after the local commit succeeds:
 
-```bash
-git push
+```text
+Show me the remote, branch and committed Copilot setup change, then ask for
+confirmation to publish it. Stop if branch rules require a reviewed PR; do not
+bypass them or force-push. Do not stage files or create another commit.
 ```
 
 Check that **Copilot Setup Steps** passed in Actions. Dependencies missing from setup may require downloads during the session, where the agent firewall can block them.
@@ -2109,8 +2134,10 @@ Level 4 made the method repository-readable. This level makes the work traceable
 
 The strict APM audit rule is active before any backlog workflow or planning changes begin. Create a feature branch for those changes; the setup PR must pass both required checks and receive human review before you continue:
 
-```powershell
-git switch -c feature/level-5b-backlog
+```text
+Verify the working tree is clean and the current default-branch baseline includes
+the verified Stage 5a setup. Create and switch to feature/level-5b-backlog.
+Stop if that branch already exists or the baseline is not ready. Do not commit or push.
 ```
 
 ## Install and initialize gh-aw
@@ -2177,8 +2204,14 @@ Compilation validates the source and creates the Actions workflow. The generated
 
 ```powershell
 gh aw compile
-git status
-git diff -- .github\workflows\daily-backlog.md
+```
+
+Ask Copilot to inspect the compilation changes without staging them:
+
+```text
+Inspect the pending paths and diffs from gh aw init and gh aw compile, including
+.github/workflows/daily-backlog.md and its generated lock. Report unexpected
+changes. Do not stage, commit, modify generated files or publish anything.
 ```
 
 Confirm that the changed files belong to `gh aw init`, the backlog source, or generated workflows. The generated `.github/workflows/daily-backlog.lock.yml` is local until the reviewed setup PR is merged.
@@ -2207,14 +2240,15 @@ Keep the original slice's exclusions: the selected document records a follow-up,
 
 ### Step 2: Publish the 5b setup in a reviewed PR
 
-The strict `apm-audit` rule is already active. Review the `gh aw init` output, then stage the backlog source, generated workflow, planning brief, and any required initializer files by their exact paths before publishing the Stage 5b feature branch:
+The strict `apm-audit` rule is already active. Review the `gh aw init` output and ask Copilot to inspect the setup before invoking the commit prompt:
 
-```bash
-git status
-git diff -- .github/workflows docs/project-planning/remove-playlist-track.md
+```text
+Inspect pending paths and diffs under .github/workflows and the selected later-slice
+planning brief. Identify required initializer files and unrelated changes.
+Do not stage, commit or publish anything.
 ```
 
-For your own DT idea, replace the example planning path above and in the commit request below with `docs/project-planning/dt-later-slice.md`. That brief may already be committed from Level 2; do not create an empty commit for it. Commit any reviewed refinements together with the new setup files.
+For your own DT idea, use `docs/project-planning/dt-later-slice.md` as the selected brief and replace the fallback path in the commit request below. That brief may already be committed from Level 2; do not create an empty commit for it. Commit any reviewed refinements together with the new setup files. If required initializer files remain pending, add their reviewed exact paths to the commit request before sending.
 
 Select the HVE commit prompt with **Tab** and provide this bounded task. Review
 the source workflow, its compiled lock and the planning brief before confirming
@@ -2228,18 +2262,25 @@ docs/project-planning/remove-playlist-track.md only. Ask me to select whole path
 and confirm the exact staged set. Exclude .copilot-tracking/ and unrelated changes.
 ```
 
-After successful local commit, push this branch and create the setup PR:
+After successful local commit, use the pull-request capability to publish this branch and create the setup PR:
 
-```bash
-git push -u origin feature/level-5b-backlog
-gh pr create --title "Add the Stage 5b backlog setup" --body "Adds the bounded backlog workflow and the reviewed planning brief after the APM audit gate is active."
+```text
+/hve-core:pull-request
+Create a PR titled "Add the Stage 5b backlog setup" from feature/level-5b-backlog
+to this repository's default branch for the committed bounded backlog workflow
+and reviewed planning brief. Show me the description, target and needed push,
+then ask for publication approval. After confirmation, publish only this feature
+branch and open the PR, reusing an existing matching PR if present.
+Do not merge, push to the default branch or bypass test or apm-audit checks.
 ```
 
 Wait for both required checks, `test` and `apm-audit`, on the PR revision. A human reviews and merges the PR through the normal workflow; do not bypass either check or treat an open PR as completion. After merge, sync the default branch before creating the feature issue:
 
-```powershell
-git switch main
-git pull
+```text
+Verify the Stage 5b setup PR is merged and the working tree is clean. Switch to
+the actual default branch and update it by fast-forward only. Stop on local
+changes or divergent history without discarding, resetting or rebasing anything.
+Confirm the reviewed planning brief and compiled backlog workflow are present.
 ```
 
 **What to expect:** the default branch contains the reviewed planning brief and compiled workflow, and the PR records passing required checks plus human approval.
@@ -2537,10 +2578,17 @@ The solution workflow `solutions/afternoon-2/.github/workflows/security-review-d
 - **Safe output:** `assign-to-agent` performs the assignment with `custom-agent: security-reviewer`, `target: triggering`, and `max: 1`. The `names: [security-review]` trigger filter is the label gate.
 - **Authentication:** assigning Copilot needs a fine-grained PAT stored as the `GH_AW_AGENT_TOKEN` secret. The PAT needs read access to metadata and write access to actions, contents, issues, and pull requests. The default `GITHUB_TOKEN` and GitHub App tokens are not accepted.
 
-Run from the repository root on a new branch; the APM rule now protects the default branch:
+Ask Copilot to prepare a new branch; the APM rule now protects the default branch:
+
+```text
+Verify the default-branch baseline and clean working tree, then create and switch
+to security-review-delegation. Stop if that branch already exists or the baseline
+is not ready. Do not commit or publish anything.
+```
+
+Then copy and compile the workflow from the repository root. Enter the secret only in the CLI's interactive prompt, never in Copilot Chat:
 
 ```bash
-git switch -c security-review-delegation
 cp solutions/afternoon-2/.github/workflows/security-review-delegation.md .github/workflows/security-review-delegation.md
 gh aw compile
 gh label create security-review --description "Delegate a security review to Copilot cloud agent"
@@ -2558,13 +2606,18 @@ Ask me to select whole paths and confirm the exact staged set; exclude credentia
 .copilot-tracking/ and unrelated changes.
 ```
 
-After the local commit succeeds, publish the branch separately:
+After the local commit succeeds, publish through a reviewed setup PR:
 
-```bash
-git push -u origin HEAD
+```text
+/hve-core:pull-request
+Create a PR for the committed security-review-delegation branch to the actual
+default branch. Show me the target, description and needed push, and ask for
+publication approval. After confirmation, publish only this feature branch
+and open the PR, reusing an existing matching PR if present. Do not merge,
+bypass required checks, or include credentials or private tracking artifacts.
 ```
 
-Open a pull request, wait for the required checks, and merge the workflow setup before using the label trigger. `gh secret set` prompts for the value, so the PAT does not end up in your shell history. Then create a new security review issue, as in Step 2, and add the `security-review` label to it.
+Open the returned pull request, wait for the required checks, and have a human review and merge the workflow setup before using the label trigger. `gh secret set` prompts for the value, so the PAT does not end up in your shell history. Then create a new security review issue, as in Step 2, and add the `security-review` label to it.
 
 Success Criteria:
 - The workflow runs, and Copilot is assigned with Security Reviewer.
@@ -2656,7 +2709,13 @@ Merge only when the issue criteria are satisfied, required checks pass for the l
 
 After merge to `main`, inspect the issue timeline for the closing PR and fixing commit. If it remains open, rerun `gh aw run daily-backlog`: the opted-in reconciliation job must check delivery evidence before closing it. Partial delivery stays open with remaining criteria.
 
-On the shared Project, verify **Done** if you configured the closed-item workflow. Without that automation, update the card yourself after acceptance; issue comments do not automatically change Project fields. Finally, update your local `main` with `git pull`.
+On the shared Project, verify **Done** if you configured the closed-item workflow. Without that automation, update the card yourself after acceptance; issue comments do not automatically change Project fields. Finally, ask Copilot to synchronize the local default branch:
+
+```text
+Verify the delegated PR is merged and the working tree is clean. Switch to the
+actual default branch and update it by fast-forward only. Stop on local changes
+or divergent history; do not discard, reset, rebase or force-push.
+```
 
 **Success Criteria:** the delegated PR has a completed Copilot code review and current check evidence; the human merge/change-request decision is recorded; the issue and dashboard match delivered work.
 
@@ -2682,8 +2741,10 @@ No local commit is required for this level unless you changed local files. Check
 the working tree first; delegated PR commits are not a reason to create an empty
 local commit:
 
-```bash
-git status
+```text
+Inspect the local working tree after Level 6. Report whether any local changes
+remain; distinguish them from the delegated PR's commits. Do not stage, commit,
+discard changes or push.
 ```
 
 For reviewed local changes only, select the HVE commit prompt and provide the task:
@@ -2737,10 +2798,16 @@ Click **Save and dry run**, then **Publish pattern**, then **Enable** push prote
 
 ### Step 3: Try to push the fake key
 
-Run from the proctor repository root. Paste your generated key in place of `PASTE-KEY-HERE`:
+Ask Copilot to create the isolated demo branch in the proctor repository:
+
+```text
+Verify the working tree is clean, then create and switch to demo/push-protection.
+Stop if the branch already exists. Do not commit or publish anything.
+```
+
+From the proctor repository root, paste your generated fake key in place of `PASTE-KEY-HERE`:
 
 ```bash
-git switch -c demo/push-protection
 printf '%s\n' 'MUSIC_CATALOG_KEY=PASTE-KEY-HERE' > demo.env
 ```
 
@@ -2756,8 +2823,11 @@ path and confirm its exact staged set; exclude tracking state and unrelated file
 
 After successful local commit, attempt the protected push. Do not bypass a rejection:
 
-```bash
-git push -u origin demo/push-protection
+```text
+Show me the proctor remote, demo/push-protection branch and synthetic-fixture
+commit, then ask for confirmation to attempt that branch's push. Report the
+push-protection rejection. Do not use a bypass link, retry with a bypass,
+force-push or publish to the default branch.
 ```
 
 Success Criteria:
@@ -2774,14 +2844,17 @@ Success Criteria:
 
 Return to `main` and remove only the rejected demo branch and its temporary file. Do not bypass push protection to publish the fake key.
 
-```powershell
-git switch main
-git branch -D demo/push-protection
-Remove-Item demo.env -ErrorAction SilentlyContinue
+```text
+Verify the demo push was rejected and the current branch is demo/push-protection.
+Show me the exact temporary branch and demo.env cleanup targets and ask for
+confirmation before deleting anything. After confirmation, return to the actual
+default branch and delete only the local demo branch and any remaining demo.env
+fixture. Stop on unrelated changes or unexpected state; do not reset other work
+or bypass push protection.
 ```
 
 Success Criteria:
-- `git status` shows a clean working tree on `main`.
+- Copilot reports a clean working tree on the default branch.
 - The fake key never reached GitHub.
 
 </details>
