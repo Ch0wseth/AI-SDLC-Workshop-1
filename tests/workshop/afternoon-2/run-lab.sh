@@ -78,7 +78,7 @@ finish_step
 step pre-npm-test preflight "Starter readiness: Vitest passes" literal 600 'npm --prefix src/front test'
 finish_step
 
-step pre-clean-tree preflight "Starter readiness: clean working tree" literal 60 'git status'
+step pre-clean-tree preflight "Sandbox translation: readiness inspection" translated 60 'git status'
 tree_clean_check
 finish_step
 
@@ -99,7 +99,7 @@ finish_step
 
 skip_step l1-vscode "Level 1" "VS Code alternative (ise-hve-essentials.hve-core)" "VS Code UI fallback, not executable headless"
 
-step l1-git-status "Level 1" "Commit checkpoint: git status" literal 30 'git status'
+step l1-git-status "Level 1" "Sandbox translation: clean-tree inspection" translated 30 'git status'
 tree_clean_check
 finish_step
 
@@ -179,7 +179,7 @@ step l2-curate-commit "Level 2" "Sandbox translation: checkpoint planning drafts
 [ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
 finish_step
 
-step l2-git-status "Level 2" "Commit checkpoint: git status" literal 30 'git status; git log --oneline -1'
+step l2-git-status "Level 2" "Sandbox translation: commit checkpoint inspection" translated 30 'git status; git log --oneline -1'
 tree_clean_check
 finish_step
 
@@ -307,6 +307,8 @@ step l3-review-npm "Level 3" "Validate after review: npm test" translated 600 'c
 finish_step
 [ "$STEP_FAILED" -eq 0 ] || exit 1
 
+skip_step l3-pull-request "Level 3" "HVE PR prompt: confirm push and creation" \
+  "native publication approval is not replayed; sandbox push/PR steps below are translations, not prompt execution or learner consent"
 step l3-pr-push "Level 3" "Publish the feature branch to the sandbox repository" translated 300 \
   'git push -u origin feature/playlist-slice'
 push_fallback l3-pr-push
@@ -520,7 +522,7 @@ skip_step l5-project-progress "Level 5b" "Follow task progress on a shared Proje
 skip_step l5-accessibility-demo "Level 5b" "Browser-supported accessibility review demonstration" \
   "proctor-only private repository example; no attendee audit or MCP configuration"
 
-step l5-git-status "Level 5b" "Commit checkpoint: git status" literal 30 'git status'
+step l5-git-status "Level 5b" "Sandbox translation: commit checkpoint inspection" translated 30 'git status'
 tree_clean_check
 finish_step
 
@@ -595,6 +597,6 @@ skip_step l6-accept-and-reconcile "Level 6" "Accept delivery and verify issue/Pr
 skip_step l6-push-protection "Recap" "Facilitator demo: secret scanning push protection" \
   "facilitator demo: needs GitHub Secret Protection on a licensed proctor repository and settings-UI steps (custom pattern, dry run)"
 
-step l6-git-status "Level 6" "Commit checkpoint: git status" literal 30 'git status'
+step l6-git-status "Level 6" "Sandbox translation: local change inspection" translated 30 'git status'
 tree_clean_check
 finish_step

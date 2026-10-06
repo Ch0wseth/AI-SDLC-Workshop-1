@@ -25,17 +25,17 @@ test('Level 3 publishes through a reviewed PR and proceeds directly to Level 4',
   assert.doesNotMatch(level3, /^# Level 4:/m);
   assert.doesNotMatch(runner, /break-status|Working tree clean before the break/);
 
-  const branch = level3.indexOf('git switch -c feature/playlist-slice');
+  const branch = level3.indexOf('Create and switch to feature/playlist-slice');
   const implement = level3.indexOf('### Step 1: Ask RPI to implement');
   const reviewSection = level3.indexOf('## Review phase');
   const review = level3.indexOf('### Step 1: Ask RPI to review', reviewSection);
-  const push = level3.indexOf('git push -u origin feature/playlist-slice');
+  const push = level3.indexOf('Create a pull request for the committed Level 3');
   const humanGate = level3.indexOf('A human reviewer inspects and approves');
-  const mergeSync = level3.indexOf('git switch main');
+  const mergeSync = level3.indexOf('Verify that the Level 3 PR is merged');
   assert.ok(branch >= 0 && branch < implement, 'feature branch precedes implementation');
   assert.ok(review >= 0 && review < push, 'local RPI review precedes publication');
   assert.ok(push < humanGate && humanGate < mergeSync, 'publication, human review, and default-branch sync are ordered');
-  assert.match(level3, /prepared title and description/);
+  assert.match(level3, /Nothing is published until you confirm the push and PR creation/);
   assert.match(level3, /default branch includes the merged Level 3 pull request/);
   assert.doesNotMatch(level3, /You do not push until Level 4/);
 
@@ -144,7 +144,8 @@ test('starter readiness belongs to the introduction, not a separate level', () =
   const firstLevel = workshop.indexOf('# Level 1:');
   assert.ok(introduction >= 0 && readiness > introduction && firstLevel > readiness);
   assert.doesNotMatch(workshop, /Level 0|Baseline Afternoon 2 starter/);
-  assert.match(workshop.slice(readiness, firstLevel), /dotnet test\nnpm --prefix src\/front test\ngit status/);
+  assert.match(workshop.slice(readiness, firstLevel), /dotnet test\nnpm --prefix src\/front test/);
+  assert.match(workshop.slice(readiness, firstLevel), /Report any staged, unstaged/);
   assert.match(workshop, /since the initial commit of this workshop repository/);
 });
 

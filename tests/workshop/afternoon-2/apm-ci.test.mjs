@@ -35,8 +35,8 @@ test('the active default-branch rule requires the exact audit job with no admini
   const setupCommit = level5.indexOf('Commit the reviewed Copilot setup at .github/workflows/copilot-setup-steps.yml');
   const auditRule = level5.indexOf('rulesets\\main-apm-audit-required.json');
   const stage5b = level5.indexOf('## Stage 5b: Backlog and delegation');
-  const branch = level5.indexOf('git switch -c feature/level-5b-backlog');
-  const setupPr = level5.indexOf('gh pr create --title "Add the Stage 5b backlog setup"');
+  const branch = level5.indexOf('Create and switch to feature/level-5b-backlog');
+  const setupPr = level5.indexOf('Create a PR titled "Add the Stage 5b backlog setup"');
   const assignment = level5.indexOf('### Step 2: Assign the issue');
   assert.ok(setupCommit >= 0 && setupCommit < auditRule && auditRule < stage5b &&
     stage5b < branch && branch < setupPr && setupPr < assignment);
@@ -48,9 +48,9 @@ test('the active default-branch rule requires the exact audit job with no admini
   assert.match(level5, /A human reviews and merges the PR through the normal workflow/);
   assert.match(level5, /administration permission and a supported GitHub plan/);
   const security = level5.slice(level5.indexOf('### Step 5 (facilitator demo)'));
-  assert.match(security, /git switch -c security-review-delegation/);
-  assert.match(security, /git push -u origin HEAD/);
-  assert.match(security, /Open a pull request, wait for the required checks, and merge/);
+  assert.match(security, /to security-review-delegation/);
+  assert.match(security, /\/hve-core:pull-request[\s\S]*?ask for\npublication approval/);
+  assert.match(security, /Open the returned pull request, wait for the required checks, and have a human review and merge/);
 });
 
 test('Level 4 copies the workflow and stages shared skills before publishing its context', () => {

@@ -70,6 +70,31 @@ const wanted = {
   'commit-security': byCommitTask('Commit the reviewed label-gated security workflow'),
   'commit-l6': byCommitTask('Commit the reviewed local Level 6 changes'),
   'commit-demo': byCommitTask('Commit only demo.env'),
+  'git-clone': byFirstLine('Clone https://github.com/OWNER/my-music-catalog'),
+  'git-readiness': byFirstLine('Verify Git is installed'),
+  'git-l1-inspect': byFirstLine('Check whether the working tree is still clean after Level 1'),
+  'git-l3-branch': byFirstLine('Verify that the current branch is the repository'),
+  'git-l3-pr': blocks.find(b => b.body.startsWith('/hve-core:pull-request\n') &&
+    b.body.includes('Create a pull request for the committed Level 3')),
+  'git-l3-sync': byFirstLine('Verify that the Level 3 PR is merged'),
+  'git-l4-inspect': byFirstLine('Inspect the pending repository setup paths'),
+  'git-l4-publish': byFirstLine('Publish the committed Level 4 repository setup'),
+  'git-ci-publish': byFirstLine('Show me the remote, branch and committed CI workflow change'),
+  'git-setup-publish': byFirstLine('Show me the remote, branch and committed Copilot setup change'),
+  'git-l5-branch': byFirstLine('Verify the working tree is clean and the current default-branch baseline'),
+  'git-compile-inspect': byFirstLine('Inspect the pending paths and diffs from gh aw init'),
+  'git-backlog-inspect': byFirstLine('Inspect pending paths and diffs under .github/workflows'),
+  'git-backlog-pr': blocks.find(b => b.body.startsWith('/hve-core:pull-request\n') &&
+    b.body.includes('Create a PR titled "Add the Stage 5b backlog setup"')),
+  'git-backlog-sync': byFirstLine('Verify the Stage 5b setup PR is merged'),
+  'git-security-branch': byFirstLine('Verify the default-branch baseline and clean working tree'),
+  'git-security-pr': blocks.find(b => b.body.startsWith('/hve-core:pull-request\n') &&
+    b.body.includes('Create a PR for the committed security-review-delegation branch')),
+  'git-l6-sync': byFirstLine('Verify the delegated PR is merged'),
+  'git-l6-inspect': byFirstLine('Inspect the local working tree after Level 6'),
+  'git-demo-branch': byFirstLine('Verify the working tree is clean, then create and switch to demo/push-protection'),
+  'git-demo-push': byFirstLine('Show me the proctor remote, demo/push-protection branch'),
+  'git-demo-cleanup': byFirstLine('Verify the demo push was rejected'),
 };
 
 const missing = [];
