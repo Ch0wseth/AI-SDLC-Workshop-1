@@ -9,6 +9,17 @@ this document exists.
 
 **Baseline PR:** [#59](https://github.com/Justrebl/AI-SDLC-Workshop/pull/59).
 
+## Current marketplace scope (2026-10-06)
+
+The maintainer superseded this plan's demo-only marketplace boundary: Level 4
+now includes a template-shipped remote catalog with HVE-Core, Java Development,
+Java Modernization Studio and WorkIQ, CLI/VS Code registration and HVE installation,
+construction/versioning, and an explicit existing-HVE/APM transition. Only HVE is
+a required install; the app setup remains a tutor demo. Level 4 has a 45-minute
+estimate, not measured delivery timing. The historical checklist below describes
+the earlier increment; its demo-only statements are not current implementation
+instructions. Preserve the Linux/Bash-only lab convention in future handoffs.
+
 ## Goal and boundary
 
 Make Levels 4-6 explain one delivery story:

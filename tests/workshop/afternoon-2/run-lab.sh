@@ -136,6 +136,11 @@ tree_clean_check
 note "file existence checked headlessly; human inspection and authentic research remain unverified"
 finish_step
 
+skip_step l2-dt-later-choice "Level 2" "Choose a later slice with DT Coach" \
+  "requires an authentic learner decision; no choice, approval or completed DT method is fabricated"
+skip_step l2-dt-later-record "Level 2" "Curate the confirmed later-slice decision" \
+  "requires the learner's confirmed choice; sandbox uses the documented Remove a track fallback, not a claimed DT outcome"
+
 copilot_prompt l2-dt-record "Level 2" "Documentation: curate the shared delivery brief" dt-record 900 "--continue --agent hve-core:documentation"
 rec=docs/project-planning/playlist-design-decisions.md
 [ -s "$rec" ] && check "decision record written" true || check "decision record written" false "missing $rec"
@@ -167,7 +172,9 @@ step l2-curate-ignored "Level 2" "Curate: check that the tracking folder is igno
 git check-ignore -q .copilot-tracking/probe && check ".copilot-tracking/ is ignored" true || check ".copilot-tracking/ is ignored" false
 finish_step
 
-step l2-curate-commit "Level 2" "Curate: commit the reviewed deliverables" translated 60 \
+skip_step l2-hve-commit "Level 2" "HVE commit prompt: path selection and staged-set confirmation" \
+  "human commit decisions are not replayed; the following sandbox checkpoint is a translation, not prompt execution or reviewed approval"
+step l2-curate-commit "Level 2" "Sandbox translation: checkpoint planning drafts" translated 60 \
   'git add docs/project-planning && git status && git commit -m "Add playlist slice design record, BRD and PRD"'
 [ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
 finish_step
@@ -267,8 +274,10 @@ finish_step
 [ "$STEP_FAILED" -eq 0 ] || exit 1
 pkill -f 'dotnet run' 2>/dev/null; pkill -f 'vite' 2>/dev/null
 
+skip_step l3-hve-commit "Level 3" "HVE implementation commit prompt" \
+  "human path selection/staged-set confirmation skipped; deterministic sandbox checkpoint preserves clean-tree and already-committed cases"
 export -f commit_checkpoint
-step l3-implement-commit "Level 3" "Commit implementation checkpoint" translated 60 \
+step l3-implement-commit "Level 3" "Sandbox translation: implementation checkpoint" translated 60 \
   'commit_checkpoint "Implement playlist slice with RPI"'
 tree_clean_check
 [ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true \
@@ -329,56 +338,79 @@ skip_step l3-tech-lead "Level 3" "Optional Tech Lead activities (ADR Creator and
   "optional human-gated agents that pause for scope and perspective confirmation"
 
 # ---------------------------------------------------------------- Level 4
-step l4-copy-apm "Level 4" "Copy the solution manifest" translated 30 'cp solutions/afternoon-2/apm.yml ./apm.yml && cat apm.yml'
+step l4-marketplace-install "Level 4" "Register sandbox catalog, inspect source, and install curated HVE" emulated 900 \
+  ". '$SCRIPT_DIR/marketplace.sh' && curated_hve_install '$SANDBOX_REPO'"
+note "qualified replacement is authorized only in the disposable sandbox; learner consent is not emulated"
+finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
+skip_step l4-marketplace-agents "Level 4" "Confirm DT Coach and RPI in a fresh CLI picker" \
+  "inventory/version verified; live interactive agent-picker capability remains unverified"
+skip_step l4-marketplace-vscode "Level 4" "Register and verify catalog in VS Code" \
+  "VS Code UI and shared host/remote filesystem discovery are not exercised headlessly"
+skip_step l4-marketplace-app "Level 4" "Tutor app registration demo" \
+  "tutor-only app UI; no participant or tenant operations"
+
+step l4-copy-apm "Level 4" "Copy the solution manifest" literal 30 'cp solutions/afternoon-2/apm.yml ./apm.yml && cat apm.yml'
 grep -q 'microsoft/hve-core#1dbd6a7ea90b74accaf8c809262e38952bd4c359' apm.yml \
   && check "apm.yml pins HVE-Core by SHA" true || check "apm.yml pins HVE-Core by SHA" false
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l4-apm-install "Level 4" "Install the APM dependency" literal 1200 'apm install --target copilot'
 [ -f apm.lock.yaml ] && check "apm.lock.yaml created" true || check "apm.lock.yaml created" false
 grep -q 'resolved_commit' apm.lock.yaml 2>/dev/null && check "lockfile records resolved_commit" true "$(grep -m3 'resolved_commit' apm.lock.yaml)" \
   || check "lockfile records resolved_commit" false
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
-step l4-plugin-disable "Level 4" "Disable personal HVE-Core after verifying repository agents" translated 300 \
-  'test -f .github/agents/rpi-agent.agent.md && test -f .github/agents/backlog-manager.agent.md && copilot plugin disable hve-core && copilot plugin list'
+step l4-plugin-disable "Level 4" "Disable personal HVE-Core after verifying repository agents" emulated 300 \
+  ". '$SCRIPT_DIR/marketplace.sh' && curated_hve_disable"
 note "repository profile presence is checked before disabling; fresh interactive agent-picker verification is not emulated"
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
-step l4-copy-policy "Level 4" "Copy the policy" translated 30 'cp solutions/afternoon-2/apm-policy.yml ./apm-policy.yml'
+step l4-copy-policy "Level 4" "Copy the policy" literal 30 'cp solutions/afternoon-2/apm-policy.yml ./apm-policy.yml'
 grep -q 'self_defined: deny' apm-policy.yml && check "policy denies self-defined MCP" true || check "policy denies self-defined MCP" false
 grep -q '^targets:' apm-policy.yml && check "no top-level targets key" false || check "no top-level targets key" true
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l4-policy-status "Level 4" "Confirm APM parses the policy" literal 300 'apm policy status --policy-source apm-policy.yml'
 log_has 'found' && check "Outcome: found" true || check "Outcome: found" false
 log_has 'block' && check "Enforcement: block" true || check "Enforcement: block" false
 log_has 'warnings?[^a-z]*none' && check "Warnings: none" true || check "Warnings: none" false
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l4-policy-audit "Level 4" "Audit with policy" literal 1200 'apm audit --ci --policy apm-policy.yml'
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l4-deny-edit "Level 4" "Temporarily deny microsoft/hve-core in the policy" translated 30 \
   'cp apm-policy.yml "$RESULTS_DIR/policy-before-deny.yml" && awk '"'"'/^  require_pinned_constraint:/{print "  deny:\n    - \"microsoft/hve-core\""} {print}'"'"' apm-policy.yml > apm-policy.tmp && mv apm-policy.tmp apm-policy.yml && cat apm-policy.yml'
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l4-deny-audit "Level 4" "Policy audit fails with exit code 1" literal 1200 'apm audit --ci --policy apm-policy.yml'
 finish_step 1
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l4-restore-policy "Level 4" "Remove the temporary deny entry and audit the original policy" translated 1200 \
   'cp "$RESULTS_DIR/policy-before-deny.yml" apm-policy.yml && apm audit --ci --policy apm-policy.yml'
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l4-copy-apm-ci "Level 4" "Copy the PR audit workflow" literal 30 \
   'mkdir -p .github/workflows && cp solutions/afternoon-2/.github/workflows/apm-audit.yml .github/workflows/apm-audit.yml'
 grep -q 'microsoft/apm-action@v1' .github/workflows/apm-audit.yml \
   && check "PR audit uses the APM action" true || check "PR audit uses the APM action" false
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
-step l4-commit "Level 4" "Commit and push governed repository agents and audit" translated 300 \
+skip_step l4-hve-commit "Level 4" "HVE governed setup commit prompt" \
+  "native prompt availability and human path/staged-set confirmations unverified; following sandbox commit is a translation"
+step l4-commit "Level 4" "Sandbox translation: commit and push governed setup" translated 300 \
   'git status; git add apm.yml apm.lock.yaml apm-policy.yml .github .agents && git diff --cached --stat && git commit -m "Add governed repository agents and APM audit" && git push'
-push_fallback l4-commit
 git ls-files --error-unmatch .github/workflows/daily-backlog.lock.yml >/dev/null 2>&1 \
   && check "no workflow lock files committed in Level 4" false || check "no workflow lock files committed in Level 4" true
 gh api "repos/$SANDBOX_REPO/contents/.github/agents/rpi-agent.agent.md" --jq .path >/dev/null 2>&1 \
@@ -386,11 +418,11 @@ gh api "repos/$SANDBOX_REPO/contents/.github/agents/rpi-agent.agent.md" --jq .pa
 untracked=$(git status --porcelain | head -n 30)
 [ -n "$untracked" ] && note "left uncommitted after Level 4: $(echo "$untracked" | tr '\n' ' ')"
 finish_step
-
-skip_step l4-marketplace-demo "Level 4" "Private company marketplace orientation" \
-  "proctor-only screenshot/demo; no participant plugin installation"
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 # ---------------------------------------------------------------- Level 5a
+skip_step l5-ci-hve-commit "Level 5a" "HVE CI workflow commit prompt" \
+  "human commit selection/confirmation skipped; following sandbox checkpoint is a translation"
 step l5-ci "Level 5a" "Make the tests the contract: add CI and push" translated 300 \
   'mkdir -p .github/workflows && cp solutions/afternoon-2/.github/workflows/ci.yml .github/workflows/ci.yml && git add .github/workflows/ci.yml && git commit -m "Add CI for API and front-end tests" && git push'
 push_fallback l5-ci
@@ -414,6 +446,8 @@ node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
 skip_step l5-ruleset "Level 5a" "Create the branch ruleset that requires the test check" \
   "needs the Administration permission, which the sandbox-scoped tester token does not have; the solution JSON is checked statically"
 
+skip_step l5-setup-hve-commit "Level 5a" "HVE Copilot setup commit prompt" \
+  "human commit selection/confirmation skipped; following sandbox checkpoint is a translation"
 step l5-setup-steps "Level 5a" "Add the API build to copilot-setup-steps.yml and push" translated 300 \
   "awk '{print} /^[[:space:]]+run: npm ci[[:space:]]*\$/ && !done {print \"\"; print \"      - name: Build the API\"; print \"        run: dotnet build MusicCatalog.slnx --no-restore\"; done=1}' .github/workflows/copilot-setup-steps.yml > /tmp/setup-steps.yml && mv /tmp/setup-steps.yml .github/workflows/copilot-setup-steps.yml && git add .github/workflows/copilot-setup-steps.yml && git commit -m 'Build the API in Copilot setup steps' && git push"
 push_fallback l5-setup-steps
@@ -459,7 +493,7 @@ skip_step l5-compile "Level 5b" "Compile workflows (gh aw compile)" \
   "the workflow was not copied because the Stage 5b setup PR gate is unavailable"
 skip_step l5-review-diff "Level 5b" "Review generated files without editing" \
   "the Stage 5b setup files were not created"
-skip_step l5-commit "Level 5b" "Commit workflow sources and locks" \
+skip_step l5-commit "Level 5b" "HVE prompt: commit workflow sources and locks" \
   "the Stage 5b setup files were not created"
 skip_step l5-push "Level 5b" "Push the Stage 5b feature branch" \
   "the Stage 5b setup files were not created"

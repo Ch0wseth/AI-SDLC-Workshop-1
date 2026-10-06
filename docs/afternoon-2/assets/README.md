@@ -15,7 +15,7 @@ This folder intentionally contains placeholders referenced by `docs\afternoon-2\
 - `l3-frontend-ports.png` — Supplied VS Code Ports screenshot showing the private forwarded API and frontend addresses. Open the frontend row's address for the current environment; the pictured URL is only an example.
 - `l4-apm-marketplace.png` — Terminal output for APM install or audit plus repository marketplace files.
 - `l4-duplicate-agent-entries.png` — Supplied VS Code Copilot Chat agent-picker screenshot showing duplicate HVE-Core names when both the plugin and repository custom agents are available. This is expected, not an installation failure.
-- `l4-private-marketplace.png` — Supplied private CoffeeSoft catalog README, cropped to omit the contributor sidebar. Proctor orientation only; attendees need no private repository access.
+- `l4-private-marketplace.png` — Supplied private CoffeeSoft catalog README, cropped to omit the contributor sidebar. Optional historical tutor comparison; the required participant exercise uses the template-shipped catalog, not private access.
 - `l4-vscode-agentplugins.png` — VS Code Extensions view filtered with `@agentPlugins @recommended`.
 - `l5-ghaw-compile.png` — Terminal output from `gh aw compile` generating lock files.
 - `l5-daily-backlog-issue.png` — GitHub issue created by the daily backlog workflow with recommended order and parallelizable work.
