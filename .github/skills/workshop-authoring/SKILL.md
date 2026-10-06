@@ -14,7 +14,7 @@ Produce a guide that an attendee can follow with optional explanations closed: t
 
 Give each level a short introduction stating its purpose, value, and relevant starting context. Put longer definitions, comparisons, architecture explanations, and methodology discussions in default-collapsed `<details>` blocks with descriptive `<summary>` labels.
 
-This changes presentation, not the exercise contract. Keep required commands, starter prompts, expected results, prerequisites, permission or licensing warnings, and human approval gates visible. Optional worked examples and reference commands may remain in labelled toggles.
+This changes presentation, not the exercise contract. Keep required commands, starter prompts, success criteria, prerequisites, permission or licensing warnings, and human approval gates visible. Label observable checkpoints **Success Criteria**. Optional worked examples and reference commands may remain in labelled toggles.
 
 For a new application scenario, show enough code structure to orient the learner before discovery or coding starts. Verify the described starter state; distinguish existing behavior from the feature to build. Do not turn that overview into a technical implementation recipe.
 
@@ -28,6 +28,7 @@ Use the approved audience, learning outcomes, scope, guide paths, and authoritat
 2. Keep the visible introduction concise. State the outcome and why it matters; reuse existing summaries that are already sufficient instead of adding a toggle mechanically.
 3. Move supporting detail into balanced, default-closed `<details>` blocks. Reuse existing blocks where possible and avoid unnecessary nesting. A descriptive summary must explain what the learner can find inside.
 4. Keep the hands-on path usable with the blocks closed. Preserve required steps, prompts, evidence checks, and approval gates outside them. Ask learners for context and decisions, not an outline or recipe that duplicates a specialist's native instructions.
+   Introduce each command or starter prompt with its purpose and what it changes or checks. Success Criteria describe observable files, output, behavior, or recorded decisions; move definitions and capability explanations before the action. Do not use claims about what learners understand as proof of success.
 5. Preserve page separators, level boundaries, assets, and required navigation targets. Do not place a MOAW page separator inside a detail block.
 6. Run the repository's applicable local guide and prompt-extraction checks. Inspect the collapsed reading path and record missing live-rendering or CI evidence without claiming it passed.
 

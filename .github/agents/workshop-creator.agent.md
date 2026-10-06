@@ -37,7 +37,7 @@ Deliver a workshop repository that an attendee can follow literally on every sup
 Success means:
 
 - The blueprint is approved and every phase below is `done` or explicitly `skipped` with a reason.
-- Each attendee guide step has an **Expected result** that the tester can check.
+- Meaningful exercise checkpoints have observable **Success Criteria** that the tester can check; explanations introduce the actions rather than appear as learning claims in the checklist.
 - The dev container image builds and smoke-tests on pull requests and publishes on `main` only.
 - The workshop tester ran on `main` and either called `noop` or opened an issue that was triaged.
 - The kick-off README and deck match the per-option pre-D-Day guides.
@@ -115,7 +115,7 @@ Offer **Implement next phase with RPI** for the content, one session per pass. F
 | Artifact | Purpose |
 | --- | --- |
 | `README.md` | Concepts, session split, delivery options, pre-D-Day overview |
-| `docs/<session>/workshop.md` | MOAW-formatted attendee guide. Levels and steps, each step with copy-paste prompts and an **Expected result** |
+| `docs/<session>/workshop.md` | MOAW-formatted attendee guide. Purpose-led steps, copy-paste prompts, and observable **Success Criteria** at meaningful checkpoints |
 | `docs/prerequisites.md` | Shared prerequisites, network allowlist and organization settings |
 | `docs/before-d-day-codespace.md`, `-devcontainer.md`, `-local.md` | One self-contained checklist per delivery option, covering every session |
 | `docs/tutor.md` | Timing, pre-flight, risks, messaging guardrails |

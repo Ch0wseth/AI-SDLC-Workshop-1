@@ -13,6 +13,46 @@ const visible = (text) => text.replace(/<details>[\s\S]*?<\/details>/g, '');
 const header = workflow.split('\n---\n')[0];
 const output = (name) => header.match(new RegExp(`^  ${name}:\\n((?:    .*\\n)+)`, 'm'))?.[1];
 
+test('both workshop guides use observable checkpoints instead of learner-understanding claims', () => {
+  for (const path of ['../../../docs/afternoon-1/workshop.md', '../../../docs/afternoon-2/workshop.md']) {
+    const text = read(path);
+    const checkpoints = [...text.matchAll(/(?:^|\n)(?:\*\*)?Success Criteria:(?:\*\*)?([^\n]*)(?:\n(- [^\n]*(?:\n- [^\n]*)*))?/g)];
+    assert.ok(checkpoints.length > 0, path);
+    for (const checkpoint of checkpoints) {
+      const evidence = `${checkpoint[1]} ${checkpoint[2] || ''}`.trim();
+      assert.ok(evidence, `Empty checkpoint in ${path}`);
+      assert.doesNotMatch(evidence,
+        /(?:participants?|students?).*\b(?:understand|know|learn)|you (?:understand|know|see how|can (?:name|explain))/i,
+        evidence);
+      assert.doesNotMatch(evidence, /Participants understand that|This section governs|This is separate from/i);
+    }
+  }
+});
+
+test('visible commands have purpose-led introductions across both workshop guides', () => {
+  for (const path of ['../../../docs/afternoon-1/workshop.md', '../../../docs/afternoon-2/workshop.md']) {
+    const text = visible(read(path));
+    for (const block of text.matchAll(/```(?:powershell|bash)\n([\s\S]*?)\n```/g)) {
+      const preceding = text.slice(0, block.index).trim().split('\n\n').at(-1);
+      assert.ok(preceding.length > 25, `${path}: purpose before ${block[1].split('\n')[0]}`);
+      assert.doesNotMatch(preceding, /^(?:Then )?Run(?: from [^:]+)?:$/i);
+    }
+  }
+});
+
+test('APM executable governance is explained before the command and checked through files and output', () => {
+  const l4 = level(4);
+  const section = l4.slice(l4.indexOf('### Step 1: Set the allowed sources'),
+    l4.indexOf('### Step 3: See a blocked dependency'));
+  const copy = section.indexOf('cp solutions/afternoon-2/apm-policy.yml');
+  assert.ok(section.indexOf('components that can run code') < copy);
+  assert.ok(section.indexOf('even if local consent is given') < copy);
+  assert.match(section, /`dependencies\.allow` contains `microsoft\/\*\*`/);
+  assert.match(section, /`executables\.deny` contains `untrusted-org\/\*`/);
+  assert.match(section, /Outcome: found.*Enforcement: block.*Warnings: none/);
+  assert.match(section, /The audit exits successfully/);
+});
+
 test('Levels 4-6 explain commands without subjective success claims or timing', () => {
   for (const number of [4, 5, 6]) {
     const text = level(number);

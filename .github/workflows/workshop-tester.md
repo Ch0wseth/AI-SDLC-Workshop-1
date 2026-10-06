@@ -185,7 +185,7 @@ safe-outputs:
 
 You are running unattended in GitHub Actions for `${{ github.repository }}` after a change reached `main`. The tested commit is in `meta.json`.
 Do not ask questions. Do not modify files. Your only possible outputs are one issue or a `noop`.
-Follow `docs/afternoon-2/workshop.md` literally: use only its guided steps, expected results and links it explicitly provides, together with the supplied tester results and logs. Do not browse or search the internet, consult unrelated documentation, invent missing instructions, or infer how to accomplish an undocumented step. If the guide or captured evidence does not establish an outcome, report the evidence gap in the notes rather than guessing a defect category; never turn an assumption into a pass.
+Follow `docs/afternoon-2/workshop.md` literally: use only its guided steps, success criteria and links it explicitly provides, together with the supplied tester results and logs. Do not browse or search the internet, consult unrelated documentation, invent missing instructions, or infer how to accomplish an undocumented step. If the guide or captured evidence does not establish an outcome, report the evidence gap in the notes rather than guessing a defect category; never turn an assumption into a pass.
 
 Treat the published **Toggle solution / Toggle example** blocks as the canonical example path for tester conversations. Compare the extracted `prompts/curated-solutions.txt` and individual DT/BRD example messages with the session transcripts. The tester must use these supplied answers in order, not improvise a different persona, feature, stakeholder, success measure, or approval. Report deviations as tester limitations or replay defects, not as evidence that the published example failed. The DT example samples methods without completing their evidence gates. BRD example approval and handoff steps depend on human review and are intentionally skipped; never infer approval, waived findings, or full PM-track completion from a saved draft.
 
@@ -216,11 +216,11 @@ If `lab/` is missing, the lab never ran. Report the infrastructure failure from 
 
 ## Validation
 
-1. Read `docs/afternoon-2/workshop.md` and list every step and its **Expected result** bullets, level by level.
+1. Read `docs/afternoon-2/workshop.md` and list every step and its **Success Criteria** bullets, level by level.
 2. Match each documented step to a result `id`, using its `level` and `title`.
    - List any documented step that has no result. That is coverage drift between the lab and `tests/workshop/afternoon-2/run-lab.sh`.
    - List any executed step that no longer exists in the lab.
-3. For each step, judge the outcome against the documented expected result, using the `checks`, `exit_code` and logs. Do not substitute an alternative command or result not supplied in the guide.
+3. For each step, judge the outcome against the documented success criteria, using the `checks`, `exit_code` and logs. Do not substitute an alternative command or result not supplied in the guide.
    - Copilot output is non-deterministic. Judge only the documented acceptance behavior, not exact wording or outside product knowledge.
 4. Classify every problem as exactly one of:
    - **Lab defect**: the document is wrong, incomplete or out of order, so a participant following it literally would fail or be confused. Examples: a missing push before a step that needs the remote, files the lab never commits, a missing title, a repository that is not a template.
@@ -238,7 +238,7 @@ If `lab/` is missing, the lab never ran. Report the infrastructure failure from 
   - Title: a short summary of the most important failure.
   - `## Summary`: the overall verdict, source commit, link to the run (from `meta.json`), and steps passed, failed, warned and skipped.
   - `## Results by level`: a table with Level | Steps | Pass | Fail | Warn | Skip | Notes.
-  - `## Problems`: one subsection per problem. Give the classification, the step `id` and the documented expected result. Add evidence of 15 lines at most from the log, and the smallest suggested fix: the exact doc text to change, or the file to fix.
+  - `## Problems`: one subsection per problem. Give the classification, the step `id` and the documented success criteria. Add evidence of 15 lines at most from the log, and the smallest suggested fix: the exact doc text to change, or the file to fix.
   - `## Coverage drift`: list it, or write "none".
   - `## Egress`: the mode, the number of distinct destinations, and a table of `unlisted` or `refused` hosts with method and outcome. Write "no unlisted egress" when there is none, or "egress evidence missing".
   - `## Copilot CLI usage`: a table by prompt step, in the reported units.

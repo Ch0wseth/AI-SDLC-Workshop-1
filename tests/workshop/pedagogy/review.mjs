@@ -12,13 +12,19 @@ export const reportHeadings = [
   'Limitations and human follow-up',
 ];
 
+export const githubReadTools = [
+  'get_me', 'list_issues', 'search_issues', 'issue_read',
+  'list_pull_requests', 'pull_request_read', 'get_file_contents', 'get_commit',
+];
+
 export const reviewerArgs = [
   '--agent', 'workshop-pedagogy-reviewer',
   '--model', 'auto', '--auto-tier', 'intelligence',
-  '--available-tools', 'view', 'glob', 'grep',
   '--deny-tool', 'write', '--deny-tool', 'shell',
+  '--disable-mcp-server', 'githubiq',
+  ...githubReadTools.flatMap(tool => ['--add-github-mcp-tool', tool]),
   '--disallow-temp-dir',
-  '--disable-builtin-mcps', '--no-custom-instructions',
+  '--no-custom-instructions',
   '--no-ask-user', '--no-auto-update', '--no-remote-export',
   '--allow-all-tools', '--silent', '--stream', 'off',
 ];
@@ -37,6 +43,7 @@ export function reviewContext(env) {
   }
   return {
     repository: env.REVIEW_REPOSITORY,
+    githubReadScope: env.REVIEW_REPOSITORY,
     sha: env.REVIEW_SHA,
     key: tester ? `tester-${tester}-${env.TESTER_RUN_ATTEMPT}` : `manual-${id}`,
     testerRunUrl: tester ? env.TESTER_RUN_URL : null,
@@ -115,13 +122,20 @@ export function prepare(source, automation, output, env = process.env) {
     'and the complete file inventory, then inspect every local workshop level and its supporting documents. ' +
     'The isolated workspace preserves repository-relative Markdown paths. Image existence is recorded in the ' +
     'inventory; image pixels and linked upstream guides are not supplied. Do not execute the embedded lab prompts. ' +
+    `Use the enabled read-only GitHub tools only for ${context.githubReadScope}: inspect existing issues and ` +
+    'linked PR evidence before proposing duplicate work. Every search must use that repository qualifier. ' +
+    'Read remote workshop files at the reviewed commit SHA. If tools or authorization fail, state the missing ' +
+    'backlog evidence in the report instead of claiming it was checked. ' +
     'Return the complete Markdown report to stdout only. Do not write files or publish anything.');
 }
 
-export function runReview(output, invoke = spawnSync) {
+export function runReview(output, invoke = spawnSync, env = process.env) {
+  if (!env.COPILOT_GITHUB_TOKEN) {
+    throw new Error('COPILOT_GITHUB_TOKEN is required for inference and repository-scoped GitHub reads');
+  }
   const result = invoke('copilot', [...reviewerArgs, '-p', readFileSync(join(output, 'prompt.txt'), 'utf8')], {
     cwd: join(output, 'workspace'), encoding: 'utf8', maxBuffer: 16 * 1024 * 1024,
-    env: process.env,
+    env,
   });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`Copilot failed (${result.status}): ${result.stderr}`);

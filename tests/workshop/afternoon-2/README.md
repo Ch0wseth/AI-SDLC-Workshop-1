@@ -57,7 +57,7 @@ Run the APM PR gate regression checks with `node --test tests/workshop/afternoon
 
 Run the local artifact-binding and HTTP request fixtures with `bash tests/workshop/afternoon-2/rpi-flow.test.sh`. They use temporary files and a mock `curl`; no Copilot invocation or network request runs.
 
-After this Actions workflow completes on `main`, the separate [Workshop Pedagogy Reviewer](../../../.github/agents/workshop-pedagogy-reviewer.agent.md) reviews the tested revision's teaching content with Auto intelligence routing. It publishes an Actions summary and one `pedagogy-review` issue even for a clean tester run. It does not replay commands or change workshop files. See the [maintainer setup and boundaries](../../../docs/maintainer-handbook.md#pedagogy-review-after-the-tester) and run its local checks with `node --test tests/workshop/pedagogy/review.test.mjs`.
+After this Actions workflow completes on `main`, the separate [Workshop Pedagogy Reviewer](../../../.github/agents/workshop-pedagogy-reviewer.agent.md) reviews the tested revision's teaching content with Auto intelligence routing and repository-scoped GitHub issue/PR reads. A separate publisher creates or refreshes its own `pedagogy-review` report even for a clean tester run; it does not close or assign backlog tasks. The reviewer does not replay commands or change workshop files. It needs a credential that can make Copilot requests and read this repository, not the tester's inference-only token. See the [maintainer setup and boundaries](../../../docs/maintainer-handbook.md#pedagogy-review-after-the-tester) and run its local checks with `node --test tests/workshop/pedagogy/review.test.mjs`.
 
 ## Setup
 

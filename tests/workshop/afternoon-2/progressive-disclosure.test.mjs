@@ -13,6 +13,22 @@ const skill = read('.github/skills/workshop-authoring/SKILL.md');
 const frontmatter = (text) => text.match(/^---\n([\s\S]*?)\n---\n/)?.[1];
 const withoutDetails = (text) => text.replace(/<details>[\s\S]*?<\/details>/g, '');
 
+test('checkpoint labels consistently use Success Criteria across both workshops and authoring guidance', () => {
+  const obsolete = new RegExp(['expected', 'results?'].join(' '), 'i');
+  for (const path of [
+    'docs/afternoon-1/workshop.md',
+    'docs/afternoon-2/workshop.md',
+    '.github/agents/workshop-creator.agent.md',
+    '.github/agents/workshop-pedagogy-reviewer.agent.md',
+    '.github/skills/workshop-authoring/SKILL.md',
+    '.github/workflows/workshop-tester.md',
+    'docs/maintainer-handbook.md',
+  ]) assert.doesNotMatch(read(path), obsolete, path);
+  for (const path of ['docs/afternoon-1/workshop.md', 'docs/afternoon-2/workshop.md']) {
+    assert.match(read(path), /^Success Criteria:$/m, path);
+  }
+});
+
 test('each level has a concise visible introduction and optional background', () => {
   const actionHeadings = [
     '## Install the CLI plugin',
@@ -106,7 +122,7 @@ test('the authoring skill records progressive disclosure without weakening the r
   assert.doesNotMatch(metadata, /^(tools|model|agent|handoffs|applyTo):/m);
   assert.match(skill, /## Documented decision: progressive disclosure/);
   assert.match(skill, /default-collapsed `<details>`/);
-  assert.match(skill, /Keep required commands, starter prompts, expected results, prerequisites/);
+  assert.match(skill, /Keep required commands, starter prompts, success criteria, prerequisites/);
   assert.match(skill, /permission or licensing warnings, and human approval gates visible/);
   assert.match(skill, /## Stop rules/);
   assert.match(read('docs/maintainer-handbook.md'), /\| D21 \| Progressive disclosure/);
