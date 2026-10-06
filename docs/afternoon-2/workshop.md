@@ -1548,7 +1548,13 @@ A sample ADR is in `solutions\afternoon-2\docs\planning\adrs\0001-in-memory-play
 
 ### Step 2: Review the change with the Code Review agent
 
-Run `/agent code-review` in Copilot CLI, or select **Code Review** in VS Code. Copy paste the following prompt:
+In Copilot CLI, switch to Code Review with:
+
+```text
+/agent code-review
+```
+
+In VS Code, select **Code Review** in the agent picker. Keep that agent selected, then copy paste the following prompt:
 
 ```text
 Review the local commits for the playlist slice since the initial commit of this workshop repository (the template copy or "Workshop starter" commit).
