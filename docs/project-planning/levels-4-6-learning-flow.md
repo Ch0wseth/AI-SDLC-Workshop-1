@@ -3,6 +3,10 @@
 **Decision date:** 2026-10-06  
 **Status:** Applied to the guide and solution workflow; live delivery validation remains separate.
 
+The next focused increment and post-merge recovery sequence are in
+[the pedagogy resume plan](pedagogy-resume-plan.md). This decision record describes
+the established scope; the resume plan does not mark that follow-up complete.
+
 This document records the agreed redesign of the
 [Afternoon 2 workshop](../afternoon-2/workshop.md) and the implementation
 clarifications below. Local guide, solution, and tester changes do not publish

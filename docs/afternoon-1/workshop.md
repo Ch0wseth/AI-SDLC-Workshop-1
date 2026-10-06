@@ -201,23 +201,23 @@ Open the [GHCopilotHoL introduction](https://moaw.dev/workshop/gh:Philess/GHCopi
 - **OPTION 1: Work with GitHub Codespaces** or **OPTION 2: Work locally**.
 - **How to run the code?** Run at least the front end, as the upstream lab requires.
 
-Expected result:
+Success Criteria:
 - You own a fork of `gh-copilot-demo`.
 - The repository contains `album-viewer`, `albums-api`, `iac`, `legacy`, and `.github`.
 - Copilot is signed in in VS Code or in your Codespace.
 
 ### Step 2: Create a baseline checkpoint
 
-Open a terminal at the repository root. Run:
+Check for existing edits, then create an `afternoon-1` branch to keep the workshop changes separate from your default branch. Run from the repository root:
 
 ```powershell
 git status
 git checkout -b afternoon-1
 ```
 
-Expected result:
+Success Criteria:
 - Your working tree is clean.
-- You work on a dedicated branch, so you can compare or reset at any time.
+- Git reports `afternoon-1` as the current branch.
 
 <div class="tip" data-title="Two tabs">
 
@@ -235,7 +235,7 @@ You will learn completions, Chat, agent mode, and the plan-then-implement loop u
 
 <div class="tip" data-title="Fast track">
 
-> On the fast track, complete these four levels as pre-work or watch the facilitator demo, then make sure your fork has the commit checkpoint below. Check one thing before you move on: you can explain why a plan reviewed before implementation is cheaper than a diff reviewed after it. Every later level builds on that idea.
+> On the fast track, complete these four levels as pre-work or watch the facilitator demo, then make sure your fork has the commit checkpoint below. Review the plan before implementation so scope errors are caught before they become code changes. Every later level builds on that practice.
 
 </div>
 
@@ -282,7 +282,7 @@ Focus on:
 
 ## Commit checkpoint
 
-Run from the repository root:
+Save the reviewed upstream exercises as a checkpoint before adding repository customizations. Check the diff for unrelated files, then run from the repository root:
 
 ```powershell
 git status
@@ -362,7 +362,7 @@ A custom agent defines **who** is working: a role, tools, and behavior. An Agent
 
 ### Step 1: Create the skill folder
 
-At the root of your fork, create the folder:
+Give Copilot a reusable procedure for this API instead of repeating the conventions in every request. At the root of your fork, create the skill folder:
 
 ```text
 .github\skills\albums-api-endpoint
@@ -370,7 +370,7 @@ At the root of your fork, create the folder:
 
 ### Step 2: Create the skill file
 
-Create `.github\skills\albums-api-endpoint\SKILL.md` with this content:
+Define when the skill should load and the endpoint procedure it supplies. Create `.github\skills\albums-api-endpoint\SKILL.md` with this content:
 
 ```markdown
 ---
@@ -387,18 +387,18 @@ description: Add or change an HTTP endpoint in the albums-api .NET project. Use 
 5. Summarize the new route, its verb, and an example `curl` call.
 ```
 
-Expected result:
-- The skill is a folder with a `SKILL.md` file, committed with the repository.
+Success Criteria:
+- `.github\skills\albums-api-endpoint\SKILL.md` exists with the supplied `name`, `description`, and five procedure steps. You will commit it at the checkpoint below.
 
 ### Step 3: Use the skill from Chat
 
-Open Copilot Chat in **Agent** mode. Copy paste the following prompt:
+Ask Copilot to add an endpoint so you can verify that the new skill is loaded and its build step is followed. Open Copilot Chat in **Agent** mode and send:
 
 ```text
 Add a GET endpoint to albums-api that returns the number of albums. Follow the repository conventions.
 ```
 
-Expected result:
+Success Criteria:
 - Copilot loads the `albums-api-endpoint` skill. Check the references or tool calls in the response.
 - The change follows the five steps of the skill, including `dotnet build` and a `curl` example.
 
@@ -432,26 +432,27 @@ You will use GitHub Copilot CLI from the repository root. You will trust the fol
 
 ### Step 1: Install the CLI
 
-If the CLI is not installed yet, run:
+Install the CLI so you can use the repository's Copilot customizations from a terminal. Skip installation if `copilot` is already available:
 
 ```powershell
 npm install -g @github/copilot
 ```
 
-Expected result:
+Success Criteria:
 - The `copilot` command is available in a new terminal.
 
 ### Step 2: Start from the repository root
 
-Open a terminal at the root of your fork. Run:
+Start an interactive session in your fork so Copilot loads this repository's context:
 
 ```powershell
 copilot
 ```
 
-Expected result:
+Success Criteria:
 - The CLI opens an interactive session.
-- You may be asked to trust the folder.
+
+If the CLI asks for folder trust, continue to the next step before allowing workspace tools.
 
 ### Step 3: Trust the folder
 
@@ -467,7 +468,7 @@ Trust the folder only if it is your workshop fork.
 
 ### Step 1: Sign in
 
-In the CLI session, run:
+Connect the CLI to your Copilot account so the session can use its authorized models and services:
 
 ```text
 /login
@@ -477,24 +478,26 @@ Complete the browser authentication flow if prompted.
 
 ### Step 2: Open help
 
-Run:
+Display the commands supported by this installed CLI version rather than relying on a command list from another release:
 
 ```text
 /help
 ```
 
-Expected result:
-- The CLI lists available commands for your installed version. Use `/help` as the source of truth, since commands can change.
+Success Criteria:
+- The help view lists the commands supported by your installed version.
+
+Use that view as the source of truth when a workshop command differs in your release.
 
 ### Step 3: Check usage
 
-Run:
+Inspect the CLI's account usage view before making more requests:
 
 ```text
 /usage
 ```
 
-Expected result:
+Success Criteria:
 - The CLI shows the usage information available to your account and plan.
 
 <div class="info" data-title="Usage units">
@@ -505,13 +508,13 @@ Expected result:
 
 ## Ask the CLI to explain the repository
 
-Copy paste the following prompt:
+Ask for a read-only repository map before requesting edits. The response should identify the projects and their run commands without changing files:
 
 ```text
 Explain this repository in ten bullets. Include the front end, the albums API, the infrastructure folder, the legacy folder, and the commands to run the app. Do not modify files.
 ```
 
-Expected result:
+Success Criteria:
 - The CLI mentions `album-viewer`, `albums-api`, `iac`, and `legacy`.
 - It does not change any file.
 
@@ -519,14 +522,14 @@ Expected result:
 
 ## Choose a model
 
-In the CLI, run:
+Open the model picker to inspect the models allowed by your account and organization:
 
 ```text
 /model
 ```
 
-Expected result:
-- The CLI shows the models available to your account. Availability depends on your plan and organization policy.
+Success Criteria:
+- The model picker lists your available model choices.
 
 Keep the default or choose the model your facilitator recommends. Model comparison and Auto selection are covered in **AI SDLC with GitHub and GitHub Copilot**.
 
@@ -534,30 +537,30 @@ Keep the default or choose the model your facilitator recommends. Model comparis
 
 ### Step 1: Reuse your skill
 
-Copy paste the following prompt:
+Use the endpoint skill from Level 7 for a new artist filter while preserving the existing routes:
 
 ```text
 Add a GET endpoint to albums-api that returns albums filtered by artist name. Use the albums-api-endpoint skill. Do not change existing endpoints.
 ```
 
-Expected result:
+Success Criteria:
 - The CLI asks for permission before editing files or running commands.
 - It uses the skill you created in Level 7 and runs `dotnet build`.
 
 ### Step 2: Use shell escape
 
-In the CLI, run:
+Use shell escape to inspect the actual working-tree changes without leaving the Copilot session:
 
 ```text
 ! git status --short
 ```
 
-Expected result:
+Success Criteria:
 - The CLI prints the Git status without leaving the session.
 
 ### Step 3: Select a custom agent
 
-Run:
+Open the agent picker to reuse a repository specialist for a read-only review of your change:
 
 ```text
 /agent
@@ -565,8 +568,8 @@ Run:
 
 Select one of the custom agents you created in upstream Level 5 or 6, if listed. Ask it a short, read-only question about the change you just made.
 
-Expected result:
-- The CLI uses the same repository agents, instructions, and skills as VS Code.
+Success Criteria:
+- The selected custom agent appears as the active agent, and its response addresses the change without adding file edits.
 
 <div class="tip" data-title="One set of customizations">
 
@@ -582,7 +585,7 @@ The CLI can run one prompt non-interactively with `-p`. Exit the interactive ses
 copilot -p "List the commands needed to build and run this repository. Do not edit files."
 ```
 
-Expected result:
+Success Criteria:
 - The CLI prints a summary and exits.
 
 <div class="warning" data-title="Tool allow flags">
@@ -643,13 +646,13 @@ applyTo: "albums-api/**"
 
 ### Step 2: Check that the layer applies
 
-Open Copilot Chat in **Agent** mode, or start `copilot` from the repository root. Copy paste the following prompt:
+Request an API change to verify that its matching path-specific instruction adds XML documentation. Open Copilot Chat in **Agent** mode, or start `copilot` from the repository root, and send:
 
 ```text
 Add a GET endpoint to albums-api that returns the albums released in a given year. Follow the repository conventions.
 ```
 
-Expected result:
+Success Criteria:
 - The new controller action has a `/// <summary>` comment.
 - In VS Code, the references of the response list `albums-api.instructions.md` next to the repository-wide instructions and the `albums-api-endpoint` skill from Level 7.
 
@@ -712,13 +715,13 @@ Create `.github\hooks\guardrails.json` with this content:
 
 ### Step 3: Test the hook
 
-Start `copilot` from the repository root and copy paste the following prompt:
+Exercise the hook with a dry-run push: the command should be denied before Git executes, without publishing anything. Start `copilot` from the repository root and send:
 
 ```text
 Run git push --dry-run and show me the output.
 ```
 
-Expected result:
+Success Criteria:
 - The CLI reports that the tool call was denied, with the reason "Pushing is a human decision in this repository."
 - A prompt such as "Run git status" still works.
 
@@ -732,14 +735,15 @@ Expected result:
 
 ### Step 1: Inventory your MCP servers
 
-Open Copilot Chat in **Ask** mode, or start `copilot`. Copy paste the following prompt:
+Inventory the configured servers before enabling more MCP tools. Open Copilot Chat in **Ask** mode, or start `copilot`, and request a read-only report:
 
 ```text
 Read the MCP configuration in this repository, such as .vscode/mcp.json. For each server, list whether it runs as a local process or a remote URL, which credentials or environment variables it receives, and which tools it exposes. Then say what could go wrong if untrusted text from an issue or a web page reached that server. Do not start servers or edit files.
 ```
 
-Expected result:
-- A short table, one row per MCP server you added in upstream Level 5.
+Success Criteria:
+- The report has one row per configured server, with transport, exposed tools, and credential/environment-variable names. Secret values are not reproduced.
+- No server is started and no configuration file is changed.
 
 ### Step 2: Narrow the tools
 
@@ -798,18 +802,18 @@ A **marketplace** is a GitHub repository that lists plugins. **AI SDLC with GitH
 
 ### Step 1: List marketplaces
 
-Run:
+List the catalogs already registered with this CLI so you can choose an actual marketplace name:
 
 ```powershell
 copilot plugin marketplace list
 ```
 
-Expected result:
+Success Criteria:
 - The CLI lists the configured marketplaces, such as `github/copilot-plugins` or `github/awesome-copilot`, depending on your version.
 
 ### Step 2: Browse a marketplace
 
-Run, replacing the name with one from the previous list:
+Browse the selected catalog before installing anything. Replace the placeholder with a marketplace name from the previous list:
 
 ```powershell
 copilot plugin marketplace browse <marketplace-name>
@@ -819,43 +823,47 @@ Pick one small plugin that does not request secrets or broad system access.
 
 ### Step 3: Install and inspect
 
-Run:
+Install the chosen plugin into your Copilot environment, then list installed plugins to confirm it was added:
 
 ```powershell
 copilot plugin install <plugin>@<marketplace-name>
 copilot plugin list
 ```
 
-Then start `copilot` and copy paste the following prompt:
+Inspect what that install exposed before using its capabilities. Start `copilot` and request a read-only inventory:
 
 ```text
 Explain what the installed plugin added to my Copilot environment. Focus on agents, skills, prompts, hooks, and MCP configuration. Do not run plugin tools or modify files.
 ```
 
-Expected result:
-- You can name each asset the plugin added.
+Success Criteria:
+- `copilot plugin list` includes the selected plugin.
+- The report identifies its agents, skills, prompts, hooks, and MCP configuration where present, with references to the relevant files.
+- No plugin tool is executed and no repository file is changed.
 
 ### Step 4: Uninstall
 
-Exit the CLI and run:
+Remove the demo plugin so the next workshop starts without its extra capabilities. Exit the CLI and uninstall the same plugin:
 
 ```powershell
 copilot plugin uninstall <plugin>
 ```
 
-Expected result:
-- Your environment returns to the repository customizations you created today.
+Success Criteria:
+- The CLI reports successful removal of the selected plugin; the repository customization files remain unchanged.
 
 ## Browse from VS Code
 
-In VS Code, open the Extensions view and search:
+Compare CLI discovery with VS Code's plugin catalog. Open the Extensions view and use this filter:
 
 ```text
 @agentPlugins
 ```
 
-Expected result:
-- VS Code lists agent plugins from the configured marketplaces. If nothing appears, your build may require enabling the `chat.plugins.enabled` setting, or plugins may not be available for your account yet.
+Success Criteria:
+- The filtered Extensions view lists available agent plugins.
+
+If the view is unavailable, your build may require `chat.plugins.enabled`, or your account may not support plugins yet. Record that limitation rather than count it as a completed catalog check.
 
 <div class="tip" data-title="Why uninstall?">
 

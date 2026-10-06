@@ -240,7 +240,7 @@ If **Confirm folder trust** appears, check that the displayed path is your works
 
 ![Copilot CLI folder-trust prompt showing the folder path and trust choices](../assets/copilot-trust-folder.png)
 
-Check that every tool answers:
+Check the installed tool versions before starting the exercises. These commands report availability; they do not install or update anything:
 
 ```bash
 git --version
@@ -275,7 +275,7 @@ npm --prefix src/front test
 git status
 ```
 
-Expected result:
+Success Criteria:
 - xUnit and Vitest pass.
 - The working tree is clean before agents edit the repository. A fresh template copy already has an initial commit; no extra baseline commit is needed.
 - The starter only serves and displays `/api/hello`. The 12 synthetic tracks in `src\api\Data\tracks.json` are not exposed by an endpoint yet, and the playlist capability is not implemented.
@@ -333,27 +333,25 @@ In GitHub Copilot Zero to Hero, you wrote your own primitives. Here you install 
 
 ### Step 1: Register the HVE-Core marketplace
 
-Run from any terminal where `copilot` is available:
+Register HVE-Core's catalog so the CLI can resolve its plugin by name. Run from any terminal where `copilot` is available; if this marketplace is already registered, continue to installation:
 
 ```powershell
 copilot plugin marketplace add microsoft/hve-core
 ```
 
-Expected result:
+Success Criteria:
 - Copilot CLI registers the `hve-core` marketplace.
-- If the marketplace already exists, continue.
 
 ### Step 2: Install HVE-Core
 
-Run:
+Install HVE-Core's agents, prompts, and skills into your personal CLI environment. This package supplies the Research, Plan, Implement, Review method you will use later:
 
 ```powershell
 copilot plugin install hve-core@hve-core
 ```
 
-Expected result:
-- The plugin installs the HVE-Core agents, commands, and skills for your Copilot CLI environment.
-- The plugin includes the Research, Plan, Implement, Review lifecycle.
+Success Criteria:
+- The CLI reports that `hve-core` was installed successfully; it appears in the plugin view in the next step.
 
 <div class="info" data-title="Documented capability">
 
@@ -363,21 +361,21 @@ Expected result:
 
 ### Step 3: Browse plugin commands
 
-Start an interactive Copilot CLI session in the repository root:
+Open a repository-root CLI session to inspect the installed plugin before using it:
 
 ```powershell
 copilot
 ```
 
-Then type:
+Open the plugin view. HVE prompts use the `/hve-core:...` namespace; the later exercises select those entries from the slash-command menu:
 
 ```text
 /plugin
 ```
 
-Expected result:
-- You can see installed plugins or plugin help for your CLI version.
-- HVE skills and prompts use the `/hve-core:...` namespace, such as `/hve-core:rpi-research`. Select the matching entry from the slash-command menu if needed.
+Success Criteria:
+- The plugin view lists HVE-Core, or the installed version's plugin help identifies how to open that list.
+- `/hve-core:rpi-research` appears in the slash-command menu.
 
 **For every HVE invocation:** type the short name, such as `/rpi-research`, select the matching HVE-Core entry, and press **Tab** to accept it. Add the task text before sending. Each block below shows the expanded `/hve-core:...` command and its prompt together as **one message**; do not submit the command line first. Built-in CLI commands such as `/agent <name>` and `/model auto intelligence` stay separate.
 
@@ -395,9 +393,8 @@ If the Copilot CLI plugin path is blocked, install the VS Code extension instead
 ise-hve-essentials.hve-core
 ```
 
-Expected result:
-- You can select HVE agents from Copilot Chat in VS Code.
-- The remaining prompts still work, but the UI path is different.
+Success Criteria:
+- DT Coach and RPI Agent appear in the VS Code Copilot Chat agent picker.
 
 ![VS Code Marketplace showing the HVE Core extension by ISE HVE Essentials and its Install Pre-Release button](../assets/vscode-hve-core.png)
 
@@ -409,7 +406,7 @@ No repository file should change in this level. Run:
 git status
 ```
 
-Expected result:
+Success Criteria:
 - Your working tree is still clean.
 
 ---
@@ -562,7 +559,7 @@ This is a **workshop demonstration**, not a production product specification. Ex
 
 You do not need to prescribe the coach's process. Keep any working-note edits limited to `.copilot-tracking/`; application code, tests, and published documentation stay unchanged during exploration.
 
-Expected result:
+Success Criteria:
 - You supply the user/context and make choices rather than accepting a prewritten feature definition.
 - DT Coach guides small activities across the nine methods, or explicitly reports which were only previewed or not reached.
 - It does not implement code.
@@ -727,7 +724,7 @@ Separately recap the shared playlist delivery contract in docs/afternoon-2/works
 Do not claim that sampling validated the concept or completed a method. Keep working notes under .copilot-tracking/ only.
 ```
 
-Expected result:
+Success Criteria:
 - The recap preserves your exploration and its evidence limits.
 - The common coding scope is kept separate from your explored concept, without changing the supplied requirements.
 
@@ -944,7 +941,7 @@ Record unresolved details as open questions and proceed with the draft. Do not i
 
 **Check and share the saved result:** open `docs/project-planning/music-catalog-playlist-slice-brd.md` in Explorer (or the actual path confirmed by the agent). Verify the file exists and contains the reviewed problem, objectives, scope, constraints, risks, and open questions—not just a chat summary. Check that the shared playlist boundary is preserved and no invented metrics or customer validation appear. Ask for corrections before approving the handoff. Share this reviewed document with PRD Builder in Step 4; include it in the curated planning-document commit later in this level, not the private `.copilot-tracking/` session files.
 
-Expected result:
+Success Criteria:
 - BRD Builder shows its requirements-planning disclaimer, then creates a BRD such as `docs\project-planning\music-catalog-playlist-slice-brd.md`. The exact file name can differ.
 - Objectives and success criteria trace back to the supplied facts, with assumptions and open questions clearly identified.
 - Out-of-scope items are listed as out of scope.
@@ -981,10 +978,10 @@ Do not sign off yet. Correct these scope differences against the reviewed BRD an
 
 Review validation findings before giving final approval. A request to sign off as **v1.0.0** is an approval gate, not evidence that validation passed; do not force a version, waive unresolved findings silently, or treat a scope confirmation as blanket approval.
 
-Expected result:
+Success Criteria:
 - PRD Builder creates a PRD such as `docs\project-planning\music-catalog-playlist-slice.md`, with functional requirements, acceptance criteria, and non-functional requirements.
 - The requirements match the fixed behaviour of Level 3, so the PM and the developer share one contract.
-- You inspect the saved draft, explicitly confirm or correct the presented scope, and review validation findings before final sign-off.
+- The conversation records your scope confirmation or corrections and the validation findings reviewed before final sign-off.
 
 Read both documents before you continue. Remove any scope creep. The issues you create next link to these documents.
 
@@ -997,7 +994,7 @@ Plan a GitHub issue hierarchy for <owner>/<repo> from the reviewed playlist PRD 
 Keep this planning-only and prepare the handoff for my review. Do not plan labels, milestones, or assignees.
 ```
 
-Expected result:
+Success Criteria:
 - Functional Planner confirms the repository, reads the existing issues, and writes a planning log and a `handoff.md`. It tells you where they are.
 - No new issue is created on GitHub during planning; existing issues may be read.
 
@@ -1017,7 +1014,7 @@ Confirm that **Backlog Manager** is active. If your installation uses an unprefi
 Execute the plan in the reviewed PRD handoff at <reviewed-handoff-path> and create the corresponding issues in GitHub repository <owner>/<repo>.
 ```
 
-Expected result:
+Success Criteria:
 - Backlog Manager confirms GitHub and your repository, then hands the operations to its GitHub Backlog Executor subagent.
 - After you confirm, Backlog Manager creates the approved issues in your repository and reports their URLs. Any planned sub-issue relationships match the reviewed handoff; failures or blocked operations are reported explicitly.
 - No issue is assigned to Copilot. Delegation stays a human decision, which you make in Level 5.
@@ -1044,7 +1041,7 @@ Review the proposed operations before approving writes. If authentication or wri
 
 ### Step 7: Verify the backlog on GitHub
 
-Run:
+List the open issues before inspecting them so you can reconcile their numbers and URLs with the reviewed creation plan:
 
 ```powershell
 gh issue list --state open
@@ -1052,11 +1049,13 @@ gh issue list --state open
 
 Then open the created issues on GitHub, including any parent tracking issue.
 
-Expected result:
+Success Criteria:
 - The created issues match the approved operations in the handoff; reconcile their URLs and count with that plan rather than a fixed number.
 - Any planned parent issue shows the expected sub-issues and their progress.
 
 ### Step 8: Get a sprint order (read-only)
+
+Ask for dependencies and an implementation order without editing the backlog. Level 5 schedules this triage and adds evidence-based reconciliation.
 
 Run `/agent backlog-manager` in Copilot CLI, or select **Backlog Manager** in VS Code. Type `/backlog-plan`, select the HVE-Core entry, and press **Tab**. Replace `<owner>/<repo>` and add the read-only request before sending:
 
@@ -1069,10 +1068,9 @@ Read-only: recommend an implementation order with dependencies and say which iss
 
 If the agent still reports missing GitHub MCP tools, stop and check the server connection and tool enablement from Step 1; changing the prompt does not grant tool access.
 
-Expected result:
-- An order such as the tracks API, then the playlist API, then the front end, with tests alongside each step.
+Success Criteria:
+- The saved recommendation links the existing issues, identifies dependencies, and gives an implementation order and any independent work groups.
 - Nothing changes on GitHub.
-- In Level 5, the daily backlog workflow automates this same triage every weekday.
 
 ![Sprint planner output showing issue dependencies, recommended implementation order, and parallel work waves](assets/l2-sprint-planner.png)
 
@@ -1224,6 +1222,8 @@ See [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-
 
 ### Step 1: Ask RPI to research only
 
+Research gathers repository evidence and open questions before anyone plans code changes. Keep application files unchanged during this phase:
+
 Run `/agent rpi-agent` in Copilot CLI, or select **RPI Agent** in the VS Code agent picker. Type `/rpi-research`, select the HVE-Core entry, and press **Tab**. Add the research request before sending:
 
 ```text
@@ -1233,9 +1233,9 @@ Research the Music Catalog playlist slice described in docs/project-planning/pla
 Identify the evidence, risks, and decisions needed before planning. Do not change application files.
 ```
 
-Expected result:
-- Research grounds the feature in repository evidence and exposes material gaps instead of guessing.
-- It returns a saved research artifact. Application files remain unchanged.
+Success Criteria:
+- A research file exists at the returned path, with repository references supporting its findings and an explicit record of gaps or open questions.
+- Application files remain unchanged.
 
 ### Step 2: Inspect the research
 
@@ -1244,6 +1244,8 @@ Open the returned file. Check what supports its key conclusions and which questi
 ## Plan phase
 
 ### Step 1: Ask for an implementation plan
+
+Turn the reviewed evidence into tasks and validation checks before implementation. The planner's default plan critique checks readiness, while the duplicate-feedback choice stays yours:
 
 Type `/rpi-plan`, select the HVE-Core entry, and press **Tab**. Replace `<research-path>` with this task's returned artifact path, then send the command and request together:
 
@@ -1254,10 +1256,10 @@ Plan the playlist slice from the reviewed requirements and research at <research
 Keep the scope workshop-sized. Explain the duplicate-feedback options and their trade-offs so I can decide.
 ```
 
-Expected result:
+Success Criteria:
 - A saved plan connects the requirements to implementation work and validation.
-- The default plan critique identifies any readiness issues; the planner addresses them before implementation.
-- Material choices are explained for your decision, not silently settled.
+- The critique record identifies any blocking readiness findings and their resolution status.
+- The plan presents duplicate-feedback alternatives and leaves the choice pending until your decision is recorded.
 
 ### Step 2: Review the plan and decide
 
@@ -1273,6 +1275,8 @@ Replace the placeholders with your actual choice and reasoning. Once the plan re
 
 ### Step 1: Ask RPI to implement
 
+Authorize the approved plan's code and test changes. Implementation returns a changes record with test evidence; a material departure still needs your decision:
+
 Type `/rpi-implement`, select the HVE-Core entry, and press **Tab**. Replace `<plan-path>` with the approved plan's path before sending:
 
 ```text
@@ -1281,25 +1285,26 @@ Type `/rpi-implement`, select the HVE-Core entry, and press **Tab**. Replace `<p
 Implement the approved plan at <plan-path>.
 ```
 
-Expected result:
-- Implementation follows the approved plan, including the tests. Material departures are raised for a decision.
-- The changes record reports completed work and validation evidence. The RPI flow runs the API and front-end tests; check the reported results rather than repeating them manually. A skipped or blocked run is not a pass.
-- Keep the returned changes-record path for Review.
+Success Criteria:
+- The source and test diff matches the approved plan; any material departure has a recorded decision.
+- The changes record exists at the returned path and reports completed tasks and API/front-end test results.
+
+Keep that path for Review. Check the reported runs rather than repeating them manually. A skipped or blocked run is not a pass.
 
 ![Playlist feature implemented locally](assets/l3-playlist-implemented.png)
 
 ### Step 2: Run the app
 
-Start each terminal from the repository root.
+Start the API and UI in separate terminals so you can test the delivered playlist in a browser. Start each terminal from the repository root.
 
-In one terminal:
+Launch the API in one terminal:
 
 ```bash
 cd src/api
 dotnet run
 ```
 
-In another terminal:
+Launch Vite in another terminal; its proxy sends `/api` requests to the API:
 
 ```bash
 cd src/front
@@ -1310,7 +1315,7 @@ In a Codespace or dev container, open the **Ports** tab beside **Terminal** in V
 
 ![VS Code Ports tab showing forwarded addresses for the Music Catalog API on 5080 and frontend on 5173](assets/l3-frontend-ports.png)
 
-Expected result:
+Success Criteria:
 - The browser shows the track catalog.
 - The playlist panel shows the empty-state message.
 - Adding a track moves or copies it into the playlist panel.
@@ -1325,7 +1330,7 @@ git status
 git add -A; git commit -m "Implement playlist slice with RPI"
 ```
 
-Expected result:
+Success Criteria:
 - Pending implementation changes are committed and the working tree is clean.
 - If the implementation was already committed, a clean working tree and the existing implementation commits satisfy this checkpoint; "nothing to commit" is not a failure.
 - `.copilot-tracking\` is not included in any commit.
@@ -1335,6 +1340,8 @@ Expected result:
 
 ### Step 1: Ask RPI to review the implementation
 
+Compare delivery with the approved plan before accepting it. Review is read-only: implementation defects go to a later Implement pass, not fixes inside Review.
+
 Type `/rpi-review`, select the HVE-Core entry, and press **Tab**. Replace the placeholders with this task's plan and changes-record paths before sending:
 
 ```text
@@ -1343,23 +1350,23 @@ Type `/rpi-review`, select the HVE-Core entry, and press **Tab**. Replace the pl
 Review the completed implementation against the approved plan at <plan-path> and changes record at <changes-path>.
 ```
 
-Expected result:
-- Review compares the implementation and validation evidence with the approved requirements and plan.
-- It reports an acceptance outcome and routes genuine findings. Review is read-only: implementation defects go to a later Implement pass, not fixes inside Review.
-- A clean review is valid. Carry genuine residual work into Level 5 if any remains; do not invent a finding or defer a required fix to populate the backlog.
+Success Criteria:
+- The returned review file links the plan, changes record, and validation evidence, and records an acceptance outcome.
+- Each finding identifies its evidence and next action, or the review explicitly records no findings.
+- Application files remain unchanged during Review.
 
-Read the returned review and resolve accepted blockers before treating the slice as complete. Review notes stay in the ignored tracking folder, so a clean review needs no additional commit.
+A clean review is valid. Carry genuine residual work into Level 5 if any remains; do not invent a finding or defer a required fix to populate the backlog. Read the returned review and resolve accepted blockers before treating the slice as complete. Review notes stay in the ignored tracking folder, so a clean review needs no additional commit.
 
 ### Step 2: Debrief the decision
 
-Compare your duplicate-add choice with your neighbours, or with the room if your facilitator runs a quick poll:
+The same acceptance criteria can support different duplicate-feedback designs. Compare your recorded choice with your neighbours or the room, using its tests as evidence:
 
 - Which option did you pick, and why?
 - Did the agent recommend the same option? Did its tests follow your choice, or the recommendation?
 - Which option is easier to verify with Testing Library queries by role and name?
 
-Expected result:
-- You see how the same reviewed requirements can produce different valid designs because a human made a different call at the plan gate.
+Success Criteria:
+- Your approved plan records the selected duplicate-feedback approach and rationale, and the UI/tests match that choice. Any mismatch is recorded as a finding to resolve.
 
 <div class="tip" data-title="Reference fallback">
 
@@ -1418,7 +1425,7 @@ Use `from-planner-handoff` only when you can share the actual upstream output; s
 
 Answer the native questions and review the Frame and Decide summaries. Let the agent derive the options, rationale, consequences, and validation with you; do not force a question limit or mark a gate passed just to finish quickly.
 
-Expected result:
+Success Criteria:
 - ADR Creator preserves the chosen session and template, guides the decision, and reports any missing inputs or validation blockers.
 - After its gates are satisfied, Govern allocates the ADR number and saves the record under `docs/planning/adrs/`. Keep the reported filename and any generated `.adr-config.yml` changes for the reviewed commit in Step 3.
 
@@ -1437,7 +1444,7 @@ Report findings only. Do not edit files.
 
 Code Review asks you to confirm the scope and the perspectives before it runs.
 
-Expected result:
+Success Criteria:
 - A short walkthrough of the change, then one findings report merged from each perspective.
 - Findings that `/hve-core:rpi-review` missed, or a confirmation that there are none.
 
@@ -1461,7 +1468,7 @@ If Steps 1 and 2 left changes to keep, type `/git-commit`, select the HVE-Core p
 Prepare a commit for the reviewed changes. Let me confirm the selected files and commit message.
 ```
 
-Expected result:
+Success Criteria:
 - The agent stages your changes and proposes a conventional commit message for you to accept or edit.
 
 <div class="tip" data-title="Close the PM backlog from a commit">
@@ -1480,7 +1487,7 @@ Type `/pull-request`, select the HVE-Core entry, and press **Tab**. Add the prep
 Prepare a pull request title and description for the committed changes. Do not publish a pull request or push the branch.
 ```
 
-Expected result:
+Success Criteria:
 - The agent reads the committed diff of your branch, runs quick checks on the changed areas, and shows you a pull request title and description.
 - This is preparation only: nothing is written to GitHub. You do not push until Level 4, so keep the draft as the description for a pull request you open later.
 
@@ -1561,24 +1568,34 @@ Start `copilot` again from the repository root and check the agent picker. **RPI
 
 ### Step 1: Set the allowed sources
 
-The manifest selects a package; the policy decides whether that selection is permitted. Copy the workshop policy:
+The manifest selects a package; the policy decides whether that selection is permitted. This policy allows **`microsoft/**`** sources, requires pins, limits dependency depth, and denies inline self-defined MCP servers.
+
+`executables.deny` is a separate guard on components that can run code: hooks, `bin` executables, self-defined MCP servers, LSP servers, and canvas extensions. The `untrusted-org/*` rule blocks matching executable components even if local consent is given. Source selection and executable trust are different checks.
+
+Copy the policy, then open it to inspect those two rule groups:
 
 ```bash
 cp solutions/afternoon-2/apm-policy.yml ./apm-policy.yml
 ```
 
-Open `apm-policy.yml` and find `dependencies.allow`. For now, the trusted source pattern is **`microsoft/**`**. The policy also requires pins, limits dependency depth, denies inline self-defined MCP servers, and blocks executable components from `untrusted-org/*`.
+Success Criteria:
+- `apm-policy.yml` exists at the repository root with `enforcement: block`.
+- `dependencies.allow` contains `microsoft/**`, and `executables.deny` contains `untrusted-org/*`.
 
 ### Step 2: Check policy and installed content
 
-First check that APM found and parsed the policy. Then audit the lockfile and deployed content against it:
+Parse the policy first so configuration errors are visible, then check whether the installed dependency and deployed files comply. The audit checks provenance, consistency, and policy—not whether the agent will always behave correctly:
 
 ```powershell
 apm policy status --policy-source apm-policy.yml
 apm audit --ci --policy apm-policy.yml
 ```
 
-**What to expect:** policy status shows `found`, `block`, and no warnings; the audit exits successfully for the pinned dependency. A failure names the check to investigate. Audit verifies provenance, consistency, and policy—not that the agent will always behave correctly.
+Success Criteria:
+- Policy status reports `Outcome: found`, `Enforcement: block`, and `Warnings: none`.
+- The audit exits successfully for the pinned HVE-Core dependency and its deployed content.
+
+If either check fails, inspect the named error before continuing; a parsed policy alone is not a passing audit.
 
 <div class="warning" data-title="Audit coverage">
 
@@ -1648,7 +1665,7 @@ git push
 
 On the default branch, open `.github/agents` and `.agents/skills`, then inspect the **APM Audit** run in **Actions**. If your setup was published on a branch, get it reviewed and merged before continuing.
 
-**Success criteria:** the pinned setup is on the default branch, the audit passed for that commit, and RPI Agent and Backlog Manager are available in the repository. You will use them next—not the disabled personal plugin.
+**Success Criteria:** the pinned setup is on the default branch, the audit passed for that commit, and RPI Agent and Backlog Manager are available in the repository. You will use them next—not the disabled personal plugin.
 
 The marketplace orientation is a facilitator demo; you do not need to install another plugin. The sample [CoffeeSoft catalog](https://github.com/CoffeesoftDotDev/Plugin-Marketplace) is private, so the demonstration uses prepared visuals rather than attendee access.
 
@@ -1822,7 +1839,7 @@ Out of scope:
 Persistence, multiple playlists, users, reorder, search, and styling library changes.
 ```
 
-Expected result:
+Success Criteria:
 - The issue has five checkable acceptance criteria and explicit exclusions.
 
 Add a comment linking to the two planning documents on your repository's default branch. Copy their URLs from GitHub's file view, not from a local editor. The job can now relate the issue to the committed planning revision.
@@ -2015,9 +2032,10 @@ List the published agent profiles so the delegated task can select Security Revi
 gh api "repos/{owner}/{repo}/contents/.github/agents" --jq ".[].name"
 ```
 
-Expected result:
+Success Criteria:
 - `security-reviewer.agent.md` is listed.
-- If it is missing, check that your Level 4 commit included `.github` and that you pushed it. You can still continue: assign the issue without a custom agent. The default Copilot agent follows the issue instructions, but without the HVE-Core orchestration.
+
+If it is missing, check that the Level 4 commit included `.github` and reached the default branch. Assigning without the custom agent is a fallback, not a successful check of HVE-Core orchestration.
 
 ### Step 2: Create the security review issue
 
@@ -2049,7 +2067,7 @@ $issue = $url.Split('/')[-1]
 $url
 ```
 
-Expected result:
+Success Criteria:
 - A new issue exists, and `$issue` holds its number.
 
 ### Step 3: Assign the issue to Copilot with Security Reviewer
@@ -2079,9 +2097,9 @@ $payload = @{
 $payload | gh api --method POST "repos/$repo/issues/$issue/assignees" --input -
 ```
 
-Expected result:
+Success Criteria:
 - Copilot is an assignee and opens a draft pull request.
-- In the agent session, you can see it profile the code base and apply security skills.
+- The session log identifies the reviewed code scope and the security skills it applied.
 
 <div class="info" data-title="Workshop note">
 
@@ -2100,7 +2118,7 @@ When the pull request is ready, check:
 
 A sample report with illustrative findings is in `solutions\afternoon-2\docs\security\playlist-security-review.md`. Use it to compare the shape, not the findings.
 
-Expected result:
+Success Criteria:
 - Nothing merges without a human decision.
 - Each finding you accept becomes an issue. You can create these issues with Backlog Manager, as in the Level 2 Product Manager track.
 
@@ -2128,7 +2146,7 @@ git push -u origin HEAD
 
 Open a pull request, wait for the required checks, and merge the workflow setup before using the label trigger. `gh secret set` prompts for the value, so the PAT does not end up in your shell history. Then create a new security review issue, as in Step 2, and add the `security-review` label to it.
 
-Expected result:
+Success Criteria:
 - The workflow runs, and Copilot is assigned with Security Reviewer.
 - Without the label, or without the secret, nothing is assigned.
 
@@ -2217,7 +2235,7 @@ After merge to `main`, inspect the issue timeline for the closing PR and fixing 
 
 On the shared Project, verify **Done** if you configured the closed-item workflow. Without that automation, update the card yourself after acceptance; issue comments do not automatically change Project fields. Finally, update your local `main` with `git pull`.
 
-**Success criteria:** the delegated PR has a completed Copilot code review and current check evidence; the human merge/change-request decision is recorded; the issue and dashboard match delivered work.
+**Success Criteria:** the delegated PR has a completed Copilot code review and current check evidence; the human merge/change-request decision is recorded; the issue and dashboard match delivered work.
 
 <details>
 <summary>Cloud-agent guardrails behind the review gates</summary>
@@ -2279,7 +2297,7 @@ git commit -m "Demo: push protection"
 git push -u origin demo/push-protection
 ```
 
-Expected result:
+Success Criteria:
 - The push is **rejected**. The output names the **Music Catalog workshop key** pattern, the file and the commit.
 - No alert is created, because nothing reached the repository.
 
@@ -2299,7 +2317,7 @@ git branch -D demo/push-protection
 Remove-Item demo.env -ErrorAction SilentlyContinue
 ```
 
-Expected result:
+Success Criteria:
 - `git status` shows a clean working tree on `main`.
 - The fake key never reached GitHub.
 
@@ -2313,7 +2331,7 @@ No local commit is required for this level unless you changed local files. Run:
 git status
 ```
 
-Expected result:
+Success Criteria:
 - Local work remains clean.
 - The delegated work is merged or tracked in its pull request, and the rest of the backlog is tracked in GitHub.
 
@@ -2361,20 +2379,20 @@ If you ran the extended tracks, you also worked in three roles: as a Product Man
 
 ## Final validation
 
-Run from the repository root:
+Verify the final API behavior with its integration tests before closing the workshop. Run from the repository root:
 
 ```powershell
 dotnet test
 ```
 
-Then run:
+Run the front-end suite from its project directory to verify the rendered interaction contract:
 
 ```bash
 cd src/front
 npm test
 ```
 
-Expected result:
+Success Criteria:
 - API tests pass.
 - Front-end tests pass.
 - Your repository has clean, reviewed commits for the playlist slice and governance setup.
@@ -2499,24 +2517,28 @@ Separate context sources when interpreting the result:
 
 ## CLI commands to verify locally
 
-Use these commands only if your installed CLI version supports them:
+Inspect available models and usage first; use only commands listed by your installed CLI version:
 
 ```text
 /model
 ```
 
+Read the usage view to record the units and values reported by this CLI experience:
+
 ```text
 /usage
 ```
+
+`/fleet` starts parallel delegated work; it is not a usage report. The entry below is a reference, not a task to execute here. Use `/help` to check whether your version lists it, without submitting delegated work:
 
 ```text
 /fleet
 ```
 
-Expected result:
+Success Criteria:
 - `/model` shows available model selection options.
 - `/usage` shows usage information if supported for your account and CLI version.
-- `/fleet` is available in documented Copilot CLI versions for parallel sub-agent execution; verify in your CLI version before teaching it.
+- `/help` lists `/fleet` if the installed version supports it; otherwise the missing command is recorded as unavailable. No delegated task is started in this verification step.
 
 ## Help us improve this Workshop
 
