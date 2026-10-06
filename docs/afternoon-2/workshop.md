@@ -661,7 +661,9 @@ Use the table as a route map, not nine prompts to paste at once. Spend more of y
 | 8. User Testing | Ask a peer to walk through the sketch, or plan a neutral task and observation. | Full Method 8 testing of a functional prototype. |
 | 9. Iteration at Scale | Choose a next experiment, success signal, and reason to revisit an earlier method. | Scaled rollout or measured impact. |
 
-To assess where to go next, use DT Coach's **Method Next** handoff, or type `/dt-method-next`, select the HVE-Core entry, and press **Tab**. Add the request below before sending:
+**Method Next** helps you decide where to go next. This HVE-Core prompt (`dt-method-next`) reads your project's `coaching-state.md` and the artifacts in the project folder, compares them with each method's exit signals, and recommends what to do next: move forward, return to an earlier method, or hand off to the RPI workflow. It only recommends; nothing changes until you confirm. Use it when you are unsure what comes next. If you already know which method you want, ask DT Coach for it directly.
+
+Type `/dt-method-next`, select the HVE-Core entry, and press **Tab**. In VS Code Chat, you can instead select the **🎯 Method Next** handoff button below DT Coach's response; it pre-fills the same prompt without sending it. Add the request below before sending:
 
 ```text
 /hve-core:dt-method-next.prompt
@@ -669,7 +671,64 @@ To assess where to go next, use DT Coach's **Method Next** handoff, or type `/dt
 Assess project music-catalog-listening-experience and recommend the next method from its current coaching state.
 ```
 
-Let it read the current project's coaching state and explain its recommendation. If it asks which project to use, provide `music-catalog-listening-experience` in a separate reply. It may recommend more work or a return to an earlier method; missing exit evidence is not permission to mark a method complete. In this sampler, ask for a preview of the remaining work when full progression is not justified.
+If it asks which project to use, provide `music-catalog-listening-experience` in a separate reply. To continue, confirm the suggested method or name a different one; DT Coach then records the transition in `coaching-state.md` and starts coaching that method. It may recommend more work or a return to an earlier method; missing exit evidence is not permission to mark a method complete. In this sampler, ask for a preview of the remaining work when full progression is not justified.
+
+<details>
+<summary>What Method Next returns: format and example outputs</summary>
+
+The response format is a **documented capability** defined in HVE-Core's [`dt-method-next.prompt.md`](https://github.com/microsoft/hve-core/blob/main/.github/prompts/design-thinking/dt-method-next.prompt.md). It has three parts:
+
+1. **Status:** project name and slug, current method and phase, methods completed out of nine, recent work, and two or three key artifacts from the current method folder.
+2. **Recommendation:** suggested method, transition type (forward progression, backward iteration, or lateral handoff), and rationale. At a space boundary (Method 3 to 4, or 6 to 7), it adds a readiness check. When it suggests going back, it quotes the matching rule from HVE-Core's [method sequencing reference](https://github.com/microsoft/hve-core/blob/main/.github/skills/design-thinking/dt-coaching-foundation/references/method-sequencing.md).
+3. **Your choice:** it asks whether the direction makes sense or whether you prefer another method. After Methods 1, 3, 4, 5, and 6, and at space boundaries, it can also suggest `/dt-figma-export`; that export is optional and needs the Figma MCP server.
+
+The two outputs below are a **workshop simulation** that follows this format, the HVE-Core readiness signals and sequencing rules, and the Music Catalog example prompts above. Wording varies by model and session, so do not expect your output to match.
+
+**Example 1: Readiness not met at the Problem to Solution boundary**
+
+```text
+Project: Music Catalog listening experience (music-catalog-listening-experience)
+Current method: 3 - Input Synthesis (opportunity framed as a "How might we" question)
+Progress: 0 of 9 methods completed
+Recent work: Separated observations from assumptions and asked how we might help listeners see what is coming next and adapt the music to their mood.
+Key artifacts: method-03-synthesis/how-might-we-questions.md, method-03-synthesis/insight-statements.md
+
+Suggested next method: 2 - Design Research
+Transition type: Backward iteration
+Rationale: Your themes rest on assumptions, not on research, so Method 3's exit signals are not met. Brainstorming now would build ideas on unvalidated themes.
+Sequencing rule: "Problem to Solution (after Method 3): validated synthesis across five dimensions required."
+Readiness check (Problem Space to Solution Space):
+- HMW questions formulated: yes
+- Themes validated across sources: no
+- Team alignment confirmed: no
+
+Does this direction make sense, or would you prefer to target a different method?
+You can also export these artifacts to a FigJam board for team review using /dt-figma-export.
+```
+
+In this sampler, you can still reply that you want to preview Brainstorming, because Method Next lets you choose a different method. HVE-Core only marks a method complete when you and the coach agree its outputs are sufficient, so the preview leaves Method 3 open.
+
+**Example 2: Back to research after a low-fidelity sketch**
+
+```text
+Project: Music Catalog listening experience (music-catalog-listening-experience)
+Current method: 6 - Low-Fidelity Prototypes (text sketch of the mood filter)
+Progress: 0 of 9 methods completed
+Recent work: Sketched the mood filter in text. It exposed a confusing state: when no upcoming track matches the mood, the whole queue is dimmed and skipped.
+Key artifacts: method-06-lofi-prototypes/prototype-plan.md, method-06-lofi-prototypes/constraint-discoveries.md
+
+Suggested next method: 2 - Design Research
+Transition type: Backward iteration
+Rationale: The sketch revealed a constraint we have not researched: what listeners expect when a filter would skip every track they queued.
+Sequencing rule: "Prototype reveals unknown constraint: return to Method 2 for targeted research, then re-synthesize in Method 3"
+
+Does this direction make sense, or would you prefer to target a different method?
+You can also export these artifacts to a FigJam board for team review using /dt-figma-export.
+```
+
+If the prompt finds no project, it replies: "No Design Thinking project found. Start a new project by running `/dt-start-project` and describing what you would like to work on." In that case, check that your notes are under `.copilot-tracking/dt/music-catalog-listening-experience/`.
+
+</details>
 
 Try saying **"Challenge my assumption"**, **"Give me a contrasting idea"**, or **"Let's revisit research"**. Before moving on, contribute an answer, decision, sketch, or question of your own. The nine methods are not a one-way checklist: discovering a weak assumption is a reason to revisit an earlier method.
 
