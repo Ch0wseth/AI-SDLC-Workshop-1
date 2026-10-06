@@ -61,12 +61,13 @@ In the recap, walk the autonomy ladder explicitly and point out that the upstrea
 | 0:50 | Level 3 RPI, with context engineering and the duplicate-add decision | 65 | Playlist feature merged, tests green, decision debriefed | Share your finished branch; keep the 5-minute decision debrief |
 | 1:55 | Break | 10 | Implementation committed, tests pass | |
 | 2:05 | Level 4 Trusted repository agents with APM | 30 | Personal CLI plugin disabled; repository agents, lockfile and audit published; marketplace orientation shown | Begin installation early; use recorded audits without claiming blocked installs passed |
-| 2:35 | Level 5 Reconcile, delegate, and track | 50 | Managed issue has planning evidence; `test` and `apm-audit` required; RPI cloud task visible on the issue/Project; separate accessibility demo | Show a prepared reconciliation; finish setup pushes before the strict audit rule |
-| 3:25 | Level 6 Independently review and accept | 20 | Copilot review posted on the RPI PR; human decision and issue/Project outcome recorded | Use a prepared PR/review; demo push protection yourself |
-| 3:45 | Recap and architect capstone | 15 | | Keep the recap to 5 minutes and run the capstone as a discussion |
+| 2:35 | Level 5a Verification as contract | 20 | CI and Copilot setup published; `test` and strict `apm-audit` checks required | Show prepared check evidence; publish initial setup before enabling the strict audit rule |
+| 2:55 | Level 5b Backlog and delegation | 30 | Managed issue has committed planning evidence; RPI cloud task visible on the issue/Project; separate accessibility demo | Show a prepared reconciliation and reviewed setup PR; do not bypass the strict audit gate |
+| 3:25 | Level 6 Independently review and accept | 20 | Copilot review posted on the RPI PR; human decision and issue/Project outcome recorded | Use a prepared PR/review; keep this block on revision-bound acceptance evidence |
+| 3:45 | Recap and architect capstone | 15 | | Keep the recap to 5 minutes; if licensed, show the facilitator-only push-protection demo, then run the capstone as a discussion |
 | 4:00 | End | | | |
 
-Level 3 and the break together form a 75-minute block. Stop the room at the plan gate for the duplicate-feedback decision, then run a 5-minute debrief after Review: ask attendees with contrasting choices to explain the trade-off. Do not prescribe two options before the planner explores them. In Level 5, assign the issue as soon as setup and ruleset checks are complete. While it runs, follow issue/Project progress and show the separate accessibility demo. Agent latency is variable; keep a completed PR ready for Level 6. The Extra Credits page is optional.
+Level 3 and the break together form a 75-minute block. Stop the room at the plan gate for the duplicate-feedback decision, then run a 5-minute debrief after Review: ask attendees with contrasting choices to explain the trade-off. Do not prescribe two options before the planner explores them. In Level 5a, publish the initial CI and Copilot setup before enabling the strict APM audit rule. In Level 5b, complete the reviewed workflow/planning setup and select an issue only after its planning evidence is committed. While the cloud task runs, follow issue/Project progress and show the separate accessibility demo. Agent latency is variable; keep a completed PR ready for Level 6. The Extra Credits page is optional.
 
 ### Level 4 proctor flow
 
@@ -105,7 +106,11 @@ Use [the supplied catalog capture](afternoon-2/assets/l4-private-marketplace.png
 
 Do not add another personal HVE-Core copy after attendees have disabled it. Keep the existing [duplicate-agent screenshot](afternoon-2/assets/l4-duplicate-agent-entries.png) as a troubleshooting visual for VS Code/managed plugins.
 
-### Level 5 proctor flow
+### Level 5a proctor flow
+
+Publish the initial CI and Copilot setup files before activating the strict no-bypass APM audit rule. Verify the required checks against the latest default-branch commit; the static ruleset example is not evidence that live enforcement is active.
+
+### Level 5b proctor flow
 
 Demonstrate a real issue linked to the committed Level 2 brief and remove-feature follow-up. Explain each state change by its evidence, not by an agent's conclusion.
 

@@ -32,31 +32,35 @@ test('the active default-branch rule requires the exact audit job with no admini
   assert.deepEqual(ruleset.bypass_actors, []);
   const required = ruleset.rules.find((rule) => rule.type === 'required_status_checks');
   assert.deepEqual(required.parameters.required_status_checks, [{ context: jobName }]);
-});
-
-test('Level 4 copies the workflow and stages shared skills before publishing its context', () => {
-  const copyStep = level4.slice(level4.indexOf('### Step 1: Add the PR audit workflow'),
-    level4.indexOf('### Step 2: Commit and push'));
-  assert.match(copyStep, /```bash\nmkdir -p \.github\/workflows\ncp solutions\/afternoon-2\/\.github\/workflows\/apm-audit\.yml \.github\/workflows\/apm-audit\.yml\n```/);
-  assert.match(copyStep, /without reinstalling your packages/);
-  assert.match(copyStep, /A workflow alone does not block merging/);
-  assert.match(level4, /git add apm\.yml apm\.lock\.yaml apm-policy\.yml \.github \.agents\n/);
-  assert.doesNotMatch(level4, /Step 5: Discuss CI|does not require authoring a new CI workflow/);
-});
-
-test('strict audit enforcement starts after setup pushes and before delegation', () => {
   const setupCommit = level5.indexOf('git commit -m "Build the API in Copilot setup steps"');
   const auditRule = level5.indexOf('rulesets\\main-apm-audit-required.json');
-  const assignment = level5.indexOf('### Step 5: Assign the issue');
-  assert.ok(setupCommit >= 0 && setupCommit < auditRule && auditRule < assignment);
-  assert.match(level5, /Wait for \*\*APM Audit\*\* on the latest `main` commit to pass/);
+  const stage5b = level5.indexOf('## Stage 5b: Backlog and delegation');
+  const branch = level5.indexOf('git switch -c feature/level-5b-backlog');
+  const setupPr = level5.indexOf('gh pr create --title "Add the Stage 5b backlog setup"');
+  const assignment = level5.indexOf('### Step 2: Assign the issue');
+  assert.ok(setupCommit >= 0 && setupCommit < auditRule && auditRule < stage5b &&
+    stage5b < branch && branch < setupPr && setupPr < assignment);
+  assert.match(level5, /wait for \*\*APM Audit\*\* on its latest commit to pass/);
   assert.match(level5, /no bypass list/);
   assert.match(level5, /A failed or missing `apm-audit` blocks merging/);
+  assert.match(level5, /later Stage 5b workflow and planning changes must use a reviewed pull request/);
+  assert.match(level5, /Wait for both required checks, `test` and `apm-audit`/);
+  assert.match(level5, /A human reviews and merges the PR through the normal workflow/);
   assert.match(level5, /administration permission and a supported GitHub plan/);
   const security = level5.slice(level5.indexOf('### Step 5 (facilitator demo)'));
   assert.match(security, /git switch -c security-review-delegation/);
   assert.match(security, /git push -u origin HEAD/);
   assert.match(security, /Open a pull request, wait for the required checks, and merge/);
+});
+
+test('Level 4 copies the workflow and stages shared skills before publishing its context', () => {
+  const copyStep = level4.slice(level4.indexOf('### Step 1: Add the PR audit workflow'),
+    level4.indexOf('### Step 2: Commit and push'));
+  assert.match(copyStep, /```powershell\nNew-Item -ItemType Directory -Path \.\\\.github\\workflows -Force \| Out-Null\nCopy-Item \.\\solutions\\afternoon-2\\\.github\\workflows\\apm-audit\.yml \.\\\.github\\workflows\\apm-audit\.yml\n```/);
+  assert.match(copyStep, /without reinstalling your packages/);
+  assert.match(copyStep, /A workflow alone does not block merging/);
+  assert.match(level4, /git add apm\.yml apm\.lock\.yaml apm-policy\.yml \.github \.agents\n/);
+  assert.doesNotMatch(level4, /Step 5: Discuss CI|does not require authoring a new CI workflow/);
 });
 
 test('the runner copies and stages the audit contract without claiming live admin enforcement', () => {
@@ -66,7 +70,7 @@ test('the runner copies and stages the audit contract without claiming live admi
   assert.match(runner, /skip_step l5-apm-ruleset/);
   assert.match(runner, /live merge enforcement is not simulated/);
   assert.ok(runner.indexOf('step l5-setup-steps') < runner.indexOf('step l5-apm-ci'));
-  assert.ok(runner.indexOf('skip_step l5-apm-ruleset') < runner.indexOf('step l5-prereqs'));
+  assert.ok(runner.indexOf('skip_step l5-apm-ruleset') < runner.indexOf('skip_step l5-prereqs'));
 });
 
 for (const status of [0, 1]) {

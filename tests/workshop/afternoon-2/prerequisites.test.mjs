@@ -8,13 +8,15 @@ import assert from 'node:assert/strict';
 
 const workshop = readFileSync(new URL('../../../docs/afternoon-2/workshop.md', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 const runner = readFileSync(new URL('./run-lab.sh', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const testerReadme = readFileSync(new URL('./README.md', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+const overview = readFileSync(new URL('../../../README.md', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 const level3 = workshop.slice(workshop.indexOf('# Level 3:'), workshop.indexOf('# Level 4:'));
 const phaseInvocation = (phase) => level3.match(new RegExp(
   '```text\\n(/hve-core:' + phase + '\\n[\\s\\S]*?)\\n```',
 ))?.[1];
 const phasePrompt = (phase) => phaseInvocation(phase)?.split('\n').slice(1).join('\n').trim();
 
-test('Level 3 proceeds directly to Level 4 without a break page or checkpoint', () => {
+test('Level 3 publishes through a reviewed PR and proceeds directly to Level 4', () => {
   assert.doesNotMatch(workshop, /^# Break$|^  - 'Break'$|Before leaving your machine|data-title="After the break"/m);
   const pages = workshop.replace(/^---\n[\s\S]*?\n---\n/, '').split(/\n\n---\n\n/);
   const level3Index = pages.findIndex((page) => /^# Level 3:/m.test(page));
@@ -22,27 +24,87 @@ test('Level 3 proceeds directly to Level 4 without a break page or checkpoint', 
   assert.match(pages[level3Index + 1], /^# Level 4:/m);
   assert.doesNotMatch(level3, /^# Level 4:/m);
   assert.doesNotMatch(runner, /break-status|Working tree clean before the break/);
+
+  const branch = level3.indexOf('git switch -c feature/playlist-slice');
+  const implement = level3.indexOf('### Step 1: Ask RPI to implement');
+  const reviewSection = level3.indexOf('## Review phase');
+  const review = level3.indexOf('### Step 1: Ask RPI to review', reviewSection);
+  const push = level3.indexOf('git push -u origin feature/playlist-slice');
+  const humanGate = level3.indexOf('A human reviewer inspects and approves');
+  const mergeSync = level3.indexOf('git switch main');
+  assert.ok(branch >= 0 && branch < implement, 'feature branch precedes implementation');
+  assert.ok(review >= 0 && review < push, 'local RPI review precedes publication');
+  assert.ok(push < humanGate && humanGate < mergeSync, 'publication, human review, and default-branch sync are ordered');
+  assert.match(level3, /prepared title and description/);
+  assert.match(level3, /default branch includes the merged Level 3 pull request/);
+  assert.doesNotMatch(level3, /You do not push until Level 4/);
+
+  const l3Replay = runner.slice(runner.indexOf('copilot_prompt l3-research'), runner.indexOf('step l4-copy-apm'));
+  assert.ok(l3Replay.indexOf('step l3-feature-branch') < l3Replay.indexOf('copilot_prompt l3-implement'));
+  assert.ok(l3Replay.indexOf('step l3-review-npm') < l3Replay.indexOf('step l3-pr-push'));
+  assert.ok(l3Replay.indexOf('step l3-pr-create') < l3Replay.indexOf('skip_step l3-human-review-merge'));
+  assert.ok(l3Replay.indexOf('skip_step l3-human-review-merge') <
+    l3Replay.indexOf('step l3-sandbox-merge-translation'));
+  assert.ok([...l3Replay.matchAll(/\[ "\$STEP_FAILED" -eq 0 \] \|\| exit 1/g)].length >= 8,
+    'failed checks, review, publication, or translation stop the dependent replay');
+  assert.doesNotMatch(l3Replay, /--admin|--force|git push(?: origin)? main/);
+  assert.match(l3Replay, /sandbox-only continuation; automatic merge is not human review/);
+  assert.match(testerReadme, /If the sandbox token cannot publish the branch\/PR or safely merge without a bypass, the replay stops before Level 4/);
+  assert.match(testerReadme, /automated merge is not human review, human acceptance, or evidence of live ruleset enforcement/);
 });
 
 test('Level 4 preserves the pinned installation without maintainer verification notes', () => {
   const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
   assert.doesNotMatch(level4, /Documented capability plus live verification|Live verification for this workshop|release-tag pins failed/);
-  assert.match(level4, /```bash\ncp solutions\/afternoon-2\/apm\.yml \.\/apm\.yml\n```/);
+  assert.doesNotMatch(level4, /```bash/);
+  assert.match(level4, /```powershell\nCopy-Item \.\\solutions\\afternoon-2\\apm\.yml \.\\apm\.yml\n```/);
   assert.match(level4, /microsoft\/hve-core#1dbd6a7ea90b74accaf8c809262e38952bd4c359/);
   assert.match(level4, /apm install --target copilot/);
+  assert.match(runner, /cp solutions\/afternoon-2\/apm\.yml \.\/apm\.yml/);
+  const topic = level4.slice(level4.indexOf('## Topic'), level4.indexOf('<details>'));
+  const visibleLines = topic.split('\n').filter((line) => line.trim() && !line.startsWith('## Topic'));
+  assert.match(level4, /^# Level 4: APM-governed repository agents$/m);
+  assert.match(workshop, /^  - 'Level 4: APM-governed repository agents'$/m);
+  assert.match(overview, /^\| 4 \| APM and repository agents \|/m);
+  assert.ok(visibleLines.length <= 5, `${visibleLines.length} visible topic lines`);
+  assert.doesNotMatch(topic, /```/);
+  for (const phrase of [
+    'APM moves HVE-Core from your personal install into this repository',
+    'manifest pins the dependency; the lockfile records its resolution',
+    'Copilot reads deployed profiles and skills',
+    'policy and audit verify them',
+    'Level 5 requires that audit before cloud-agent PRs merge',
+    'does not run RPI or change the playlist',
+  ]) assert.ok(topic.includes(phrase), phrase);
+  assert.match(level4, /lockfile records APM's\nresolved dependency state/);
+  assert.match(level4, /does not guarantee identical behavior across client or\nmodel versions/);
+  assert.match(level4, /deployment layout for this workshop, not an AI model/);
+  assert.match(level4, /Managed settings may prevent local disabling/);
+  assert.match(level4, /does not disable a separate VS Code extension or plugin/);
 });
 
 test('Level 4 demonstrates a temporary deny without widening the original allowlist', () => {
+  const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
+  const installation = level4.slice(level4.indexOf('## Install HVE-Core through APM'),
+    level4.indexOf('## Apply repository policy'));
+  const publication = level4.slice(level4.indexOf('## Publish the method and its audit'));
   const policy = workshop.slice(workshop.indexOf('## Apply repository policy'),
     workshop.indexOf('## Publish the method and its audit'));
-  assert.match(policy, /```bash\ncp solutions\/afternoon-2\/apm-policy\.yml \.\/apm-policy\.yml\n```/);
+  assert.match(installation, /Copy-Item \.\\solutions\\afternoon-2\\apm\.yml \.\\apm\.yml[\s\S]*?\*\*Decision check:\*\* Which exact HVE-Core commit SHA and deployment target are selected in `apm\.yml`\?/);
+  assert.match(policy, /```powershell\nCopy-Item \.\\solutions\\afternoon-2\\apm-policy\.yml \.\\apm-policy\.yml\n```/);
+  assert.match(policy, /Copy-Item \.\\solutions\\afternoon-2\\apm-policy\.yml \.\\apm-policy\.yml[\s\S]*?\*\*Decision check:\*\* Which dependency source pattern is allowed, and which executable namespace is denied\?/);
+  assert.match(publication, /Copy-Item \.\\solutions\\afternoon-2\\\.github\\workflows\\apm-audit\.yml \.\\.github\\workflows\\apm-audit\.yml[\s\S]*?\*\*Decision check:\*\* Does this workflow reinstall packages or audit the committed context as-is\?/);
   const demonstration = policy.slice(policy.indexOf('### Step 3:'));
+  assert.match(demonstration, /\*\*Learner edit:\*\* Keep the allowlist unchanged and add a temporary `dependencies\.deny` entry for `microsoft\/hve-core`/);
   assert.match(demonstration, /allow:\n    - "microsoft\/\*\*"\n  deny:\n    - "microsoft\/hve-core"/);
+  assert.match(demonstration, /Run `apm audit --ci --policy apm-policy\.yml` again\.[\s\S]*?Remove only the temporary `deny` entry and rerun the audit/);
   assert.match(demonstration, /Remove only the temporary `deny` entry/);
   assert.match(demonstration, /Restore a passing audit before committing/);
   assert.match(runner, /policy-before-deny\.yml/);
   assert.doesNotMatch(runner, /sed -i '.*deny:.*allow:/);
-  assert.doesNotMatch(policy, /Copy-Item/);
+  assert.match(policy, /Copy-Item \.\\solutions\\afternoon-2\\apm-policy\.yml/);
+  assert.match(workshop, /New-Item -ItemType Directory -Path \.\\\.github\\workflows -Force/);
+  assert.match(workshop, /Copy-Item \.\\solutions\\afternoon-2\\\.github\\workflows\\apm-audit\.yml/);
   assert.match(policy, /no `apm experimental enable` command is needed/);
   assert.doesNotMatch(policy, /validated command used the experimental policy path/);
 });
@@ -312,8 +374,8 @@ test('the RPI tester uses returned same-task artifacts and keeps Review read-onl
   assert.match(rpi, /grep -qi 'dotnet test' "\$RPI_PLAN_PATH"/);
   assert.doesNotMatch(rpi, /research mentions|review returns a pass\/fail summary|Review playlist slice/);
   assert.match(rpi, /review does not create source commits/);
-  const backlogFinding = workshop.slice(workshop.indexOf('### Step 4: Turn a deferred review finding into an issue'),
-    workshop.indexOf('### Step 5: Run daily backlog'));
+  const backlogFinding = workshop.slice(workshop.indexOf('### Step 5: Turn a deferred review finding into an issue'),
+    workshop.indexOf('### Step 6: Run daily backlog'));
   assert.match(backlogFinding, /If the review was clean, skip this step/);
   assert.doesNotMatch(backlogFinding, /newest review file|at least two open issues/);
   assert.match(runner, /skip_step l5-seed-issues/);

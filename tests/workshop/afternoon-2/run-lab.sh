@@ -33,6 +33,19 @@ finish() {
 }
 trap finish EXIT
 
+# push_fallback <step-id>: retry a rejected sandbox push with the tester token.
+push_fallback() {
+  if [ "$STEP_CODE" -ne 0 ]; then
+    note "git push with the Codespace credential failed; retrying with the tester token to continue the sandbox replay"
+    if git -c credential.helper= -c credential.helper='!gh auth git-credential' push >> "$RESULTS_DIR/steps/$1.log" 2>&1; then
+      check "push succeeded with the tester token (fallback)" true
+      STEP_CODE=0
+    else
+      check "push succeeded with the tester token (fallback)" false
+    fi
+  fi
+}
+
 cd "$REPO_DIR" || exit 1
 : "${SANDBOX_REPO:?SANDBOX_REPO is required}"
 git config user.name >/dev/null || git config user.name "Workshop Tester"
@@ -192,6 +205,11 @@ tree_clean_check
 finish_step
 [ "$STEP_CODE" -eq 0 ] && [ -n "$RPI_PLAN_PATH" ] || exit 1
 
+step l3-feature-branch "Level 3" "Create the feature branch before implementation" translated 30 \
+  'git switch -c feature/playlist-slice && [ "$(git branch --show-current)" = "feature/playlist-slice" ]'
+finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
+
 implementation_base=$(git rev-parse HEAD) || exit 1
 copilot_prompt l3-implement "Level 3" "RPI implement command and task" rpi-implement 3600 "--continue --agent hve-core:rpi-agent"
 if RPI_CHANGES_PATH=$(resolve_rpi_artifact changes "$RESULTS_DIR/steps/$STEP_ID.log" "$RPI_TASK_SLUG"); then
@@ -214,11 +232,13 @@ finish_step
 step l3-dotnet-test "Level 3" "Validate API tests" literal 900 'dotnet test'
 log_has 'Passed!|passed' && check "dotnet test reports passing tests" true || check "dotnet test reports passing tests" false
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l3-npm-test "Level 3" "Validate front-end tests" translated 600 'cd src/front && npm test'
 grep -rqsE 'getByRole|findByRole|getAllByRole|findAllByRole|getByLabelText' src/front/src \
   && check "Testing Library queries use roles or labels" true || check "Testing Library queries use roles or labels" false
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 # Run the app: the API on 5080 and the Vite dev server on 5173 (proxying /api).
 (cd src/api && nohup dotnet run > "$RESULTS_DIR/steps/l3-api-server.log" 2>&1 &)
@@ -244,6 +264,7 @@ if [ "$STEP_CODE" -eq 0 ]; then
 fi
 note "browser checks (rendered list, empty state, duplicate message) are covered by Vitest and by the source checks above"
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 pkill -f 'dotnet run' 2>/dev/null; pkill -f 'vite' 2>/dev/null
 
 export -f commit_checkpoint
@@ -253,6 +274,7 @@ tree_clean_check
 [ -z "$(git ls-files .copilot-tracking)" ] && check "no tracking file committed" true \
   || check "no tracking file committed" false "$(git ls-files .copilot-tracking | head -n 10)"
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 review_base=$(git rev-parse HEAD) || exit 1
 copilot_prompt l3-review "Level 3" "RPI review command and task" rpi-review 2400 "--continue --agent hve-core:rpi-agent"
@@ -267,14 +289,44 @@ tree_clean_check
 [ "$(git rev-parse HEAD)" = "$review_base" ] \
   && check "review does not create source commits" true || check "review does not create source commits" false
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
 step l3-review-dotnet "Level 3" "Validate after review: dotnet test" literal 900 'dotnet test'
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 step l3-review-npm "Level 3" "Validate after review: npm test" translated 600 'cd src/front && npm test'
 finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
 
-skip_step l3-tech-lead "Level 3" "Tech Lead extension (ADR Creator, Code Review agent, /git-commit)" \
-  "extended track: human-gated agents that pause for scope and perspective confirmation"
+step l3-pr-push "Level 3" "Publish the feature branch to the sandbox repository" translated 300 \
+  'git push -u origin feature/playlist-slice'
+push_fallback l3-pr-push
+finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
+
+step l3-pr-create "Level 3" "Create and verify the sandbox pull request" translated 300 \
+  'gh pr create --repo "$SANDBOX_REPO" --base main --head feature/playlist-slice --title "Implement playlist slice" --body "Sandbox replay description: local API and front-end tests and RPI review ran before this pull request. The unattended replay cannot perform human review or claim human acceptance." && gh pr view feature/playlist-slice --repo "$SANDBOX_REPO" --json number,state,baseRefName,headRefName --jq "if .state == \"OPEN\" and .baseRefName == \"main\" and .headRefName == \"feature/playlist-slice\" then \"open sandbox PR \" + (.number|tostring) + \" verified\" else error(\"PR base, head, or state does not match\") end"'
+if PR_NUMBER=$(grep -Eo 'open sandbox PR [0-9]+ verified' "$RESULTS_DIR/steps/l3-pr-create.log" | tail -n 1 | grep -Eo '[0-9]+'); then
+  export PR_NUMBER
+  check "sandbox pull request number resolved" true "$PR_NUMBER"
+else
+  check "sandbox pull request number resolved" false "could not verify the published PR"
+  STEP_CODE=1
+fi
+finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
+
+skip_step l3-human-review-merge "Level 3" "Human review and merge of the feature pull request" \
+  "unattended sandbox replay cannot provide a human decision or claim human acceptance"
+
+step l3-sandbox-merge-translation "Level 3" "Merge the sandbox PR as a replay-only translation" translated 300 \
+  'gh pr merge "$PR_NUMBER" --repo "$SANDBOX_REPO" --merge --delete-branch && git switch main && git pull --ff-only origin main && [ "$(gh pr view "$PR_NUMBER" --repo "$SANDBOX_REPO" --json state --jq .state)" = "MERGED" ]'
+note "sandbox-only continuation; automatic merge is not human review, human acceptance, or evidence of live ruleset enforcement"
+finish_step
+[ "$STEP_FAILED" -eq 0 ] || exit 1
+
+skip_step l3-tech-lead "Level 3" "Optional Tech Lead activities (ADR Creator and Code Review agent)" \
+  "optional human-gated agents that pause for scope and perspective confirmation"
 
 # ---------------------------------------------------------------- Level 4
 step l4-copy-apm "Level 4" "Copy the solution manifest" translated 30 'cp solutions/afternoon-2/apm.yml ./apm.yml && cat apm.yml'
@@ -324,15 +376,6 @@ grep -q 'microsoft/apm-action@v1' .github/workflows/apm-audit.yml \
   && check "PR audit uses the APM action" true || check "PR audit uses the APM action" false
 finish_step
 
-# push_fallback <step-id>: retry a rejected push with the sandbox-scoped tester token so later levels can still run.
-push_fallback() {
-  if [ "$STEP_CODE" -ne 0 ]; then
-    note "git push with the Codespace credential failed; retrying with the tester token to continue the run"
-    git -c credential.helper= -c credential.helper='!gh auth git-credential' push >> "$RESULTS_DIR/steps/$1.log" 2>&1 \
-      && check "push succeeded with the tester token (fallback)" true || check "push succeeded with the tester token (fallback)" false
-  fi
-}
-
 step l4-commit "Level 4" "Commit and push governed repository agents and audit" translated 300 \
   'git status; git add apm.yml apm.lock.yaml apm-policy.yml .github .agents && git diff --cached --stat && git commit -m "Add governed repository agents and APM audit" && git push'
 push_fallback l4-commit
@@ -347,136 +390,8 @@ finish_step
 skip_step l4-marketplace-demo "Level 4" "Private company marketplace orientation" \
   "proctor-only screenshot/demo; no participant plugin installation"
 
-# ---------------------------------------------------------------- Level 5
-step l5-ghaw-install "Level 5" "Install the gh-aw extension" literal 300 'gh extension install github/gh-aw'
-if [ "$STEP_CODE" -ne 0 ] && log_has 'already installed'; then note "gh-aw already installed by the dev container (allowed)"; STEP_CODE=0; fi
-gh aw version >/dev/null 2>&1 && check "gh aw command available" true || check "gh aw command available" false
-finish_step
-
-step l5-ghaw-init "Level 5" "Initialize the repository (gh aw init)" literal 300 'gh aw init'
-finish_step
-
-step l5-copy-workflows "Level 5" "Copy the bounded backlog workflow" translated 30 \
-  'cp solutions/afternoon-2/.github/workflows/daily-backlog.md .github/workflows/daily-backlog.md'
-finish_step
-
-step l5-compile "Level 5" "Compile workflows (gh aw compile)" literal 600 'gh aw compile'
-for w in daily-backlog; do
-  [ -f ".github/workflows/$w.lock.yml" ] && check "$w.lock.yml generated" true || check "$w.lock.yml generated" false
-done
-finish_step
-
-step l5-review-diff "Level 5" "Review generated files without editing" translated 60 \
-  'git status; git diff -- .github/workflows/daily-backlog.md'
-finish_step
-
-step l5-commit "Level 5" "Commit workflow sources and locks" translated 60 \
-  'git status; git add -A && git diff --cached --stat && git commit -m "Add bounded daily backlog reconciliation"'
-for w in daily-backlog; do
-  git ls-files --error-unmatch ".github/workflows/$w.lock.yml" >/dev/null 2>&1 \
-    && check "$w.lock.yml committed" true || check "$w.lock.yml committed" false
-done
-finish_step
-
-step l5-push "Level 5" "Push your branch (Codespace credentials)" literal 300 'git push'
-push_fallback l5-push
-finish_step
-
-step l5-planning-follow-up "Level 5" "Publish the remove-from-playlist follow-up brief" translated 300 \
-  'test -f docs/project-planning/playlist-design-decisions.md && cp solutions/afternoon-2/docs/project-planning/remove-playlist-track.md docs/project-planning/remove-playlist-track.md && git add docs/project-planning/remove-playlist-track.md && git commit -m "Plan the remove-from-playlist follow-up" && git push'
-push_fallback l5-planning-follow-up
-finish_step
-
-P=$RESULTS_DIR/prompts
-step l5-create-issue "Level 5" "File a follow-up feature request from the feature form" emulated 120 \
-  "printf '### Problem statement\n\n%s\n\n### Expected outcome\n\n%s\n\n### Acceptance criteria\n\n%s\n\n### Area\n\n%s\n\n### Out of scope\n\n%s\n' \"\$(cat $P/issue-problem.txt)\" \"\$(cat $P/issue-outcome.txt)\" \"\$(cat $P/issue-acceptance.txt)\" \"\$(cat $P/issue-area.txt)\" \"\$(cat $P/issue-out-of-scope.txt)\" > $RESULTS_DIR/issue-body.md && gh issue create -R $SANDBOX_REPO --title \"\$(cat $P/issue-title.txt)\" --label enhancement --body-file $RESULTS_DIR/issue-body.md"
-note "web issue form replaced by gh issue create with the lab's title and the same field labels"
-ISSUE_URL=$(grep -Eo 'https://github.com/[^ ]+/issues/[0-9]+' "$RESULTS_DIR/steps/l5-create-issue.log" | tail -n1)
-ISSUE_NUMBER=${ISSUE_URL##*/}
-[ -n "$ISSUE_NUMBER" ] && check "issue created" true "$ISSUE_URL" || check "issue created" false
-finish_step
-
-if [ -n "${ISSUE_NUMBER:-}" ]; then
-  step l5-managed-issue "Level 5" "Link committed plans and opt the issue into reconciliation" emulated 120 \
-    "gh label create backlog-managed --description 'Allow bounded backlog evidence updates and verified closure' &&
-     gh issue edit '$ISSUE_NUMBER' -R '$SANDBOX_REPO' --add-label backlog-managed &&
-     gh issue comment '$ISSUE_NUMBER' -R '$SANDBOX_REPO' --body 'Source planning: https://github.com/$SANDBOX_REPO/blob/main/docs/project-planning/playlist-design-decisions.md and https://github.com/$SANDBOX_REPO/blob/main/docs/project-planning/remove-playlist-track.md'"
-  finish_step
-fi
-
-skip_step l5-seed-issues "Level 5" "Turn deferred review findings into issues" \
-  "requires a genuine residual finding and a human decision to defer it; do not create synthetic review findings"
-
-# wait_aw_run <step-id> <workflow> <title>
-wait_aw_run() {
-  local id=$1 wf=$2 title=$3 since run_id state concl
-  # Two minutes of margin for clock skew between the Codespace and GitHub.
-  since=$(date -u -d '-2 minutes' +%FT%TZ)
-  step "$id" "Level 5" "$title" literal 300 "gh aw run $wf"
-  local run_code=$STEP_CODE run_dur=$STEP_DUR
-  run_id=""
-  for _ in $(seq 1 30); do
-    run_id=$(gh run list -R "$SANDBOX_REPO" --workflow "$wf.lock.yml" --event workflow_dispatch --limit 5 \
-      --json databaseId,createdAt --jq "[.[] | select(.createdAt >= \"$since\")][0].databaseId // empty" 2>/dev/null)
-    [ -n "$run_id" ] && break; sleep 10
-  done
-  if [ -z "$run_id" ]; then
-    check "workflow run started" false "no $wf run found after gh aw run"
-  else
-    check "workflow run started" true "run $run_id"
-    local waited=0
-    while [ "$waited" -lt "$WORKFLOW_WAIT_S" ]; do
-      state=$(gh run view "$run_id" -R "$SANDBOX_REPO" --json status --jq .status 2>/dev/null)
-      [ "$state" = completed ] && break; sleep 30; waited=$((waited + 30))
-    done
-    concl=$(gh run view "$run_id" -R "$SANDBOX_REPO" --json conclusion --jq .conclusion 2>/dev/null)
-    [ "$concl" = success ] && check "workflow run concluded success" true || check "workflow run concluded success" false "conclusion=${concl:-timeout}"
-    gh run view "$run_id" -R "$SANDBOX_REPO" --log > "$RESULTS_DIR/steps/$id.run.log" 2>&1 || gh run view "$run_id" -R "$SANDBOX_REPO" --log-failed > "$RESULTS_DIR/steps/$id.run.log" 2>&1
-    redact "$RESULTS_DIR/steps/$id.run.log"
-  fi
-  STEP_CODE=$run_code STEP_DUR=$run_dur
-}
-
-gh issue list -R "$SANDBOX_REPO" --state open --json number,title > "$RESULTS_DIR/issues-before-daily-backlog.json" 2>/dev/null
-wait_aw_run l5-run-daily-backlog daily-backlog "Run daily backlog (gh aw run daily-backlog)"
-# Filter titles locally instead of using --search, whose index can lag behind a just-created issue.
-issue=""
-for _ in 1 2 3 4 5 6; do
-  issue=$(gh issue list -R "$SANDBOX_REPO" --state open --limit 50 --json number,title,body \
-    --jq '[.[] | select(.title | startswith("[Daily backlog]"))][0] // empty' 2>/dev/null)
-  [ -n "$issue" ] && break; sleep 10
-done
-if [ -n "$issue" ] && [ "$issue" != null ]; then
-  echo "$issue" > "$RESULTS_DIR/daily-backlog-issue.json"
-  echo "$issue" | grep -q 'Evidence and progress' && check "summary has ## Evidence and progress" true || check "summary has ## Evidence and progress" false
-  echo "$issue" | grep -q 'Recommended implementation order' && check "summary has ## Recommended implementation order" true || check "summary has ## Recommended implementation order" false
-  echo "$issue" | grep -q 'Can be developed in parallel' && check "summary has ## Can be developed in parallel" true || check "summary has ## Can be developed in parallel" false
-  if [ -n "${ISSUE_NUMBER:-}" ]; then
-    parallel=$(echo "$issue" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const b=JSON.parse(d).body||"";const m=b.split(/^##\s+/m).find(x=>/^Can be developed in parallel/.test(x))||"";console.log(m)}catch{}})')
-    if echo "$parallel" | grep -qE "#$ISSUE_NUMBER([^0-9]|$)|Remove a track"; then
-      note "the feature issue #$ISSUE_NUMBER is listed under Can be developed in parallel"
-    else
-      note "the feature issue #$ISSUE_NUMBER is not in the parallel group; human dependency inspection is not simulated"
-    fi
-  fi
-else
-  open=$(grep -o '"number"' "$RESULTS_DIR/issues-before-daily-backlog.json" 2>/dev/null | wc -l)
-  note "no [Daily backlog] issue created; open issues before the run: $open (the workflow is designed to noop when there are none)"
-  [ "$open" -eq 0 ] && check "noop expected because the sandbox had no open issues" true || check "[Daily backlog] issue created" false
-fi
-if [ -n "${ISSUE_NUMBER:-}" ]; then
-  gh issue view "$ISSUE_NUMBER" -R "$SANDBOX_REPO" --json state,comments > "$RESULTS_DIR/backlog-managed-issue.json"
-  node -e '
-    const x=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
-    const progress=x.comments.filter(c=>c.body.includes("Evidence key:"));
-    process.exit(x.state==="OPEN" && progress.some(c=>c.body.includes("remove-playlist-track.md")) ? 0 : 1);
-  ' "$RESULTS_DIR/backlog-managed-issue.json" \
-    && check "managed issue stays open with committed planning evidence" true \
-    || check "managed issue stays open with committed planning evidence" false
-fi
-finish_step
-
-step l5-ci "Level 5" "Make the tests the contract: add CI and push" translated 300 \
+# ---------------------------------------------------------------- Level 5a
+step l5-ci "Level 5a" "Make the tests the contract: add CI and push" translated 300 \
   'mkdir -p .github/workflows && cp solutions/afternoon-2/.github/workflows/ci.yml .github/workflows/ci.yml && git add .github/workflows/ci.yml && git commit -m "Add CI for API and front-end tests" && git push'
 push_fallback l5-ci
 grep -qE '^  test:' .github/workflows/ci.yml && check "ci.yml defines the test job" true || check "ci.yml defines the test job" false
@@ -496,10 +411,10 @@ finish_step
 node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.exit(r.rules.some(x=>x.type==="required_status_checks"&&x.parameters.required_status_checks.some(c=>c.context==="test"))?0:1)' \
   solutions/afternoon-2/rulesets/main-tests-required.json \
   && note "the solution ruleset requires the test check" || note "the solution ruleset does not require the test check"
-skip_step l5-ruleset "Level 5" "Create the branch ruleset that requires the test check" \
+skip_step l5-ruleset "Level 5a" "Create the branch ruleset that requires the test check" \
   "needs the Administration permission, which the sandbox-scoped tester token does not have; the solution JSON is checked statically"
 
-step l5-setup-steps "Level 5" "Add the API build to copilot-setup-steps.yml and push" translated 300 \
+step l5-setup-steps "Level 5a" "Add the API build to copilot-setup-steps.yml and push" translated 300 \
   "awk '{print} /^[[:space:]]+run: npm ci[[:space:]]*\$/ && !done {print \"\"; print \"      - name: Build the API\"; print \"        run: dotnet build MusicCatalog.slnx --no-restore\"; done=1}' .github/workflows/copilot-setup-steps.yml > /tmp/setup-steps.yml && mv /tmp/setup-steps.yml .github/workflows/copilot-setup-steps.yml && git add .github/workflows/copilot-setup-steps.yml && git commit -m 'Build the API in Copilot setup steps' && git push"
 push_fallback l5-setup-steps
 grep -q 'dotnet build MusicCatalog.slnx --no-restore' .github/workflows/copilot-setup-steps.yml \
@@ -507,7 +422,7 @@ grep -q 'dotnet build MusicCatalog.slnx --no-restore' .github/workflows/copilot-
 note "manual YAML edit replaced by an awk insertion after the npm ci step"
 finish_step
 
-step l5-apm-ci "Level 5" "Wait for the audit on the latest main commit" translated 600 "
+step l5-apm-ci "Level 5a" "Wait for the audit on the latest main commit" translated 600 "
   expected_sha=\$(git rev-parse HEAD)
   apm_run=''
   for _ in \$(seq 1 30); do
@@ -521,49 +436,61 @@ step l5-apm-ci "Level 5" "Wait for the audit on the latest main commit" translat
 "
 finish_step
 
-step l5-apm-gate-config "Level 5" "Verify the strict APM required-check rule" translated 30 \
+step l5-apm-gate-config "Level 5a" "Verify the strict APM required-check rule" translated 30 \
   'node -e '"'"'const fs=require("fs");const r=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));const ok=r.target==="branch"&&r.enforcement==="active"&&r.bypass_actors.length===0&&r.conditions.ref_name.include.includes("~DEFAULT_BRANCH")&&r.rules.some(x=>x.type==="required_status_checks"&&x.parameters.required_status_checks.some(c=>c.context==="apm-audit"));process.exit(ok?0:1)'"'"' solutions/afternoon-2/rulesets/main-apm-audit-required.json'
 finish_step
-skip_step l5-apm-ruleset "Level 5" "Require the apm-audit check before delegation" \
+skip_step l5-apm-ruleset "Level 5a" "Require the apm-audit check before delegation" \
   "needs Administration permission; the strict solution JSON is checked, but live merge enforcement is not simulated"
 
-step l5-prereqs "Level 5" "Confirm default-branch prerequisites" translated 120 \
-  "gh api repos/$SANDBOX_REPO/contents/.github/workflows/copilot-setup-steps.yml --jq .path; gh api repos/$SANDBOX_REPO/contents/.github/agents --jq '.[].name' || true"
-log_has 'copilot-setup-steps.yml' && check "copilot-setup-steps.yml on the default branch" true || check "copilot-setup-steps.yml on the default branch" false
-RPI_AGENT=""
-if log_has 'rpi-agent'; then RPI_AGENT=rpi-agent; check "RPI Agent file on the default branch" true; else
-  check "RPI Agent file on the default branch" false "HVE-Core agent files deployed by APM are not committed by the Level 4 git add list"
-fi
-OWNER=${SANDBOX_REPO%%/*}; NAME=${SANDBOX_REPO##*/}
-gh api graphql -f query="query{repository(owner:\"$OWNER\",name:\"$NAME\"){suggestedActors(capabilities:[CAN_BE_ASSIGNED],first:100){nodes{login}}}}" \
-  --jq '.data.repository.suggestedActors.nodes[].login' >> "$RESULTS_DIR/steps/l5-prereqs.log" 2>&1
-log_has 'copilot' && check "Copilot cloud agent assignable in the repository" true || check "Copilot cloud agent assignable in the repository" false
-finish_step
+# ---------------------------------------------------------------- Level 5b
+skip_step l5b-setup-pr "Level 5b" "Publish the backlog workflow and planning brief in a reviewed PR" \
+  "cannot verify the active no-bypass APM rule: Administration permission is unavailable, so the setup PR and dependent delegation are skipped rather than bypassing the gate"
+skip_step l5b-human-review "Level 5b" "Human review and merge of the setup PR" \
+  "no Stage 5b setup PR was created; the unattended replay cannot provide human approval"
+skip_step l5b-sandbox-merge-translation "Level 5b" "Merge the setup PR as a replay-only translation" \
+  "no Stage 5b setup PR was created because active no-bypass enforcement could not be verified"
+skip_step l5-ghaw-install "Level 5b" "Install the gh-aw extension" \
+  "Stage 5b cannot begin until the strict APM audit rule is active"
+skip_step l5-ghaw-init "Level 5b" "Initialize the repository (gh aw init)" \
+  "Stage 5b setup is gated on verified no-bypass APM enforcement"
+skip_step l5-copy-workflows "Level 5b" "Copy the bounded backlog workflow" \
+  "Stage 5b setup PR is skipped because live no-bypass APM enforcement is unavailable"
+skip_step l5-compile "Level 5b" "Compile workflows (gh aw compile)" \
+  "the workflow was not copied because the Stage 5b setup PR gate is unavailable"
+skip_step l5-review-diff "Level 5b" "Review generated files without editing" \
+  "the Stage 5b setup files were not created"
+skip_step l5-commit "Level 5b" "Commit workflow sources and locks" \
+  "the Stage 5b setup files were not created"
+skip_step l5-push "Level 5b" "Push the Stage 5b feature branch" \
+  "the Stage 5b setup files were not created"
+skip_step l5-planning-follow-up "Level 5b" "Publish the remove-from-playlist follow-up brief" \
+  "the planning brief remains uncommitted because the Stage 5b reviewed-PR gate is unavailable"
+skip_step l5-create-issue "Level 5b" "File a follow-up feature request from the feature form" \
+  "no committed Stage 5b planning handoff; no issue is created"
+skip_step l5-managed-issue "Level 5b" "Link committed plans and opt the issue into reconciliation" \
+  "no feature issue was created"
+skip_step l5-seed-issues "Level 5b" "Turn deferred review findings into issues" \
+  "requires a genuine residual finding and a human decision to defer it; do not create synthetic review findings"
+ISSUE_NUMBER=""
 
-if [ -z "${ISSUE_NUMBER:-}" ]; then
-  skip_step l5-assign "Level 5" "Assign the issue to Copilot cloud agent" "no issue was created"
-else
-  node -e '
-    const fs=require("fs");
-    const [repo, agent, file, out]=process.argv.slice(1);
-    fs.writeFileSync(out, JSON.stringify({assignees:["copilot-swe-agent[bot]"],agent_assignment:{target_repo:repo,base_branch:"main",custom_instructions:fs.readFileSync(file,"utf8").trim(),custom_agent:agent,model:""}}));
-  ' "$SANDBOX_REPO" "$RPI_AGENT" "$P/agent-instructions.txt" "$RESULTS_DIR/assign.json"
-  step l5-assign "Level 5" "Assign the issue to Copilot cloud agent with the RPI Agent" emulated 120 \
-    "gh api --method POST -H 'Accept: application/vnd.github+json' repos/$SANDBOX_REPO/issues/$ISSUE_NUMBER/assignees --input $RESULTS_DIR/assign.json --jq '.assignees[].login'"
-  note "UI assignment replaced by the documented REST call with agent_assignment (custom_agent='${RPI_AGENT:-none}')"
-  finish_step
-fi
+skip_step l5-run-daily-backlog "Level 5b" "Run daily backlog (gh aw run daily-backlog)" \
+  "the bounded workflow was not merged through the gated setup PR"
 
-skip_step l5-project-progress "Level 5" "Follow task progress on a shared Project" \
+skip_step l5-prereqs "Level 5b" "Confirm default-branch prerequisites" \
+  "the Stage 5b setup PR was not merged"
+skip_step l5-assign "Level 5b" "Assign the issue to Copilot cloud agent" \
+  "no feature issue was created because the setup PR gate is unavailable"
+
+skip_step l5-project-progress "Level 5b" "Follow task progress on a shared Project" \
   "needs a selected Project and human field/automation configuration; issue comments are not Project field updates"
-skip_step l5-accessibility-demo "Level 5" "Browser-supported accessibility review demonstration" \
+skip_step l5-accessibility-demo "Level 5b" "Browser-supported accessibility review demonstration" \
   "proctor-only private repository example; no attendee audit or MCP configuration"
 
-step l5-git-status "Level 5" "Commit checkpoint: git status" literal 30 'git status'
+step l5-git-status "Level 5b" "Commit checkpoint: git status" literal 30 'git status'
 tree_clean_check
 finish_step
 
-skip_step l5-security-delegation "Level 5" "Extended track: delegate a security review to Copilot cloud agent" \
+skip_step l5-security-delegation "Level 5b" "Extended track: delegate a security review to Copilot cloud agent" \
   "extended track: a second Copilot PR would collide with the Level 6 PR detection; the gh-aw variant needs a GH_AW_AGENT_TOKEN PAT"
 
 # ---------------------------------------------------------------- Level 6
@@ -600,7 +527,7 @@ if [ -n "${ISSUE_NUMBER:-}" ]; then
     skip_step l6-code-review "Level 6" "Request a Copilot code review on the PR" "no Copilot PR to review"
   else
     step l6-code-review "Level 6" "Request a Copilot code review on the PR" translated 60 \
-      "gh pr edit $PR -R $SANDBOX_REPO --add-reviewer @copilot"
+      "gh pr edit $PR -R $SANDBOX_REPO --add-reviewer '@copilot'"
     note "PR-NUMBER replaced by the Copilot PR; -R targets the sandbox"
     REVIEW_CODE=$STEP_CODE waited=0 reviews=0
     if [ "$REVIEW_CODE" -ne 0 ] && log_has "requires one of the following scopes: \['read:org'\]"; then
@@ -619,13 +546,20 @@ if [ -n "${ISSUE_NUMBER:-}" ]; then
     STEP_DUR=$waited
     finish_step
   fi
+else
+  skip_step l6-pr "Level 6" "Copilot cloud agent opens a PR that references the issue" \
+    "Stage 5b did not create or assign an issue because its no-bypass APM gate is unavailable"
+  skip_step l6-approve-checks "Level 6" "Approve and run workflows on the Copilot PR, then wait for the test check" \
+    "no Copilot PR exists because Stage 5b delegation was skipped"
+  skip_step l6-code-review "Level 6" "Request a Copilot code review on the PR" \
+    "no Copilot PR exists because Stage 5b delegation was skipped"
 fi
 
 skip_step l6-accept-and-reconcile "Level 6" "Accept delivery and verify issue/Project closure evidence" \
   "requires a human merge decision; automated tester does not merge or claim acceptance"
 
-skip_step l6-push-protection "Level 6" "Secret scanning push protection with a workshop custom pattern" \
-  "facilitator demo: needs GitHub Secret Protection on the private sandbox and settings-UI steps (custom pattern, dry run)"
+skip_step l6-push-protection "Recap" "Facilitator demo: secret scanning push protection" \
+  "facilitator demo: needs GitHub Secret Protection on a licensed proctor repository and settings-UI steps (custom pattern, dry run)"
 
 step l6-git-status "Level 6" "Commit checkpoint: git status" literal 30 'git status'
 tree_clean_check
