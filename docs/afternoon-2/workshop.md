@@ -1317,6 +1317,8 @@ Success Criteria:
 
 For example, the planner might offer **A: an inline message next to the track**, **B: one page-level status region**, or **C: disable add buttons, with a message if a duplicate request still occurs**. These are illustrative options, not a prescribed list: use the labels and descriptions in your own planner's response. The API must still reject duplicate adds with HTTP 409; your choice concerns how the UI communicates that rejection.
 
+![Example RPI plan waiting for decision D1, comparing inline feedback, a page-level status region, and disabled add buttons with their pros, cons, and recommendation](assets/l3-plan-decision-options.png)
+
 Reply in the same conversation with your choice and a short reason. If your planner offered the example options above and you prefer one shared status region, you could send:
 
 ```text
