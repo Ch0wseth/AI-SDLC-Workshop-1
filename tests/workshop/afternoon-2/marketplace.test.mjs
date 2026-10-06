@@ -10,10 +10,10 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replac
 const catalog = JSON.parse(read('../../../.github/plugin/marketplace.json'));
 const bash = process.platform === 'win32' ? 'C:\\Program Files\\Git\\bin\\bash.exe' : 'bash';
 const upstream = [{ name: 'hve-core', marketplace: 'hve-core', version: '3.2.2', enabled: true }];
-const curated = [{ name: 'hve-core', marketplace: 'music-catalog-marketplace', version: '3.2.2', enabled: true }];
+const curated = [{ name: 'hve-core', marketplace: 'contoso-plugin-marketplace', version: '3.2.2', enabled: true }];
 
 test('template and solution catalog have exactly the reviewed four remote sources', () => {
-  assert.equal(catalog.name, 'music-catalog-marketplace');
+  assert.equal(catalog.name, 'contoso-plugin-marketplace');
   assert.equal(catalog.metadata.version, '1.0.0');
   assert.deepEqual(catalog, JSON.parse(read('../../../solutions/afternoon-2/.github/plugin/marketplace.json')));
   assert.deepEqual(catalog.plugins.map(({ name, version, source }) => [name, version, source]), [
@@ -27,7 +27,7 @@ test('template and solution catalog have exactly the reviewed four remote source
       path: 'plugins/workiq', sha: '7fde3f8e6477fc75c79a7d8386e8501105b2d9bd' }],
   ]);
   const settings = JSON.parse(read('../../../solutions/afternoon-2/.github/copilot/settings.json'));
-  assert.deepEqual(settings.enabledPlugins, { 'hve-core@music-catalog-marketplace': true });
+  assert.deepEqual(settings.enabledPlugins, { 'hve-core@contoso-plugin-marketplace': true });
   assert.equal(settings.extraKnownMarketplaces[catalog.name].autoUpdate, undefined);
 });
 
@@ -36,13 +36,13 @@ test('visible Level 4 path keeps source gates, Linux prerequisites and revised t
   const l4 = guide.slice(guide.indexOf('# Level 4:'), guide.indexOf('# Level 5:'))
     .replace(/<details>[\s\S]*?<\/details>/g, '');
   for (const text of ['copilot plugin marketplace add OWNER/REPO',
-    'copilot plugin marketplace browse music-catalog-marketplace',
+    'copilot plugin marketplace browse contoso-plugin-marketplace',
     'copilot plugin uninstall hve-core@hve-core',
     'Verify there are now no HVE rows',
-    'copilot plugin install hve-core@music-catalog-marketplace',
+    'copilot plugin install hve-core@contoso-plugin-marketplace',
     'chat.plugins.marketplaces', '@agentPlugins', 'source.sha',
     'Install only HVE-Core', 'No Java runtime or Microsoft 365 account is required',
-    'copilot plugin disable hve-core@music-catalog-marketplace']) {
+    'copilot plugin disable hve-core@contoso-plugin-marketplace']) {
     assert.ok(l4.includes(text), text);
   }
   assert.doesNotMatch(l4, /```powershell|```cmd|Copy-Item|New-Item|\.\\/);
@@ -88,6 +88,9 @@ test('extractor keeps all ten commit tasks and rejects a missing scoped request'
     assert.equal(result.status, 0, result.stderr);
     assert.match(readFileSync(join(work, 'dt-later-choice.txt'), 'utf8'), /Ask me to choose and confirm/);
     assert.match(readFileSync(join(work, 'dt-later-record.txt'), 'utf8'), /Do not invoke BRD\/PRD Builder/);
+    const assignment = readFileSync(join(work, 'agent-instructions.txt'), 'utf8');
+    assert.match(assignment, /using docs\/project-planning\/dt-later-slice\.md/);
+    assert.doesNotMatch(assignment, /remove-playlist-track/);
     assert.equal(readdirSync(work).filter(name => name.startsWith('commit-')).length, 10);
     for (const name of readdirSync(work).filter(name => name.startsWith('commit-'))) {
       assert.match(readFileSync(join(work, name), 'utf8'), /^\/hve-core:git-commit\.prompt\n/);
@@ -115,6 +118,25 @@ test('DT later-slice decision feeds cloud delegation without expanding Level 3 o
   assert.match(guide, /Populate the title, problem, outcome, acceptance criteria, area and exclusions from your reviewed DT later-slice brief/);
   assert.match(read('./run-lab.sh'), /skip_step l2-dt-later-choice/);
   assert.match(read('./run-lab.sh'), /skip_step l2-dt-later-record/);
+  const delegation = guide.slice(guide.indexOf('## Delegate after the verification handoff'),
+    guide.indexOf('## Follow one task on the shared dashboard'));
+  assert.match(delegation, /only if you selected the Remove a track fallback/);
+  assert.match(delegation, /Verify the selected brief exists[\s\S]*?default branch before assignment/);
+  const handoff = guide.slice(guide.indexOf('### Step 7: Read the summary issue'),
+    guide.indexOf('## Delegate after the verification handoff'));
+  assert.match(handoff, /all acceptance criteria and exclusions from the selected later-slice brief/);
+  assert.doesNotMatch(handoff, /all five acceptance criteria/);
+});
+
+test('scope-drift guidance separates read-only findings from later bounded implementation', () => {
+  const guide = read('../../../docs/afternoon-2/workshop.md');
+  const tip = guide.slice(guide.indexOf('<div class="tip" data-title="Reference fallback">'),
+    guide.indexOf('## Tech Lead extension'));
+  assert.match(tip, /database persistence[\s\S]*?in-memory storage/);
+  assert.match(tip, /Pause acceptance and publication/);
+  assert.match(tip, /During \*\*Review\*\*[\s\S]*?without changing application files/);
+  assert.match(tip, /subsequent \*\*Implement\*\* pass[\s\S]*?approved plan[\s\S]*?rerun its validation/);
+  assert.match(tip, /Do not discard the implementation or rewrite the plan/);
 });
 
 function transition({ initial = upstream, final = curated, failure = '', remaining = [], listFailure = false } = {}) {
@@ -128,11 +150,11 @@ copilot() {
       [ "$LIST_FAILURE" = 0 ] || return 17
       printf '%s\\n' "$current" ;;
     "plugin marketplace add owner/repo") [ "$FAILURE" != add ] ;;
-    "plugin marketplace browse music-catalog-marketplace") [ "$FAILURE" != browse ] ;;
+    "plugin marketplace browse contoso-plugin-marketplace") [ "$FAILURE" != browse ] ;;
     "plugin uninstall hve-core@hve-core")
       [ "$FAILURE" != uninstall ] || return 18
       current=$REMAINING ;;
-    "plugin install hve-core@music-catalog-marketplace")
+    "plugin install hve-core@contoso-plugin-marketplace")
       [ "$FAILURE" != install ] || return 19
       current=$FINAL ;;
     *) printf 'Unexpected mock command\\n' >&2; return 99 ;;
@@ -160,7 +182,7 @@ for (const [name, initial, remove, install] of [
     assert.equal(result.stderr.includes('CALL plugin uninstall'), remove);
     assert.equal(result.stderr.includes('CALL plugin install'), install);
     if (remove) assert.ok(result.stderr.indexOf('CALL plugin uninstall hve-core@hve-core') <
-      result.stderr.indexOf('CALL plugin install hve-core@music-catalog-marketplace'));
+      result.stderr.indexOf('CALL plugin install hve-core@contoso-plugin-marketplace'));
   });
 }
 
@@ -209,7 +231,7 @@ copilot() {
   printf 'CALL %s\\n' "$*" >&2
   case "$*" in
     "plugin list --json") printf '%s\\n' "$current" ;;
-    "plugin disable hve-core@music-catalog-marketplace")
+    "plugin disable hve-core@contoso-plugin-marketplace")
       [ "$MODE" != command-fails ] || return 19
       [ "$MODE" = still-enabled ] || current=$DISABLED ;;
     *) return 99 ;;

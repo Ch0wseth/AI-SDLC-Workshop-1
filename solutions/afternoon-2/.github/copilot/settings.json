@@ -1,6 +1,6 @@
 {
   "extraKnownMarketplaces": {
-    "music-catalog-marketplace": {
+    "contoso-plugin-marketplace": {
       "source": {
         "source": "github",
         "repo": "YOUR-ORG/YOUR-REPO"
@@ -8,6 +8,6 @@
     }
   },
   "enabledPlugins": {
-    "hve-core@music-catalog-marketplace": true
+    "hve-core@contoso-plugin-marketplace": true
   }
 }

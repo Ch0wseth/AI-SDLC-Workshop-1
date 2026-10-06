@@ -84,7 +84,7 @@ test('required exercise commands and approval gates remain visible and facilitat
     '### Step 2: Assign the issue', '### Step 6: Decide',
     '### Facilitator demo: Secret scanning and push protection',
     'This is facilitator-only; attendees do not configure push protection in their repositories.', 'Never',
-    'approve it before moving on', 'A skipped or blocked run is not a pass',
+    'explicitly approve the plan in the conversation', 'A skipped or blocked run is not a pass',
   ]) assert.ok(visible.includes(text), text);
   assert.match(workshop, /use the generated fake key below/i);
   assert.match(visible, /never commit the tracking folder/i);

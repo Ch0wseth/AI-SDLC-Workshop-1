@@ -104,13 +104,13 @@ or appropriate for every task.
 Disable the personal CLI plugin only after the repository deployment is verified:
 
 ```bash
-copilot plugin disable hve-core@music-catalog-marketplace
+copilot plugin disable hve-core@contoso-plugin-marketplace
 copilot plugin list --json
 ```
 
 Explain that disable preserves the install. Verify the repository agents in a new
 CLI session if necessary. The personal plugin can later be restored with
-`copilot plugin enable hve-core@music-catalog-marketplace`. Managed settings may
+`copilot plugin enable hve-core@contoso-plugin-marketplace`. Managed settings may
 prevent local disabling; stop and resolve the handoff rather than claim success.
 This command does not disable a separate
 VS Code extension or plugin.

@@ -1,5 +1,5 @@
 {
-  "name": "music-catalog-marketplace",
+  "name": "contoso-plugin-marketplace",
   "owner": { "name": "Music Catalog Team" },
   "metadata": {
     "description": "Company-curated remote plugin examples for the Music Catalog workshop",
