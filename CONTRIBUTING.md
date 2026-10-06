@@ -70,7 +70,7 @@ These values are matched by scripts or attendee instructions:
 - The paths `docs/afternoon-1`, `docs/afternoon-2`, `solutions/afternoon-2` and `tests/workshop/afternoon-2` (display names changed, paths did not).
 - The `afternoon-1` branch name.
 - The commit message `Baseline Afternoon 2 starter`, which the workshop tester looks for.
-- `.github/workflows/workshop-tester.md`. Any edit requires recompiling `workshop-tester.lock.yml` with `gh aw compile`; commit both files together. Run the compile from a folder outside OneDrive-synced paths if it hangs.
+- `.github/workflows/workshop-tester.md`. Any edit requires recompiling `workshop-tester.lock.yml` with `gh aw compile`; commit both files together. The same applies to `.github/workflows/workshop-pedagogy-review.md` and its `workshop-pedagogy-review.lock.yml`. Run the compile from a folder outside OneDrive-synced paths if it hangs.
 
 ## Validation
 

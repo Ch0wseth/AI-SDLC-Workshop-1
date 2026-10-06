@@ -1,12 +1,12 @@
 # Workshop tester: AI SDLC with GitHub and GitHub Copilot
 
-An agentic workflow that replays the full AI SDLC with GitHub and GitHub Copilot lab ([docs/afternoon-2/workshop.md](../../../docs/afternoon-2/workshop.md)) whenever a change reaches `main`. It runs in a throwaway sandbox repository and Codespace, both deleted at the end of the run. When any step fails or the lab and its results diverge, it files a `[Workshop tester]` issue in this repository.
+An agentic workflow that replays the full AI SDLC with GitHub and GitHub Copilot lab ([docs/afternoon-2/workshop.md](../../../docs/afternoon-2/workshop.md)) when a maintainer applies the **`ready-to-test`** label to a pull request. It runs in a throwaway sandbox repository and Codespace, both deleted at the end of the run. When any step fails or the lab and its results diverge, it files a `[Workshop tester]` issue in this repository.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-  A[push to main] --> B[lab_run job<br/>deterministic, has secrets]
+  A[ready-to-test label on a PR] --> B[lab_run job<br/>deterministic, has secrets]
   B -->|setup| C[sandbox repo + Codespace]
   C -->|run-lab.sh prerequisites + L1..L6| C
   B -->|collect, cleanup| D[(artifact<br/>workshop-tester-results)]
@@ -57,7 +57,7 @@ Run the APM PR gate regression checks with `node --test tests/workshop/afternoon
 
 Run the local artifact-binding and HTTP request fixtures with `bash tests/workshop/afternoon-2/rpi-flow.test.sh`. They use temporary files and a mock `curl`; no Copilot invocation or network request runs.
 
-After this Actions workflow completes on `main`, the separate [Workshop Pedagogy Reviewer](../../../.github/agents/workshop-pedagogy-reviewer.agent.md) reviews the tested revision's teaching content with Auto intelligence routing and repository-scoped GitHub issue/PR reads. A separate publisher creates or refreshes its own `pedagogy-review` report even for a clean tester run; it does not close or assign backlog tasks. The reviewer does not replay commands or change workshop files. It needs a credential that can make Copilot requests and read this repository, not the tester's inference-only token. See the [maintainer setup and boundaries](../../../docs/maintainer-handbook.md#pedagogy-review-after-the-tester) and run its local checks with `node --test tests/workshop/pedagogy/review.test.mjs`.
+Teaching content is reviewed separately and earlier: the [Workshop Pedagogy Reviewer](../../../.github/agents/workshop-pedagogy-reviewer.agent.md) runs on every new pull request that changes a `workshop.md`, posts its report in the pull request and files improvement issues. It does not replay commands. See [Pedagogy review on pull requests](../../../docs/maintainer-handbook.md#pedagogy-review-on-pull-requests).
 
 ## Setup
 
@@ -91,7 +91,7 @@ The tester account also needs:
 - Permission to create Codespaces billed to the sandbox owner.
 - The marketplace and APM sources used in the lab (`microsoft/hve-core`) reachable.
 
-Then run it once by hand: `gh workflow run workshop-tester.lock.yml`, or `gh aw run workshop-tester`.
+Create the **`ready-to-test`** label in Issues > Labels. Apply it to a same-repository pull request to test that pull request; remove and re-apply it to test new commits. Other labels do not start a run, and fork pull requests are blocked. To test `main` by hand, run `gh workflow run workshop-tester.lock.yml`, or `gh aw run workshop-tester`.
 
 > [!IMPORTANT]
 > gh-aw compiled this workflow in safe update mode and flagged the tester secrets as new restricted secrets. They are used only in the `lab_run` custom job, which runs outside the agent firewall. The agent and detection jobs never receive them and only read the uploaded artifact.

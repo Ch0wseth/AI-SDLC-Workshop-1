@@ -1,18 +1,12 @@
 ---
 description: "Workshop tester: replays the entire Afternoon 2 lab in a throwaway sandbox repository and Codespace, then reports failures as an issue."
 
+# Runs only when a maintainer applies the `ready-to-test` label to a same-repository pull request
+# (gh-aw blocks fork pull requests by default). Remove and re-apply the label to test new commits.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docs/afternoon-2/**"
-      - "solutions/afternoon-2/**"
-      - "src/**"
-      - "tests/**"
-      - "MusicCatalog.slnx"
-      - ".devcontainer.json"
-      - ".devcontainer/**"
-      - ".github/**"
+  pull_request:
+    types: [labeled]
+    names: [ready-to-test]
   workflow_dispatch:
 
 # Opt-in: forks, attendee copies and sandbox repositories do not set this variable, so they never run the tester.
@@ -90,7 +84,8 @@ jobs:
   # orphan sweep of the next run.
   sandbox_cleanup:
     needs: [lab_run]
-    if: always()
+    # Skipped lab_run means the run was not activated (another label, or the opt-in is off): nothing to clean.
+    if: ${{ always() && needs.lab_run.result != 'skipped' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions: {}
@@ -115,7 +110,7 @@ jobs:
 
   report:
     needs: [lab_run, agent, safe_outputs, sandbox_cleanup]
-    if: ${{ always() && vars.WORKSHOP_TESTER_ENABLED == 'true' }}
+    if: ${{ always() && vars.WORKSHOP_TESTER_ENABLED == 'true' && needs.lab_run.result != 'skipped' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -183,7 +178,7 @@ safe-outputs:
 
 # Workshop tester: Afternoon 2 validation report
 
-You are running unattended in GitHub Actions for `${{ github.repository }}` after a change reached `main`. The tested commit is in `meta.json`.
+You are running unattended in GitHub Actions for `${{ github.repository }}` because a maintainer labelled a pull request `ready-to-test` or started the run by hand. The tested commit is in `meta.json`.
 Do not ask questions. Do not modify files. Your only possible outputs are one issue or a `noop`.
 Follow `docs/afternoon-2/workshop.md` literally: use only its guided steps, success criteria and links it explicitly provides, together with the supplied tester results and logs. Do not browse or search the internet, consult unrelated documentation, invent missing instructions, or infer how to accomplish an undocumented step. If the guide or captured evidence does not establish an outcome, report the evidence gap in the notes rather than guessing a defect category; never turn an assumption into a pass.
 
