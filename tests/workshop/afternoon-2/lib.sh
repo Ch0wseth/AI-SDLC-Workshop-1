@@ -70,9 +70,10 @@ record() {
 #       translated = PowerShell lab command translated to bash
 #       emulated   = UI or interactive lab step replayed non-interactively
 # Add check() calls after step, then call finish_step.
-STEP_ID="" STEP_LEVEL="" STEP_TITLE="" STEP_MODE="" STEP_CMD="" STEP_CODE=0 STEP_DUR=0
+STEP_ID="" STEP_LEVEL="" STEP_TITLE="" STEP_MODE="" STEP_CMD="" STEP_CODE=0 STEP_DUR=0 STEP_FAILED=0
 step() {
   STEP_ID=$1 STEP_LEVEL=$2 STEP_TITLE=$3 STEP_MODE=$4
+  STEP_FAILED=0
   local to=$5 start
   STEP_CMD=$6
   start=$(date +%s)
@@ -87,6 +88,7 @@ finish_step() {
   local expected=${1-0} status=pass
   if [ "$expected" != any ] && [ "$STEP_CODE" -ne "$expected" ]; then status=fail; fi
   if printf '%s' "$CURRENT_CHECKS" | grep -q '"pass":false'; then status=fail; fi
+  if [ "$status" = fail ]; then STEP_FAILED=1; else STEP_FAILED=0; fi
   record "$STEP_ID" "$STEP_LEVEL" "$STEP_TITLE" "$STEP_MODE" "$STEP_CMD" "$STEP_CODE" "$STEP_DUR" "$status"
 }
 

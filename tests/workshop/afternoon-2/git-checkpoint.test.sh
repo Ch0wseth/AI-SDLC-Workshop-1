@@ -144,3 +144,12 @@ if git diff --cached --quiet; then
   exit 1
 fi
 echo "pass: rejected commit remains failed with staged changes intact"
+
+step failed_check "Validation fixture" "Failed check" translated 30 'true'
+check "intentional failing check" false
+finish_step
+equal "$STEP_FAILED" 1
+step next_step "Validation fixture" "Next step resets failure state" translated 30 'true'
+finish_step
+equal "$STEP_FAILED" 0
+echo "pass: validation failures gate dependent steps and reset for the next step"

@@ -24,11 +24,11 @@ A two-afternoon, fully hands-on workshop (about 4 hours each). It starts with in
 | **Design Thinking coach** | An HVE-Core agent that guides a team from a vague request to a scoped, user-centred problem statement before any code is written | Afternoon 2, Level 2 |
 | **RPI (Research → Plan → Implement → Review)** | A structured agentic workflow that separates investigation, planning, implementation and review into explicit phases with durable artifacts | Afternoon 2, Level 3 |
 | **Context engineering** | Deciding what an agent sees: layered instructions, skills loaded on demand, and phase artifacts on disk instead of a long chat history | Afternoon 1, Deeper primitives; Afternoon 2, Level 3 |
-| **Verification as contract** | Tests, CI and branch rulesets define "done" for humans and agents alike, so delegated work is checked the same way as your own | Afternoon 2, Levels 5 and 6 |
-| **Agentic threat model** | Prompt injection, safe outputs, the agent firewall and token scope: what limits an agent that runs without you | Afternoon 2, Levels 5 and 6 |
+| **Verification as contract** | Tests, CI and branch rulesets define "done" for humans and agents alike, so delegated work is checked the same way as your own | Afternoon 2, Levels 5a and 6 |
+| **Agentic threat model** | Prompt injection, safe outputs, the agent firewall and token scope: what limits an agent that runs without you | Afternoon 2, Levels 5b and 6 |
 | **APM (Agent Package Manager)** | A package manager for agent primitives: declare dependencies in `apm.yml`, pin them in a lockfile, and enforce policy and audits in CI | Afternoon 2, Level 4 |
-| **GitHub Agentic Workflows (gh-aw)** | Markdown-defined workflows compiled to GitHub Actions, where a coding agent runs on a schedule or on events, with safe outputs such as issues and comments | Afternoon 2, Level 5 |
-| **Copilot cloud agent** (formerly coding agent) | Assign an issue to Copilot; it works in a GitHub Actions environment and opens a pull request for human review | Afternoon 1, Level 6; Afternoon 2, Levels 5 and 6 |
+| **GitHub Agentic Workflows (gh-aw)** | Markdown-defined workflows compiled to GitHub Actions, where a coding agent runs on a schedule or on events, with safe outputs such as issues and comments | Afternoon 2, Levels 5a and 5b |
+| **Copilot cloud agent** (formerly coding agent) | Assign an issue to Copilot; it works in a GitHub Actions environment and opens a pull request for human review | Afternoon 1, Level 6; Afternoon 2, Levels 5b and 6 |
 | **Model selection and usage** | Explicit model choice versus Auto model selection, and how usage is measured differently in each Copilot experience | Afternoon 2, Recap and Extra Credits |
 
 Each lab opens with a short refresher on these concepts. HydraFusion multi-model orchestration is a **Research Preview** and appears only as optional Extra Credit.
@@ -64,7 +64,7 @@ Attendees build one capability in a small music catalog app (**browse tracks and
 | 1 | HVE-Core CLI plugin | Install HVE-Core into Copilot CLI and explore its agents | Afternoon 1 primitives were your own; HVE-Core brings a shared method |
 | 2 | Design Thinking coach | Turn the playlist request into a scoped problem statement | Agents build exactly what you ask; first decide what is worth asking |
 | 3 | RPI loop | Research, plan, implement and review the playlist feature, with context engineering and one real decision at the review gate | A single prompt mixes facts, decisions and edits; RPI separates them into reviewable artifacts |
-| 4 | APM, policy and marketplace | Install pinned repository agents, audit their source/content, and compare marketplace discovery | Personal setup does not travel with the code; repository practices need reproducibility and a trust rule |
+| 4 | APM and repository agents | Install pinned repository agents, inspect the lockfile and deployed profiles, and verify policy/audit governance | Personal setup does not travel with the code; repository practices need reproducibility and a trust rule |
 | 5 | Agentic workflows and delegation | Reconcile opted-in issues with committed plans and delivery evidence, then delegate a scoped RPI task | The backlog should reflect reality; people select work while automation records evidence |
 | 6 | Review the delegated work | Request Copilot review on the RPI PR, inspect required checks, and verify issue/Project closure after human acceptance | The coding agent's self-review is not independent review or a merge decision |
 | Recap | | Operating model, then an architect capstone: org rollout, measuring impact, brownfield adoption, method and model choice | |
