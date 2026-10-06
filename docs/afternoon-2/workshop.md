@@ -1161,9 +1161,6 @@ One decision remains yours: **how the user interface handles a duplicate add**. 
 
 If the agent asks how to proceed, choose **Work through each phase with me**. HVE carries the procedure; you own the decisions and approval.
 
-<details>
-<summary>How RPI Agent coordinates developer work</summary>
-
 This level follows the HVE-Core [Engineer guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/engineer) and [Tech Lead guide](https://microsoft.github.io/hve-core/docs/hve-guide/roles/tech-lead).
 
 | Engineer guide stage | HVE-Core command | Where in this level |
@@ -1173,6 +1170,9 @@ This level follows the HVE-Core [Engineer guide](https://microsoft.github.io/hve
 | Implement | `/hve-core:rpi-implement` | Implement phase |
 | Review | `/hve-core:rpi-review` | Review phase |
 | Commit and pull request | `/hve-core:git-commit.prompt`, `/hve-core:pull-request` | Tech Lead extension |
+
+<details>
+<summary>How RPI Agent coordinates developer work</summary>
 
 Apply these practices from the guides:
 
