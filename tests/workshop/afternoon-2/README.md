@@ -38,6 +38,8 @@ The published **Toggle solution / Toggle example** blocks are the tester's curat
 
 The examples supply a learner's facts and choices, not a document outline or substitute for HVE's native procedures. After the DT recap and note checks, the tester switches to Documentation to save the delivery brief before starting BRD Builder. It does not ask DT Coach to publish its private working artifacts or resume the BRD conversation to manufacture a DT record.
 
+The Level 2 later-slice choice and its curated `dt-later-slice.md` record are extracted but skipped by the replay: they require a real learner decision. The sandbox retains the documented Remove a track fallback rather than claiming that fixture came from authentic DT coaching. Interactive learners commit their reviewed later-slice decision and use it for Level 5 issue creation and delegation without BRD/PRD Builder.
+
 This is **example replay**, not authentic user research or proof of method completion. The tester checks that coaching state and the BRD draft exist, but does not infer evidence quality, human review, or sign-off from those files. BRD steps 12–13 remain skipped because they depend on actual human inspection and approval; PRD/backlog execution remains skipped until that gate is satisfied. Missing answers and readiness gaps must be reported, not improvised or waived by the tester.
 
 Interactive learners select the HVE command with Tab and add their task before sending. The headless tester emulates that completed message, not the keyboard/autocomplete interaction. DT startup and each RPI phase replay the combined published block in one invocation; extraction supports a task on the command line or following lines, but command-only HVE blocks fail. The tester resolves returned same-task artifact paths and substitutes the published placeholders. Missing, unreadable, or ambiguous paths stop the sequence; it does not select by recency. Review must leave source files and commits unchanged. The independent API checks use `POST /api/playlist/tracks` with a JSON `trackId` body; they are not extra manual learner steps.
@@ -46,7 +48,28 @@ Level 3 creates `feature/playlist-slice` before implementation, then publishes t
 
 Level 3 captures `HEAD` before implementation and compares the approved source/test paths afterward, including untracked files. Implementation commits count as edits even when the working tree is clean. The checkpoint commits only a nonempty index; staging or commit errors still fail the step. Run the local regression fixtures with `bash tests/workshop/afternoon-2/git-checkpoint.test.sh`.
 
-Run the guide structure, progressive-disclosure, learning-flow, creator-skill, and report regression checks with `node --test tests/workshop/afternoon-2/prerequisites.test.mjs tests/workshop/afternoon-2/progressive-disclosure.test.mjs tests/workshop/afternoon-2/learning-flow.test.mjs tests/workshop/afternoon-2/report.test.mjs`.
+All Afternoon 2 learner commits use `/hve-core:git-commit.prompt`. The extractor
+retains ten scoped commit requests, but the headless runner does not send them
+with fabricated whole-path or staged-set approvals. Native commit gates are
+recorded as skipped; deterministic commits in the disposable sandbox are explicitly
+`translated` checkpoints, not evidence the prompt ran or humans approved the files.
+Level 3's already-committed/clean-tree case remains a no-op. Post-APM commit prompt
+discovery must still be verified in a live client. The template/import prerequisite
+provides an existing `HEAD`; no learner bootstrap raw commit is prescribed.
+
+Run all guide, catalog, source-transition, APM gate and report regression checks
+with `node --test tests/workshop/afternoon-2/*.test.mjs`.
+
+`marketplace.test.mjs` checks remote entry semantics and runs isolated Bash
+source-transition/failure mocks. These are control-flow tests, not successful client
+installs. The sandbox registers its own root catalog, browses it, inspects personal
+HVE provenance, removes only the known upstream identity, verifies absence, and
+installs the curated copy. Unknown/duplicate/managed or malformed inventory stops
+before mutation; failed registration, browse, removal, install, APM/agent checks,
+disable, policy, audit or restore stops dependent publication. Expected deny exits
+with exactly 1. Source replacement is authorized only in the disposable sandbox,
+not evidence of learner consent. Fresh CLI agent-picker, VS Code and app checks
+remain skipped and do not establish actual capabilities.
 
 The learning-flow checks cover the opt-in task mutation filters/caps, revision-bound
 closure contract, visible commands and gates, proctor-only demos, and committed
@@ -91,7 +114,7 @@ The tester account also needs:
 
 - A Copilot license with Copilot CLI, Copilot cloud agent and agentic workflows allowed by its organization policy.
 - Permission to create Codespaces billed to the sandbox owner.
-- The marketplace and APM sources used in the lab (`microsoft/hve-core`) reachable.
+- The sandbox's root marketplace and required HVE/APM source (`microsoft/hve-core`) reachable. Java and WorkIQ entries are browse-only, with no optional service setup.
 
 Then run it once by hand: `gh workflow run workshop-tester.lock.yml`, or `gh aw run workshop-tester`.
 
@@ -140,12 +163,12 @@ See the official GitHub billing documentation for current rates; this repository
 - Level 2's learner-led nine-method sampler and generated-note inspection are skipped, not simulated as successful coaching. The tester replays the separate implementation handoff but cannot verify learner contributions, a 10–15 minute interaction, peer feedback, or personal inspection. A missing exploration recap is an evidence gap, not permission to invent learner decisions.
 - Copilot CLI prompts are model output. The checks verify the lab's acceptance criteria (endpoints, status codes, tests, files), not identical code.
 - Whether `copilot -p` expands plugin commands such as `/hve-core:rpi-research`, and how `--continue` behaves with `-p`, depend on the Copilot CLI version. A failure there is reported as a tester limitation, not a lab defect.
-- The introduction's **Dev Environment Setup** offers a template path and a copy fallback. The sandbox is a single-commit snapshot of the tested commit, which mirrors the copy fallback. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
+- The introduction's **Dev Environment Setup** offers a template path and GitHub import fallback, both with an existing `HEAD`. The sandbox is a single-commit snapshot of the tested tree; it does not exercise importer UI or preserve imported history. The `infra-template` preflight warns while this repository is not marked as a template, because the template path then fails for participants.
 - Resources are always deleted, even on failure. Debug with the `workshop-tester-results` artifact (per-step logs, Copilot session exports, gh-aw run logs, the Copilot cloud agent PR JSON, the Copilot code review JSON).
 - Level 5 is reported as separate 5a and 5b stages. The tester runs the 5a CI and APM checks, then skips the Stage 5b setup PR and dependent delegation steps because its sandbox token cannot apply or verify the active no-bypass APM ruleset. The solution JSON is checked statically; that is not live enforcement.
 - Because the Stage 5b gate is unavailable, the tester does not copy or publish the backlog workflow or planning brief, create or opt in an issue, run daily reconciliation, or assign Copilot. It neither bypasses checks nor claims an open setup PR, automated merge, human approval, or delegation as completed. Human review and any replay-only merge remain distinct gates, not automated evidence.
 - Publishing a deferred review finding is skipped because it needs a genuine finding and a human decision to defer it; the tester does not invent replacement findings.
-- The Level 4 private marketplace and Level 5 accessibility examples are proctor-only demonstrations, recorded as skipped. The tester does not install the team plugin or run `a11y-review`.
+- The Level 4 curated CLI install is replayed; its VS Code/app UI and live agent-picker are skipped. The retained private screenshot is optional historical context. Level 5 accessibility remains a proctor-only demonstration; the tester does not run `a11y-review`.
 - The tester disables the personal HVE-Core CLI plugin only after repository agent files exist. Managed-policy rejection remains a failure/limitation; fresh interactive picker verification is not simulated.
 - The shared Project configuration and intermediate fields (`l5-project-progress`) are skipped. The repository token does not grant Project access.
 - Because Stage 5b is skipped, Level 6 PR detection (`l6-pr`), review request (`l6-code-review`), workflow approval (`l6-approve-checks`), and acceptance/merge (`l6-accept-and-reconcile`) are recorded as skipped. The replay does not imply a Copilot review or human decision occurred.

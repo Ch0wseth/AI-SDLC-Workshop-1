@@ -12,15 +12,38 @@ This document records the agreed redesign of the
 clarifications below. Local guide, solution, and tester changes do not publish
 workflows, configure repository settings, or execute GitHub operations.
 
+## Workshop-wide command convention
+
+**Decision date:** 2026-10-06.
+
+**Status:** Confirmed by the maintainer; Level 4 examples and Linux access
+prerequisites converted. Conversion of remaining existing lab examples is pending.
+
+Both participant labs show Linux commands only, using Bash shell syntax and
+Linux-style paths. Do not include PowerShell or Windows Command Prompt variants
+in the lab guides. Use one copyable command path rather than parallel
+platform-specific examples.
+
+The participant prerequisites must identify the Linux/Bash environment used for
+the lab, including how Windows attendees access that environment. This decision
+does not itself remove a delivery option or change host-specific setup
+instructions outside the participant labs.
+
+Workshop Creator owns this authoring constraint and passes it to subsequent
+handoffs. The next RPI plan must account for existing command examples,
+prerequisites, and replay checks; recording this decision does not mean those
+surfaces have been converted.
+
 ## Audience, timebox, and teaching approach
 
 The audience includes TPMs, developers, architects, GitHub Platform Owners, and
 Operators. Participants know custom agents; plugin familiarity is mixed, and APM
-is new. Give plugins a quick orientation rather than a separate participant
-installation exercise.
+is new. The revised Level 4 includes a simple curated marketplace registration
+and HVE installation exercise, without authoring a local plugin.
 
 The ten-minute constraint applied to the DT coaching session, not each lab level.
-Level 4 can take approximately thirty minutes. No fixed duration has been agreed
+Level 4 now has a forty-five-minute estimate, preserving APM and adding marketplace
+practice; live delivery timing remains unverified. No fixed duration has been agreed
 for Levels 5 and 6.
 
 Use one continuous story:
@@ -42,18 +65,25 @@ They add repository agents with APM, inspect the installed content, audit it
 against the lockfile and policy, and commit and push the setup so the agents are
 available on the default branch for Levels 5-6.
 
-### Approximately thirty-minute flow
+### Revised forty-five-minute flow (estimate)
 
 | Time | Segment | Action and evidence |
 | --- | --- | --- |
 | 0-3 minutes | Establish the challenge | Explain why a personal Copilot setup does not automatically travel to a teammate or a fresh cloud-agent environment. |
-| 3-6 minutes | Orient to sharing options | Compare organization-shared assets, plugin marketplaces, and APM-managed dependencies. |
-| 6-9 minutes | Proctor marketplace demo | Use the supplied private CoffeeSoft marketplace screenshot; attendees do not need access or install its plugin. |
-| 9-16 minutes | Install with APM | Inspect `apm.yml`, run `apm install --target copilot`, then inspect `apm.lock.yaml` and deployed agent content. |
-| 16-18 minutes | Switch to repository agents | Disable the personal HVE-Core CLI plugin and verify repository agents remain available. |
-| 18-23 minutes | Apply policy and audit | Inspect the current `microsoft/**` allowlist and run `apm audit --ci --policy apm-policy.yml`. |
-| 23-27 minutes | Publish and verify | Add the audit workflow, commit and push the setup, and inspect the audit run. |
-| 27-30 minutes | Confirm the handoff | Verify the agents and required supporting files on the default branch for cloud-agent use. |
+| 3-6 minutes | Inspect the curated catalog | Four remote entries ship in the template copy; no local plugin authoring. |
+| 6-18 minutes | Register and install | Register attendee owner/repo in CLI and VS Code; inspect existing personal HVE, consent to qualified replacement, verify curated 3.2.2 and agents. |
+| 18-21 minutes | Versioning and app demo | Compare metadata versus source SHA; tutor demonstrates app registration. |
+| 21-29 minutes | Install with APM | Inspect unchanged APM pin, lockfile and deployed agent content. |
+| 29-32 minutes | Switch to repository agents | Disable exact curated personal CLI plugin and handle separate VS Code copy. |
+| 32-37 minutes | Apply policy and audit | Preserve allowlist and deny-and-restore practice. |
+| 37-42 minutes | Publish and verify | Add audit workflow, review staged content, commit and push. |
+| 42-45 minutes | Confirm the handoff | Verify default-branch agents and passing audit for cloud use. |
+
+The catalog contains HVE-Core, Java Development, Java Modernization Studio and
+WorkIQ. Only HVE is installed in the required path; Java payload and WorkIQ
+authentication limits remain visible. GitHub/Jira were withdrawn. The same-name
+HVE source transition requires qualified uninstall and absence verification,
+not assumed overwrite. Unknown/managed/duplicate sources stop with tutor help.
 
 Installation and audit can take longer on restricted networks. Preflight tooling,
 authentication, and permissions; prepare recorded audit output for delays. If
@@ -73,15 +103,16 @@ or appropriate for every task.
 
 Disable the personal CLI plugin only after the repository deployment is verified:
 
-```powershell
-copilot plugin disable hve-core
-copilot plugin list
+```bash
+copilot plugin disable hve-core@music-catalog-marketplace
+copilot plugin list --json
 ```
 
 Explain that disable preserves the install. Verify the repository agents in a new
 CLI session if necessary. The personal plugin can later be restored with
-`copilot plugin enable hve-core`. Managed settings may prevent local disabling;
-explain duplicate entries in that case. This command does not disable a separate
+`copilot plugin enable hve-core@music-catalog-marketplace`. Managed settings may
+prevent local disabling; stop and resolve the handoff rather than claim success.
+This command does not disable a separate
 VS Code extension or plugin.
 
 ### Sharing and governance distinctions
@@ -95,7 +126,7 @@ VS Code extension or plugin.
 | APM policy plus required audit | Constrain dependency sources and verify repository compliance. | A shared workflow alone is not a mandatory merge gate; enforce it with applicable rulesets or required checks. |
 
 Use the existing `microsoft/**` APM source allowlist for the hands-on exercise.
-Explain a company-curated catalog as the future model: approved GitHub-hosted
+Use the template-shipped company-curated catalog as a concrete model: approved GitHub-hosted
 package repositories can form an APM source allowlist. A marketplace display name
 is not itself an APM source rule.
 
@@ -113,15 +144,17 @@ Enterprise-only or automatically distributes standalone prompts/skills.
 See [organization custom agents](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-organization/prepare-for-custom-agents)
 and [enterprise governance](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-agents/create-github-private-repo).
 
-### Proctor plugin marketplace demo
+### Tutor app demo and optional historical marketplace comparison
 
 Use the supplied screenshot of
 [CoffeesoftDotDev/Plugin-Marketplace](https://github.com/CoffeesoftDotDev/Plugin-Marketplace),
 which is private. Do not require participant membership or live access.
 
-Show the read-access requirement, the `coffeesoft` catalog, and its `mslearn`
-entry. Explain the README commands to register and browse the catalog; installation
-is optional in a prepared proctor profile, not an attendee exercise. Explain the
+If useful, show the read-access requirement, `coffeesoft` catalog and `mslearn`
+entry as a historical comparison, not the required exercise. The required catalog
+is the attendee's template copy; its registration and HVE installation happen
+before APM. Demonstrate registration in the GitHub Copilot app in an authorized
+tutor profile; attendees register in CLI and VS Code. Explain the
 publishing path: package metadata, a catalog entry, a pull request, manifest
 validation, and code-owner review. Remind participants not to commit MCP secrets.
 

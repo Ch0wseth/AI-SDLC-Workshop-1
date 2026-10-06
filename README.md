@@ -1,6 +1,6 @@
 # Agentic SDLC with GitHub Copilot — Workshop
 
-A two-afternoon, fully hands-on workshop (about 4 hours each). It starts with individual GitHub Copilot primitives and ends with a governed, agentic software development lifecycle: repository-owned packages, policy, structured Research → Plan → Implement → Review execution, automated backlog management, and controlled delegation to the Copilot cloud agent.
+A two-afternoon, hands-on workshop (240 minutes for Afternoon 1; an estimated 255 for Afternoon 2). It starts with individual GitHub Copilot primitives and ends with a governed, agentic software development lifecycle: repository-owned packages, policy, structured Research → Plan → Implement → Review execution, automated backlog management, and controlled delegation to the Copilot cloud agent.
 
 > **Before D-Day:** every attendee and administrator must complete the checklist for the delivery option your organization chose: [Codespaces](docs/before-d-day-codespace.md), [local dev container](docs/before-d-day-devcontainer.md) or [local tools](docs/before-d-day-local.md). The shared reference is [docs/prerequisites.md](docs/prerequisites.md); organization owners can walk through [docs/kick-off-call-checklist.md](docs/kick-off-call-checklist.md) live during the kick-off call. Most setup problems on the day come from licences, organization policies, and corporate networks, and none of them can be fixed in the room.
 
@@ -64,7 +64,7 @@ Attendees build one capability in a small music catalog app (**browse tracks and
 | 1 | HVE-Core CLI plugin | Install HVE-Core into Copilot CLI and explore its agents | Afternoon 1 primitives were your own; HVE-Core brings a shared method |
 | 2 | Design Thinking coach | Turn the playlist request into a scoped problem statement | Agents build exactly what you ask; first decide what is worth asking |
 | 3 | RPI loop | Research, plan, implement and review the playlist feature, with context engineering and one real decision at the review gate | A single prompt mixes facts, decisions and edits; RPI separates them into reviewable artifacts |
-| 4 | APM and repository agents | Install pinned repository agents, inspect the lockfile and deployed profiles, and verify policy/audit governance | Personal setup does not travel with the code; repository practices need reproducibility and a trust rule |
+| 4 | APM and repository agents | Register your curated marketplace in CLI/VS Code, install HVE, inspect source/version metadata, then install and audit pinned repository agents | Discovery does not enforce trust; personal setup does not travel with the code |
 | 5 | Agentic workflows and delegation | Reconcile opted-in issues with committed plans and delivery evidence, then delegate a scoped RPI task | The backlog should reflect reality; people select work while automation records evidence |
 | 6 | Review the delegated work | Request Copilot review on the RPI PR, inspect required checks, and verify issue/Project closure after human acceptance | The coding agent's self-review is not independent review or a merge decision |
 | Recap | | Operating model, then an architect capstone: org rollout, measuring impact, brownfield adoption, method and model choice | |
@@ -91,7 +91,7 @@ flowchart LR
   H -. findings feed the backlog .-> F
 ```
 
-Each step reuses the previous output: Design Thinking decisions scope RPI, committed planning and PR evidence keep the backlog current, and a human selects the next cloud-agent task. Marketplace discovery and browser-supported accessibility review are separate proctor demonstrations.
+Each step reuses the previous output: Design Thinking decisions scope RPI, committed planning and PR evidence keep the backlog current, and a human selects the next cloud-agent task. Level 4 includes participant marketplace practice; GitHub Copilot app setup and browser-supported accessibility review remain tutor demonstrations. Its additional practice extends the estimated Afternoon 2 delivery to 255 minutes without cutting APM.
 
 ## Delivery options
 

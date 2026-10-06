@@ -32,7 +32,7 @@ test('the active default-branch rule requires the exact audit job with no admini
   assert.deepEqual(ruleset.bypass_actors, []);
   const required = ruleset.rules.find((rule) => rule.type === 'required_status_checks');
   assert.deepEqual(required.parameters.required_status_checks, [{ context: jobName }]);
-  const setupCommit = level5.indexOf('git commit -m "Build the API in Copilot setup steps"');
+  const setupCommit = level5.indexOf('Commit the reviewed Copilot setup at .github/workflows/copilot-setup-steps.yml');
   const auditRule = level5.indexOf('rulesets\\main-apm-audit-required.json');
   const stage5b = level5.indexOf('## Stage 5b: Backlog and delegation');
   const branch = level5.indexOf('git switch -c feature/level-5b-backlog');
@@ -56,10 +56,11 @@ test('the active default-branch rule requires the exact audit job with no admini
 test('Level 4 copies the workflow and stages shared skills before publishing its context', () => {
   const copyStep = level4.slice(level4.indexOf('### Step 1: Add the PR audit workflow'),
     level4.indexOf('### Step 2: Commit and push'));
-  assert.match(copyStep, /```powershell\nNew-Item -ItemType Directory -Path \.\\\.github\\workflows -Force \| Out-Null\nCopy-Item \.\\solutions\\afternoon-2\\\.github\\workflows\\apm-audit\.yml \.\\\.github\\workflows\\apm-audit\.yml\n```/);
+  assert.match(copyStep, /```bash\nmkdir -p \.github\/workflows\ncp solutions\/afternoon-2\/\.github\/workflows\/apm-audit\.yml \.github\/workflows\/apm-audit\.yml\n```/);
   assert.match(copyStep, /without reinstalling your packages/);
   assert.match(copyStep, /A workflow alone does not block merging/);
-  assert.match(level4, /git add apm\.yml apm\.lock\.yaml apm-policy\.yml \.github \.agents\n/);
+  assert.match(level4, /Commit the governed repository setup: apm\.yml, apm\.lock\.yaml, apm-policy\.yml/);
+  assert.match(level4, /reviewed deployed files under \.github\/ and \.agents\//);
   assert.doesNotMatch(level4, /Step 5: Discuss CI|does not require authoring a new CI workflow/);
 });
 

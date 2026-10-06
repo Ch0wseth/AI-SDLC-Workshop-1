@@ -56,8 +56,8 @@ test('Level 3 publishes through a reviewed PR and proceeds directly to Level 4',
 test('Level 4 preserves the pinned installation without maintainer verification notes', () => {
   const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
   assert.doesNotMatch(level4, /Documented capability plus live verification|Live verification for this workshop|release-tag pins failed/);
-  assert.doesNotMatch(level4, /```bash/);
-  assert.match(level4, /```powershell\nCopy-Item \.\\solutions\\afternoon-2\\apm\.yml \.\\apm\.yml\n```/);
+  assert.doesNotMatch(level4, /```(?:powershell|cmd)|Copy-Item|New-Item|\.\\/);
+  assert.match(level4, /```bash\ncp solutions\/afternoon-2\/apm\.yml \.\/apm\.yml\n```/);
   assert.match(level4, /microsoft\/hve-core#1dbd6a7ea90b74accaf8c809262e38952bd4c359/);
   assert.match(level4, /apm install --target copilot/);
   assert.match(runner, /cp solutions\/afternoon-2\/apm\.yml \.\/apm\.yml/);
@@ -90,10 +90,10 @@ test('Level 4 demonstrates a temporary deny without widening the original allowl
   const publication = level4.slice(level4.indexOf('## Publish the method and its audit'));
   const policy = workshop.slice(workshop.indexOf('## Apply repository policy'),
     workshop.indexOf('## Publish the method and its audit'));
-  assert.match(installation, /Copy-Item \.\\solutions\\afternoon-2\\apm\.yml \.\\apm\.yml[\s\S]*?\*\*Decision check:\*\* Which exact HVE-Core commit SHA and deployment target are selected in `apm\.yml`\?/);
-  assert.match(policy, /```powershell\nCopy-Item \.\\solutions\\afternoon-2\\apm-policy\.yml \.\\apm-policy\.yml\n```/);
-  assert.match(policy, /Copy-Item \.\\solutions\\afternoon-2\\apm-policy\.yml \.\\apm-policy\.yml[\s\S]*?\*\*Decision check:\*\* Which dependency source pattern is allowed, and which executable namespace is denied\?/);
-  assert.match(publication, /Copy-Item \.\\solutions\\afternoon-2\\\.github\\workflows\\apm-audit\.yml \.\\.github\\workflows\\apm-audit\.yml[\s\S]*?\*\*Decision check:\*\* Does this workflow reinstall packages or audit the committed context as-is\?/);
+  assert.match(installation, /cp solutions\/afternoon-2\/apm\.yml \.\/apm\.yml[\s\S]*?\*\*Decision check:\*\* Which exact HVE-Core commit SHA and deployment target are selected in `apm\.yml`\?/);
+  assert.match(policy, /```bash\ncp solutions\/afternoon-2\/apm-policy\.yml \.\/apm-policy\.yml\n```/);
+  assert.match(policy, /cp solutions\/afternoon-2\/apm-policy\.yml \.\/apm-policy\.yml[\s\S]*?\*\*Decision check:\*\* Which dependency source pattern is allowed, and which executable namespace is denied\?/);
+  assert.match(publication, /cp solutions\/afternoon-2\/\.github\/workflows\/apm-audit\.yml \.github\/workflows\/apm-audit\.yml[\s\S]*?\*\*Decision check:\*\* Does this workflow reinstall packages or audit the committed context as-is\?/);
   const demonstration = policy.slice(policy.indexOf('### Step 3:'));
   assert.match(demonstration, /\*\*Learner edit:\*\* Keep the allowlist unchanged and add a temporary `dependencies\.deny` entry for `microsoft\/hve-core`/);
   assert.match(demonstration, /allow:\n    - "microsoft\/\*\*"\n  deny:\n    - "microsoft\/hve-core"/);
@@ -102,31 +102,36 @@ test('Level 4 demonstrates a temporary deny without widening the original allowl
   assert.match(demonstration, /Restore a passing audit before committing/);
   assert.match(runner, /policy-before-deny\.yml/);
   assert.doesNotMatch(runner, /sed -i '.*deny:.*allow:/);
-  assert.match(policy, /Copy-Item \.\\solutions\\afternoon-2\\apm-policy\.yml/);
-  assert.match(workshop, /New-Item -ItemType Directory -Path \.\\\.github\\workflows -Force/);
-  assert.match(workshop, /Copy-Item \.\\solutions\\afternoon-2\\\.github\\workflows\\apm-audit\.yml/);
+  assert.match(policy, /cp solutions\/afternoon-2\/apm-policy\.yml/);
+  assert.match(publication, /mkdir -p \.github\/workflows/);
+  assert.match(publication, /cp solutions\/afternoon-2\/\.github\/workflows\/apm-audit\.yml/);
   assert.match(policy, /no `apm experimental enable` command is needed/);
   assert.doesNotMatch(policy, /validated command used the experimental policy path/);
 });
 
-test('Level 4 keeps marketplace discovery a demo rather than a second participant install', () => {
+test('Level 4 restores curated registration and install before the APM transition', () => {
   const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
-  assert.match(level4, /marketplace orientation is a facilitator demo/);
-  assert.match(level4, /sample \[CoffeeSoft catalog\].*is private/);
-  assert.doesNotMatch(level4, /copilot plugin install|cp -R solutions\/afternoon-2\/plugins/);
+  assert.match(level4, /copilot plugin marketplace add OWNER\/REPO/);
+  assert.match(level4, /copilot plugin install hve-core@music-catalog-marketplace/);
+  assert.ok(level4.indexOf('copilot plugin install') < level4.indexOf('apm install --target copilot'));
+  assert.match(level4, /No Java runtime or Microsoft 365 account is required/);
+  assert.doesNotMatch(level4, /cp -R solutions\/afternoon-2\/plugins/);
   const replay = runner.slice(runner.indexOf('# ---------------------------------------------------------------- Level 4'));
-  assert.match(replay, /skip_step l4-marketplace-demo/);
-  assert.doesNotMatch(replay, /step l4-plugin-install|step l4-marketplace-add/);
+  assert.match(replay, /step l4-marketplace-install/);
+  assert.match(replay, /skip_step l4-marketplace-vscode/);
+  assert.match(replay, /skip_step l4-marketplace-app/);
 });
 
 test('Level 4 verifies repository agents before disabling the personal plugin', () => {
   const level4 = workshop.slice(workshop.indexOf('# Level 4:'), workshop.indexOf('# Level 5:'));
   const disable = level4.indexOf('copilot plugin disable hve-core');
   assert.ok(level4.indexOf('.github/agents/rpi-agent.agent.md') < disable);
-  assert.match(level4, /copilot plugin disable hve-core\ncopilot plugin list/);
+  assert.match(level4, /copilot plugin disable hve-core@music-catalog-marketplace\ncopilot plugin list --json/);
   assert.match(level4, /Managed settings may prevent local disabling/);
   assert.match(level4, /does not disable a separate VS Code extension or plugin/);
-  assert.match(runner, /test -f \.github\/agents\/rpi-agent\.agent\.md.*copilot plugin disable hve-core/);
+  const transition = readFileSync(new URL('./marketplace.sh', import.meta.url), 'utf8');
+  assert.ok(transition.indexOf('test -f .github/agents/rpi-agent.agent.md') <
+    transition.indexOf('copilot plugin disable hve-core@music-catalog-marketplace'));
   const image = readFileSync(new URL('../../../docs/afternoon-2/assets/l4-duplicate-agent-entries.png', import.meta.url));
   assert.deepEqual([...image.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
   const inventory = readFileSync(new URL('../../../docs/afternoon-2/assets/README.md', import.meta.url), 'utf8');

@@ -8,6 +8,6 @@
     }
   },
   "enabledPlugins": {
-    "music-catalog-conventions@music-catalog-marketplace": true
+    "hve-core@music-catalog-marketplace": true
   }
 }

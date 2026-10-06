@@ -49,7 +49,7 @@ test('APM executable governance is explained before the command and checked thro
   const l4 = level(4);
   const section = l4.slice(l4.indexOf('### Step 1: Set the allowed sources'),
     l4.indexOf('### Step 3: Edit a rule to block a dependency'));
-  const copy = section.indexOf('Copy-Item .\\solutions\\afternoon-2\\apm-policy.yml');
+  const copy = section.indexOf('cp solutions/afternoon-2/apm-policy.yml');
   assert.ok(section.indexOf('components that can run code') < copy);
   assert.ok(section.indexOf('even if local consent is given') < copy);
   assert.match(section, /`dependencies\.allow` contains `microsoft\/\*\*`/);
@@ -93,10 +93,10 @@ test('Level 5a establishes verification before the reviewed 5b delegation handof
   const positions = [
     stage5a.indexOf('Copy-Item solutions\\afternoon-2\\.github\\workflows\\ci.yml'),
     stage5a.indexOf('**Decision check:** Which events trigger the `test` job'),
-    stage5a.indexOf('git add .github\\workflows\\ci.yml'),
+    stage5a.indexOf('Commit the reviewed CI workflow at .github/workflows/ci.yml'),
     stage5a.indexOf('Wait for **CI** on `main` to pass'),
     stage5a.indexOf('main-tests-required.json'),
-    stage5a.indexOf('git add .github\\workflows\\copilot-setup-steps.yml'),
+    stage5a.indexOf('Commit the reviewed Copilot setup at .github/workflows/copilot-setup-steps.yml'),
     stage5a.indexOf('Check that **Copilot Setup Steps** passed'),
     stage5a.indexOf('wait for **APM Audit** on its latest commit to pass'),
     stage5a.indexOf('main-apm-audit-required.json'),
@@ -115,7 +115,7 @@ test('Level 5a establishes verification before the reviewed 5b delegation handof
     stage5b.indexOf('git switch -c feature/level-5b-backlog'),
     stage5b.indexOf('Copy-Item solutions\\afternoon-2\\.github\\workflows\\daily-backlog.md'),
     stage5b.indexOf('**Decision check:** Which committed planning paths does the job read'),
-    stage5b.indexOf('Copy-Item solutions\\afternoon-2\\docs\\project-planning\\remove-playlist-track.md'),
+    stage5b.indexOf('Open your committed `docs/project-planning/dt-later-slice.md`'),
     stage5b.indexOf('**Decision check:** Does this brief revise the original agreement'),
     stage5b.indexOf('gh pr create --title "Add the Stage 5b backlog setup"'),
     stage5b.indexOf('Wait for both required checks, `test` and `apm-audit`'),
@@ -165,8 +165,8 @@ test('Level 5a establishes verification before the reviewed 5b delegation handof
 
   const afternoon2Schedule = tutor.slice(tutor.indexOf('## Afternoon 2'),
     tutor.indexOf('### Level 4 proctor flow'));
-  assert.match(afternoon2Schedule, /^\| 2:35 \| Level 5a Verification as contract \| 20 \|/m);
-  assert.match(afternoon2Schedule, /^\| 2:55 \| Level 5b Backlog and delegation \| 30 \|/m);
+  assert.match(afternoon2Schedule, /^\| 2:50 \| Level 5a Verification as contract \| 20 \|/m);
+  assert.match(afternoon2Schedule, /^\| 3:10 \| Level 5b Backlog and delegation \| 30 \|/m);
   assert.match(read('../../../README.md'),
     /\*\*Verification as contract\*\*.*Afternoon 2, Levels 5a and 6/);
   assert.match(read('../../../README.md'),
@@ -179,7 +179,8 @@ test('the required path works with optional context closed', () => {
   const l6 = visible(level(6));
   for (const text of ['apm install --target copilot', 'copilot plugin disable hve-core',
     'apm audit --ci --policy apm-policy.yml', 'Restore a passing audit before committing',
-    'git add apm.yml apm.lock.yaml apm-policy.yml .github .agents', 'default branch']) {
+    'Commit the governed repository setup: apm.yml, apm.lock.yaml, apm-policy.yml',
+    'the reviewed deployed files under .github/ and .agents/', 'default branch']) {
     assert.ok(l4.includes(text), text);
   }
   for (const text of ['backlog-managed', 'committed', 'gh aw compile', 'gh aw run daily-backlog',
@@ -276,17 +277,16 @@ test('proctor demos are not replayed as participant runs', () => {
     assert.ok(existsSync(new URL(`../../../docs/afternoon-2/assets/${path}`, import.meta.url)));
     assert.ok(tutor.includes(path));
   }
-  assert.match(runner, /skip_step l4-marketplace-demo/);
+  assert.match(runner, /skip_step l4-marketplace-app/);
   assert.match(runner, /skip_step l5-accessibility-demo/);
   assert.doesNotMatch(runner, /wait_aw_run l5-run-a11y|step l4-plugin-install|skip_step l6-test-writer/);
   const capstone = guide.slice(guide.indexOf('## Architect capstone'));
-  assert.match(capstone, /\| Facilitator-led marketplace demonstration \|/);
-  assert.doesNotMatch(capstone, /One team marketplace registered in/);
+  assert.match(capstone, /\| Your template copy's curated marketplace, registered in CLI and VS Code \|/);
 });
 
 test('the follow-up issue has committed planning evidence before delegation', () => {
   const l5 = level(5);
-  const planningCopy = l5.indexOf('Copy-Item solutions\\afternoon-2\\docs\\project-planning\\remove-playlist-track.md');
+  const planningCopy = l5.indexOf('Open your committed `docs/project-planning/dt-later-slice.md`');
   const setupPr = l5.indexOf('gh pr create --title "Add the Stage 5b backlog setup"');
   const issue = l5.indexOf('### Step 3: Create a scoped feature issue');
   assert.ok(planningCopy >= 0 && planningCopy < setupPr && setupPr < issue);

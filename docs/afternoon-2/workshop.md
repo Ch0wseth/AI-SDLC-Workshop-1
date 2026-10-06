@@ -7,7 +7,7 @@ description: Build a governed Music Catalog feature with HVE-Core, Design Thinki
 level: intermediate
 authors: [Julien Strebler]
 contacts: ['@justrebl']
-duration_minutes: 240
+duration_minutes: 255
 tags: github copilot, hve-core, rpi, design thinking, apm, agentic workflows, copilot cloud agent, plugins, accessibility
 banner_url: assets/banner.png
 navigation_levels: 3
@@ -156,23 +156,26 @@ To complete this lab, you need:
 Create your repository from the template: open [Justrebl/AI-SDLC-Workshop](https://github.com/Justrebl/AI-SDLC-Workshop), select **Use this template** → **Create a new repository**, and choose a **private** repository under your account. [Learn more about template repositories](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
 
 <details>
-<summary>Create the repository with GitHub CLI, or use the copy fallback</summary>
+<summary>Create the repository with GitHub CLI, or import it when templates are unavailable</summary>
 
 After signing in with `gh auth login`, replace `my-music-catalog` with any name:
 
-```powershell
+```bash
 gh repo create my-music-catalog --private --template Justrebl/AI-SDLC-Workshop --clone
 cd my-music-catalog
 ```
 
-If template creation is blocked in your organization, copy the repository with a fresh history. Run these commands only in the new copy:
+If template creation is unavailable, use [GitHub Importer](https://docs.github.com/en/migrations/importing-source-code/using-github-importer/importing-a-repository-with-github-importer)
+to import `https://github.com/Justrebl/AI-SDLC-Workshop` into your own private
+repository. Importing preserves existing commits, so the later HVE commit prompt
+has a valid `HEAD`; do not delete `.git` and make an unborn repository.
+If your policy also blocks import, ask the tutor for an approved prepared copy.
 
-```powershell
-git clone https://github.com/Justrebl/AI-SDLC-Workshop my-music-catalog
+Clone your imported repository, replacing `OWNER` with your account:
+
+```bash
+git clone https://github.com/OWNER/my-music-catalog my-music-catalog
 cd my-music-catalog
-Remove-Item -Recurse -Force .git
-git init -b main; git add -A; git commit -m "Workshop starter"
-gh repo create my-music-catalog --private --source . --remote origin --push
 ```
 
 `gh repo view` should show your own repository with a `main` branch. If the push is rejected for missing the `workflow` scope, follow the tip in Level 5 "Push your branch", then run `git push -u origin main`.
@@ -218,7 +221,13 @@ Use this option if you cannot run containers. Install:
 | [Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli) | HVE-Core plugin and marketplace exercises |
 | [APM CLI](https://microsoft.github.io/apm/getting-started/installation/) | Repository-owned HVE-Core dependency and policy audit |
 
-Then clone your repository, run `gh extension install github/gh-aw`, `dotnet restore`, and `npm --prefix src\front ci`.
+Use a Linux/Bash environment for the participant commands: the Codespace or dev
+container terminal runs Linux; Windows attendees without containers use WSL 2
+with a Linux distribution and VS Code's WSL connection. Install the tools inside
+that environment and clone the repository there. Host-specific installation help
+stays separate from the lab; do not translate the exercises into PowerShell or CMD.
+
+Then clone your repository, run `gh extension install github/gh-aw`, `dotnet restore`, and `npm --prefix src/front ci`.
 
 <div class="tip" data-title="Recommendation">
 
@@ -742,7 +751,25 @@ The example below includes `coaching-state.md`, `sampler-recap.md`, `implementat
 
 Open a coach-created note in Explorer to see how it captures your conversation. These are **local, ignored working notes**, not files to commit. The next step creates the shareable delivery brief; later, use VS Code's Source Control view to review the staged diff before committing that document.
 
-### Step 4: Save the reviewed delivery brief
+### Step 4: Choose a later slice with DT Coach
+
+Before leaving **DT Coach**, select one small idea from your conversation for Level 5's cloud-agent delegation. This is a proposed follow-up, not a validated concept or an addition to Level 3. Ask the coach to help narrow it:
+
+```text
+Help me choose one idea from our DT conversation for a later Music Catalog slice
+to delegate to Copilot cloud agent in Level 5. Recommend a small change compatible
+with the existing ASP.NET Core API, React front end and in-memory state.
+Explain its user value, observable acceptance criteria, exclusions and assumptions.
+Ask me to choose and confirm the idea. Keep the shared Level 3 playlist scope unchanged.
+Do not implement it, invoke BRD/PRD Builder, create issues or claim validation.
+Keep coaching notes under .copilot-tracking/ only.
+```
+
+Choose the idea yourself after discussing the trade-offs. Avoid features requiring authentication, persistence, external services or a new architecture. If the idea depends on Level 3, record that dependency. Do not invent research or defer a required Level 3 fix to supply future work.
+
+**Success Criteria:** your recap records the chosen idea, your decision, its evidence limits and a bounded later-slice scope.
+
+### Step 5: Save the reviewed delivery brief and later-slice decision
 
 The coaching exercise ends here. Use HVE's **Documentation** agent to curate the shared delivery brief, rather than turning DT working notes into a committed artifact. In Copilot CLI, switch with:
 
@@ -759,6 +786,21 @@ Keep private coaching notes and personal details out of the document. Limit publ
 ```
 
 Open the saved file and compare it with the reviewed contract. Correct differences before sharing it. This brief is the input for PRD Builder and Level 3, not a required reproduction of the coach's headings or filenames. Keep it uncommitted until [Curate what you commit](?step=2#curate-what-you-commit), where you review it with any BRD and PRD.
+
+Keep **Documentation** selected and give it the confirmed later-slice decision from Step 4:
+
+```text
+Write a curated later-slice decision to docs/project-planning/dt-later-slice.md
+from the DT Coach idea I selected and confirmed in this conversation.
+Record the problem, user value, chosen scope, observable acceptance criteria,
+exclusions, assumptions, dependencies and rationale. Mark it as proposed for
+Level 5 cloud-agent delegation, not implemented or validated.
+Keep the shared Level 3 scope unchanged. Do not invoke BRD/PRD Builder or create issues.
+Exclude private notes and personal details; do not link to local tracking files.
+Limit published changes to this file. If my choice is unavailable, ask rather than invent it.
+```
+
+Review this file against your actual decision and correct it before approving it. Include it in the Level 2 planning-document commit below; Level 5 will use the committed brief instead of your local DT notes. **No BRD or PRD is required for this later slice**, even if you take the optional Product Manager track for the shared playlist.
 
 ![DT decisions summary](assets/l2-dt-decisions.png)
 
@@ -1111,23 +1153,29 @@ The rule is simple: never commit the tracking folder. Curate what matters out of
 
 ### Step 1: Review and commit the deliverables
 
-The delivery brief was saved before the optional Product Manager track. Review it together with any BRD and PRD now; do not ask an agent to create another copy. Keep the agreed scope, remove personal or raw notes, and do not link to local tracking files. Agent output remains a draft until you approve it.
+The delivery brief and `docs/project-planning/dt-later-slice.md` were saved before the optional Product Manager track. Review them together with any BRD and PRD now; do not ask an agent to create another copy. Keep the agreed scope, remove personal or raw notes, and do not link to local tracking files. Agent output remains a draft until you approve it.
 
-Stage the reviewed folder by path, not with `git add -A`:
+Use HVE's commit capability to select only the reviewed files under
+`docs/project-planning/`, rather than staging the whole repository. Type
+`/git-commit`, select `/hve-core:git-commit.prompt`, press **Tab**, and add the task
+below before sending. Do not pre-stage files: the prompt inventories candidates
+and asks you to select whole paths, then confirm the exact staged set.
 
-```powershell
-git add docs\project-planning
+```text
+/hve-core:git-commit.prompt
+Commit the reviewed Level 2 planning deliverables under docs/project-planning/.
+Exclude .copilot-tracking/ and all unrelated changes. Ask me to select the intended
+whole paths and confirm their exact staged set before committing.
 ```
 
-In VS Code's Source Control view, **Staged Changes should contain only the reviewed files under `docs/project-planning/`**. Open each staged file to review the diff that will be committed. No `.copilot-tracking/` file should be included. If other files are staged, leave them out of this commit.
+In VS Code's Source Control view, **Staged Changes should contain only the reviewed files under `docs/project-planning/`**. Open each staged file to review the diff that will be committed. No `.copilot-tracking/` file should be included. If unrelated files were already staged or a path is partly staged, stop and resolve that intent before retrying; do not discard existing staging.
 
 The tracking folder stays local and ignored because it contains agent session state, draft reasoning, and potentially sensitive raw notes, not reviewed deliverables. Commit the curated outcomes instead; other readers cannot rely on links to your local working state.
 
-Once the staged tree is correct, commit:
-
-```powershell
-git commit -m "Add playlist slice design record, BRD and PRD"
-```
+Confirm only the intended staged set. HVE generates the commit message and reports
+the resulting commit; it does not push. If there are no changes, inspect the
+existing reviewed commits instead of creating an empty one. A real staging or
+commit error must be resolved before continuing.
 
 HVE-Core references:
 
@@ -1210,12 +1258,6 @@ An agent only knows what is in its **context window**: the instructions loaded f
 
 See [Context engineering](https://microsoft.github.io/hve-core/docs/rpi/context-engineering) in HVE-Core and [repository custom instructions](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions) on GitHub Docs.
 
-<div class="tip" data-title="Check it yourself">
-
-> Open the research artifact returned for this task, not whichever file is newest. Could a colleague or a fresh session start planning from its evidence and unresolved decisions? Keep the returned artifact paths for the next phase.
-
-</div>
-
 </details>
 
 ## Research phase
@@ -1237,9 +1279,17 @@ Success Criteria:
 - A research file exists at the returned path, with repository references supporting its findings and an explicit record of gaps or open questions.
 - Application files remain unchanged.
 
+<div class="tip" data-title="Check it yourself">
+
+> Open the research artifact returned for this task, not whichever file is newest. Could a colleague or a fresh session start planning from its evidence and unresolved decisions? Keep the returned artifact paths for the next phase.
+
+</div>
+
 ### Step 2: Inspect the research
 
-Open the returned file. Check what supports its key conclusions and which questions remain unresolved; ask for corrections if necessary. Keep its path for Plan. The working artifact stays ignored under `.copilot-tracking\`; no commit is needed.
+Open the research file at the path returned by the agent. Check that its key conclusions cite repository files or other evidence, and identify any unanswered questions or decisions needed before planning. Ask the agent to correct unsupported conclusions or missing evidence before continuing. Keep this exact artifact path for the Plan request.
+
+The workshop template includes `.copilot-tracking/` in `.gitignore` by default, so Git ignores the research file and other working artifacts in that folder. There is no need to commit this content; keep it locally for the next RPI phase.
 
 ## Plan phase
 
@@ -1335,17 +1385,37 @@ Success Criteria:
 
 ### Step 3: Commit implementation checkpoint
 
-Run from the repository root. Check `git status` first: pending changes should be limited to the approved source, tests and necessary test setup files, never `.copilot-tracking\`. If the implementation was already committed and the working tree is clean, inspect those commits with `git log -3 --stat` and continue without creating an empty commit.
+Run from the repository root. Inspect the implementation before committing:
+pending changes should be limited to approved source, tests and necessary test
+setup files, never `.copilot-tracking/`. If RPI already committed the implementation
+and the working tree is clean, inspect those commits and continue without creating
+an empty commit:
 
-```powershell
+```bash
 git status
-git add -A; git commit -m "Implement playlist slice with RPI"
+git log -3 --stat
 ```
+
+For pending approved changes, type `/git-commit`, select
+`/hve-core:git-commit.prompt`, press **Tab**, and add this task before sending:
+
+```text
+/hve-core:git-commit.prompt
+Commit the approved playlist implementation and its tests from the reviewed RPI plan.
+Select only the intended source, tests and necessary test setup paths; exclude
+.copilot-tracking/ and unrelated changes. Ask me to select whole paths and confirm
+the exact staged set. If the work is already committed, do not create an empty commit.
+```
+
+Do not pre-stage everything. Confirm HVE's selected paths and exact staged set only
+after reviewing their content. Resolve partly staged or unrelated initially staged
+files before retrying. HVE generates the message and creates the local commit;
+publication remains the later reviewed PR step.
 
 Success Criteria:
 - Pending implementation changes are committed and the working tree is clean.
 - If the implementation was already committed, a clean working tree and the existing implementation commits satisfy this checkpoint; "nothing to commit" is not a failure.
-- `.copilot-tracking\` is not included in any commit.
+- `.copilot-tracking/` is not included in any commit.
 - A real staging or commit error must be resolved before continuing.
 
 ## Review phase
@@ -1479,7 +1549,8 @@ If Steps 1 and 2 left changes to keep, type `/git-commit`, select the HVE-Core p
 ```text
 /hve-core:git-commit.prompt
 
-Prepare a commit for the reviewed changes. Let me confirm the selected files and commit message.
+Commit the reviewed Tech Lead changes only. Exclude .copilot-tracking/ and unrelated
+files. Ask me to select whole paths and confirm their exact staged set before committing.
 ```
 
 Success Criteria:
@@ -1534,7 +1605,7 @@ Success Criteria:
 
 ## Topic
 
-APM moves HVE-Core from your personal install into this repository.
+Your company catalog lists remote plugins; install HVE-Core through it, then APM moves HVE-Core from your personal install into this repository.
 The manifest pins the dependency; the lockfile records its resolution.
 Copilot reads deployed profiles and skills; policy and audit verify them.
 Level 5 requires that audit before cloud-agent PRs merge; this does not run RPI or change the playlist.
@@ -1563,9 +1634,137 @@ GitHub's documented shared-agent repositories are **`.github` and `.github-priva
 
 Do not assume that storing standalone prompts or skills in the shared-agent repository distributes them to every client. Check the capability's supported sharing path. See [organization agents](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-organization/prepare-for-custom-agents) and [enterprise governance](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-agents/create-github-private-repo).
 
-APM can also manage compatible **whole Agent Plugins**. This exercise deploys HVE-Core's repository agents and skills; it does not install a second personal plugin. [Plugin support](https://microsoft.github.io/apm/consumer/copilot-agent-plugins/) depends on the APM and Copilot client versions.
+APM can also manage compatible **whole Agent Plugins**. After the curated personal
+installation below, this exercise separately deploys HVE-Core's repository agents
+and skills. [Plugin support](https://microsoft.github.io/apm/consumer/copilot-agent-plugins/) depends on the APM and Copilot client versions.
 
 For other harnesses, [`apm compile`](https://microsoft.github.io/apm/producer/compile/) compiles **instructions** into target context files such as `AGENTS.md` or `CLAUDE.md`. Agents, skills, and other primitives are deployed by `apm install`. Their tools and formats must still be compatible with the target harness; compilation is not universal translation.
+
+</details>
+
+## Use your company's curated marketplace
+
+### Step 1: Inspect the catalog and register your copy
+
+Open `.github/plugin/marketplace.json` at the repository root. It already ships
+with your template copy: do not copy the solution or create another plugin.
+Its name is `music-catalog-marketplace`; its four entries refer to upstream
+repositories rather than files inside your workshop repository.
+
+**Install only HVE-Core in this exercise.** The Java entries illustrate curation:
+their advertised skills/canvas payloads are absent at the selected source revision.
+WorkIQ requires external Microsoft 365 authentication and can read and write tenant
+data. Browsing these entries is not proof that their capabilities run in every
+client. No Java runtime or Microsoft 365 account is required.
+
+Register **your template copy**, replacing `OWNER/REPO` with its GitHub owner/name,
+then browse the catalog. Run these commands from the repository root in Bash:
+
+```bash
+copilot plugin marketplace add OWNER/REPO
+copilot plugin marketplace browse music-catalog-marketplace
+```
+
+**Success Criteria:** the registered catalog points to your repository and lists
+HVE-Core, Java Development, Java Modernization Studio and WorkIQ. If registration
+is blocked by policy or this name points to another catalog, stop and ask your
+tutor; do not overwrite a managed catalog or force removal.
+
+### Step 2: Switch the personal HVE source explicitly
+
+Level 1 already installed HVE. Inspect its identity before changing anything so
+the same plugin name does not hide two different sources:
+
+```bash
+copilot plugin list --json
+```
+
+Look for rows with `name: "hve-core"` and their `marketplace`, `source`, `version`
+and `enabled` values. Continue only with no HVE entry, one `hve-core@hve-core`
+entry, or one `hve-core@music-catalog-marketplace` entry. Duplicate, direct-source,
+unknown or managed installations need tutor/admin help before continuing.
+
+If the only entry is the Level 1 `hve-core@hve-core` and you agree to replace that
+personal install, exit your current CLI session and remove **only that identity**:
+
+```bash
+copilot plugin uninstall hve-core@hve-core
+copilot plugin list --json
+```
+
+Verify there are now no HVE rows before installing the curated copy. This removes
+the known collision rather than assuming a second install overwrites it. If removal
+fails or another HVE entry remains, stop. To restore the old source after a failed
+curated installation, ask the tutor and use the Level 1 installation procedure.
+If the sole entry already comes from this company catalog, skip removal and
+installation and check its version/enabled state instead.
+
+Install the reviewed HVE package from your catalog, then inspect its provenance:
+
+```bash
+copilot plugin install hve-core@music-catalog-marketplace
+copilot plugin list --json
+```
+
+**Success Criteria:** exactly one HVE row comes from `music-catalog-marketplace`,
+reports `3.2.2`, and is enabled. Start a fresh CLI session and confirm **DT Coach**
+and **RPI Agent** are available. If the install, provenance or agent check fails,
+stop before the APM transition.
+
+### Step 3: Register the catalog in VS Code
+
+In VS Code Settings, enable `chat.plugins.enabled`. In your **user** settings JSON,
+add your repository to the existing `chat.plugins.marketplaces` array, preserving
+other entries. This is an illustrative value; replace the repository placeholder:
+
+```json
+{
+  "chat.plugins.enabled": true,
+  "chat.plugins.marketplaces": ["OWNER/REPO"]
+}
+```
+
+Open Extensions and search `@agentPlugins`, choose **HVE-Core** from
+`music-catalog-marketplace`, select **Install**, and review the trust prompt.
+If VS Code already discovers the CLI-installed copy, verify it instead of adding
+another. It can discover CLI packages only when it can access the same installed
+plugin filesystem; a host profile and a remote container/WSL profile may differ.
+Manage a separate older VS Code HVE plugin in that UI with tutor help; do not assume
+CLI uninstall removes it. Stop on policy restrictions rather than bypassing them.
+
+**Success Criteria:** VS Code shows the company catalog and its HVE installation,
+with DT Coach and RPI available. Recommendations in the solution
+`.github/copilot/settings.json` are not evidence of installation; do not copy that
+file for this exercise, as its enable overlay would interfere with the later CLI
+disable. The GitHub Copilot app registration is a **tutor demo**, not a third
+participant setup.
+
+### Step 4: Read construction and versioning
+
+Compare the HVE and Java entries in `.github/plugin/marketplace.json`.
+`source.repo` names the upstream repository, `source.path` selects a subdirectory
+when needed, and `source.sha` pins the fetched revision. HVE uses the full root
+package at the reviewed commit, not the differently shaped old release package.
+
+**Decision check:** Record the catalog's `metadata.version`, HVE's entry `version`,
+and its source SHA. Which value pins files? The catalog version describes your
+catalog; plugin version metadata describes the package; the SHA selects exact
+content. Neither label alone pins downloaded files. APM's separate lockfile does
+not lock your personal plugins.
+
+<details>
+<summary>How a maintainer publishes a reviewed version change</summary>
+
+A maintainer reviews the upstream package, updates the source SHA and matching
+version metadata in a PR, validates the catalog, and bumps the catalog version.
+Attendees then refresh discovery with
+`copilot plugin marketplace update music-catalog-marketplace` and explicitly
+update the installed package with
+`copilot plugin update hve-core@music-catalog-marketplace`. VS Code uses
+**Extensions: Check for Extension Updates**. No version bump or live update is
+required today. A pinned source remains pinned until the reviewed entry changes.
+Custom marketplace auto-update is separate user/managed configuration, not enabled
+by shipping this catalog. Company curation is not itself enforced enterprise policy.
 
 </details>
 
@@ -1573,10 +1772,10 @@ For other harnesses, [`apm compile`](https://microsoft.github.io/apm/producer/co
 
 ### Step 1: Declare the repository dependency
 
-Use the same repository as Levels 1–3. Copy the manifest that tells APM which package and version this project uses. Run this PowerShell file-copy command from the repository root:
+Use the same repository as Levels 1–3. Copy the manifest that tells APM which package and version this project uses. Run this Bash file-copy command from the repository root:
 
-```powershell
-Copy-Item .\solutions\afternoon-2\apm.yml .\apm.yml
+```bash
+cp solutions/afternoon-2/apm.yml ./apm.yml
 ```
 
 **Decision check:** Which exact HVE-Core commit SHA and deployment target are selected in `apm.yml`? Record both values before you install.
@@ -1587,7 +1786,7 @@ Open `apm.yml`. Its dependency is `microsoft/hve-core#1dbd6a7ea90b74accaf8c80926
 
 Install that dependency for Copilot:
 
-```powershell
+```bash
 apm install --target copilot
 ```
 
@@ -1597,18 +1796,28 @@ Open `apm.lock.yaml` and locate `resolved_commit`. Then open `.github/agents/rpi
 
 ### Step 3: Switch from personal to repository agents
 
-The personal HVE-Core plugin from Level 1 and the new repository profiles can both appear in the agent picker. After verifying the repository files, exit the current CLI session and disable the personal copy from your terminal:
+The curated personal HVE-Core plugin and the new repository profiles can both
+appear in the agent picker. After verifying the repository files, exit the current
+CLI session and disable the exact curated personal copy from your terminal:
 
-```powershell
-copilot plugin disable hve-core
-copilot plugin list
+```bash
+copilot plugin disable hve-core@music-catalog-marketplace
+copilot plugin list --json
 ```
 
-Start `copilot` again from the repository root and check the agent picker. **RPI Agent** and **Backlog Manager** should remain available from the repository. Disable preserves the personal install; `copilot plugin enable hve-core` restores it later.
+Verify the curated row is disabled, then start `copilot` again from the repository
+root and check the agent picker. **RPI Agent** and **Backlog Manager** should remain
+available from the repository. Disable preserves the personal install;
+`copilot plugin enable hve-core@music-catalog-marketplace` restores it later.
 
 <div class="warning" data-title="Managed plugins and VS Code">
 
-> Managed settings may prevent local disabling. If so, keep the managed plugin and distinguish its entries from the repository agents. This CLI command does not disable a separate VS Code extension or plugin; duplicate names there do not mean the APM installation failed.
+> Managed settings may prevent local disabling. If so, stop and ask the tutor/admin
+> to resolve the intended handoff; do not claim the personal plugin is disabled.
+> This CLI command does not disable a separate VS Code extension or plugin.
+> In VS Code, disable the personal HVE plugin through its plugin UI, then verify
+> repository RPI Agent and Backlog Manager remain available. Distinguish any managed
+> duplicate entries explicitly; they do not mean the APM installation failed.
 
 </div>
 
@@ -1620,10 +1829,10 @@ The manifest selects a package; the policy decides whether that selection is per
 
 `executables.deny` is a separate guard on components that can run code: hooks, `bin` executables, self-defined MCP servers, LSP servers, and canvas extensions. The `untrusted-org/*` rule blocks matching executable components even if local consent is given. Source selection and executable trust are different checks.
 
-Copy the policy with PowerShell, then open it to inspect those two rule groups:
+Copy the policy with Bash, then open it to inspect those two rule groups:
 
-```powershell
-Copy-Item .\solutions\afternoon-2\apm-policy.yml .\apm-policy.yml
+```bash
+cp solutions/afternoon-2/apm-policy.yml ./apm-policy.yml
 ```
 
 **Decision check:** Which dependency source pattern is allowed, and which executable namespace is denied? Point to the two rule groups in `apm-policy.yml`.
@@ -1636,7 +1845,7 @@ Success Criteria:
 
 Parse the policy first so configuration errors are visible, then check whether the installed dependency and deployed files comply. The audit checks provenance, consistency, and policy—not whether the agent will always behave correctly:
 
-```powershell
+```bash
 apm policy status --policy-source apm-policy.yml
 apm audit --ci --policy apm-policy.yml
 ```
@@ -1662,7 +1871,11 @@ For example, a company could curate packages in reviewed GitHub repositories, li
 
 A shared GitHub Actions audit checks the committed lockfile and deployed files against that policy. An organization ruleset can require a centrally controlled workflow across selected repositories where the GitHub plan supports it. This prevents a repository from simply removing its local audit to avoid the gate. Policy distribution, workflow execution, and mandatory enforcement are three distinct pieces.
 
-Enterprise Owners can also use Copilot's `managed-settings.json`, including `strictKnownMarketplaces` and `enabledPlugins`, to restrict plugin installation in supported clients. That enterprise-admin control is **not** APM policy and does not imply every governed user needs a Copilot Enterprise seat.
+For **enterprise-owned organizations**, Enterprise Owners can designate an organization's `.github-private` repository as the enterprise's client-governance source and publish `copilot/managed-settings.json` there. Server-managed settings apply to users receiving a Copilot license from the enterprise or any of its organizations, even without access to that repository; this is not a settings file to add to your workshop repository.
+
+Supported keys include `extraKnownMarketplaces` to distribute approved catalogs, `strictKnownMarketplaces` to restrict plugin installation to listed marketplaces, and `enabledPlugins` to enable or disable specific plugins. Administrators can also control permissions and specialize eligible settings for enterprise teams. Managed settings take precedence over user configuration, but **client support varies by key**: check the [supported-keys matrix](https://docs.github.com/en/copilot/reference/enterprise-administrators/enterprise-managed-settings#supported-keys) before a rollout.
+
+This enterprise-admin control is **not** APM policy or a repository CI gate, and does not imply every governed user needs a Copilot Enterprise seat. Configuring enterprise governance is outside this participant lab; see [Getting started with enterprise-managed settings](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/use-managed-settings/get-started).
 
 See [APM policy inheritance](https://microsoft.github.io/apm/enterprise/apm-policy/), [organization workflow gates](https://microsoft.github.io/apm/enterprise/github-rulesets/), and [Copilot enterprise-managed plugin standards](https://docs.github.com/en/copilot/concepts/enterprise/plugin-standards).
 
@@ -1688,11 +1901,11 @@ Run `apm audit --ci --policy apm-policy.yml` again. It should exit with code `1`
 
 ### Step 1: Add the PR audit workflow
 
-Copy the workflow with PowerShell so GitHub checks the committed setup on pushes and pull requests:
+Copy the workflow with Bash so GitHub checks the committed setup on pushes and pull requests:
 
-```powershell
-New-Item -ItemType Directory -Path .\.github\workflows -Force | Out-Null
-Copy-Item .\solutions\afternoon-2\.github\workflows\apm-audit.yml .\.github\workflows\apm-audit.yml
+```bash
+mkdir -p .github/workflows
+cp solutions/afternoon-2/.github/workflows/apm-audit.yml .github/workflows/apm-audit.yml
 ```
 
 **Decision check:** Does this workflow reinstall packages or audit the committed context as-is? Verify `setup-only` and the audit command in the copied file.
@@ -1705,11 +1918,28 @@ Open `.github/workflows/apm-audit.yml`. It sets up APM **without reinstalling yo
 
 Review `git status` and the staged diff. Include the deployed agents and shared skills, not just the manifest: a fresh cloud environment cannot read your personal plugin or private tracking notes.
 
-```powershell
+Check pending paths first; verify `/git-commit` still offers the HVE commit prompt
+from the repository deployment after personal HVE is disabled. If it is missing,
+stop and ask the tutor to resolve the deployment rather than using a raw commit.
+
+```bash
 git status
-git add apm.yml apm.lock.yaml apm-policy.yml .github .agents
-git diff --cached --stat
-git commit -m "Add governed repository agents and APM audit"
+```
+
+Select `/hve-core:git-commit.prompt` with **Tab**, then give it the governed scope.
+Review the requested whole paths and exact staged set before confirming:
+
+```text
+/hve-core:git-commit.prompt
+Commit the governed repository setup: apm.yml, apm.lock.yaml, apm-policy.yml, and
+the reviewed deployed files under .github/ and .agents/. Exclude .copilot-tracking/
+and unrelated files. Ask me to select whole paths and confirm the exact staged set.
+```
+
+Once the local commit succeeds, publish it separately. A failed or missing commit
+is not permission to continue:
+
+```bash
 git push
 ```
 
@@ -1719,7 +1949,10 @@ On the default branch, open `.github/agents` and `.agents/skills`, then inspect 
 
 **Success Criteria:** the pinned setup is on the default branch, the audit passed for that commit, and RPI Agent and Backlog Manager are available in the repository. You will use them next—not the disabled personal plugin.
 
-The marketplace orientation is a facilitator demo; you do not need to install another plugin. The sample [CoffeeSoft catalog](https://github.com/CoffeesoftDotDev/Plugin-Marketplace) is private, so the demonstration uses prepared visuals rather than attendee access.
+**Marketplace checkpoint:** your own repository catalog is registered in CLI and
+VS Code; the curated HVE source/version was checked before the personal-to-APM
+handoff. No private company repository access or optional-plugin installation was
+needed. Catalog discovery and APM source trust remain separate.
 
 ---
 
@@ -1755,11 +1988,18 @@ Copy-Item solutions\afternoon-2\.github\workflows\ci.yml .github\workflows\ci.ym
 
 **Decision check:** Which events trigger the `test` job, and which API and front-end test commands does it run? Find them in `.github/workflows/ci.yml`.
 
-Publish the reviewed workflow to the default branch before requiring its check:
+Use the HVE commit prompt to select the reviewed workflow only. Confirm its exact
+staged set; do not stage unrelated files or tracking state:
 
-```powershell
-git add .github\workflows\ci.yml
-git commit -m "Add CI for API and front-end tests"
+```text
+/hve-core:git-commit.prompt
+Commit the reviewed CI workflow at .github/workflows/ci.yml only.
+Ask me to select the whole path and confirm its exact staged set; exclude tracking state.
+```
+
+After successful local commit, publish to the default branch before requiring the check:
+
+```bash
 git push
 ```
 
@@ -1780,11 +2020,18 @@ In **Settings > Rules > Rulesets**, confirm **Tests must pass on main** is activ
         run: dotnet build MusicCatalog.slnx --no-restore
 ```
 
-Publish this setup change before enabling the strict audit rule:
+Use the same HVE capability to commit the reviewed setup change before enabling
+the strict audit rule:
 
-```powershell
-git add .github\workflows\copilot-setup-steps.yml
-git commit -m "Build the API in Copilot setup steps"
+```text
+/hve-core:git-commit.prompt
+Commit the reviewed Copilot setup at .github/workflows/copilot-setup-steps.yml only.
+Ask me to select the whole path and confirm its exact staged set; exclude tracking state.
+```
+
+Publish only after the local commit succeeds:
+
+```bash
 git push
 ```
 
@@ -1929,26 +2176,44 @@ Confirm that the changed files belong to `gh aw init`, the backlog source, or ge
 
 ### Step 1: Prepare the next small planning decision
 
-Level 2 excluded removing tracks from the first slice. The next issue deliberately extends that scope. Review the short follow-up brief alongside your committed `docs/project-planning/playlist-design-decisions.md`:
+Open your committed `docs/project-planning/dt-later-slice.md` from Level 2 alongside `docs/project-planning/playlist-design-decisions.md`. Confirm that the chosen DT idea is still a small, separate follow-up and that its dependencies are satisfied by the merged Level 3 implementation. Refine unclear acceptance criteria before creating an issue; do not use BRD/PRD Builder or start implementation here.
 
-```powershell
-Copy-Item solutions\afternoon-2\docs\project-planning\remove-playlist-track.md docs\project-planning\remove-playlist-track.md
+**Reference fallback only:** if you did not save a usable DT decision, pause and recover your choice with the tutor. If you explicitly choose **Remove a track from the playlist** instead, the supplied brief is a worked example:
+
+```bash
+cp solutions/afternoon-2/docs/project-planning/remove-playlist-track.md docs/project-planning/remove-playlist-track.md
 ```
 
 **Decision check:** Does this brief revise the original agreement or record a follow-up, and which behaviors remain excluded? Find `Status`, `Constraints`, and `Traceability`, then compare them with the committed Level 2 planning brief.
 
-Keep the original slice's exclusions: the new document records a follow-up, not a rewrite of the earlier agreement. If your Level 2 brief is missing, resolve that gap before treating it as planning evidence.
+Keep the original slice's exclusions: the selected document records a follow-up, not a rewrite of the earlier agreement. For your DT brief, check its scope, exclusions and rationale rather than requiring the example's headings. If your Level 2 brief is missing, resolve that gap before treating it as planning evidence.
 
 ### Step 2: Publish the 5b setup in a reviewed PR
 
 The strict `apm-audit` rule is already active. Review the `gh aw init` output, then stage the backlog source, generated workflow, planning brief, and any required initializer files by their exact paths before publishing the Stage 5b feature branch:
 
-```powershell
+```bash
 git status
-git diff -- .github\workflows docs\project-planning\remove-playlist-track.md
-git add .github\workflows\daily-backlog.md .github\workflows\daily-backlog.lock.yml docs\project-planning\remove-playlist-track.md
-git diff --cached --stat
-git commit -m "Add reviewed backlog workflow and planning evidence"
+git diff -- .github/workflows docs/project-planning/remove-playlist-track.md
+```
+
+For your own DT idea, replace the example planning path above and in the commit request below with `docs/project-planning/dt-later-slice.md`. That brief may already be committed from Level 2; do not create an empty commit for it. Commit any reviewed refinements together with the new setup files.
+
+Select the HVE commit prompt with **Tab** and provide this bounded task. Review
+the source workflow, its compiled lock and the planning brief before confirming
+the selected paths and exact staged set:
+
+```text
+/hve-core:git-commit.prompt
+Commit the reviewed Stage 5b setup: .github/workflows/daily-backlog.md,
+.github/workflows/daily-backlog.lock.yml and
+docs/project-planning/remove-playlist-track.md only. Ask me to select whole paths
+and confirm the exact staged set. Exclude .copilot-tracking/ and unrelated changes.
+```
+
+After successful local commit, push this branch and create the setup PR:
+
+```bash
 git push -u origin feature/level-5b-backlog
 gh pr create --title "Add the Stage 5b backlog setup" --body "Adds the bounded backlog workflow and the reviewed planning brief after the APM audit gate is active."
 ```
@@ -1964,7 +2229,7 @@ git pull
 
 ### Step 3: Create a scoped feature issue
 
-On GitHub, open **Issues > New issue > Feature request**. If this follow-up already exists, inspect it rather than create a duplicate. Fill the form:
+On GitHub, open **Issues > New issue > Feature request**. If this follow-up already exists, inspect it rather than create a duplicate. Populate the title, problem, outcome, acceptance criteria, area and exclusions from your reviewed DT later-slice brief. The following **Remove a track** form is a worked example, not a replacement for your chosen idea:
 
 Title:
 
@@ -2007,7 +2272,7 @@ Persistence, multiple playlists, users, reorder, search, and styling library cha
 ```
 
 Success Criteria:
-- The issue has five checkable acceptance criteria and explicit exclusions.
+- The issue has checkable acceptance criteria and explicit exclusions matching the selected later-slice brief.
 
 Add a comment linking to the two planning documents on your repository's default branch. Copy their URLs from GitHub's file view, not from a local editor. The job can now relate the issue to the committed planning revision.
 
@@ -2065,7 +2330,7 @@ Before delegation, record the task you chose and verify each item:
 
 ## Delegate after the verification handoff
 
-Choose **Remove a track from the playlist**, unless the summary identifies a real blocker. Prepare the same test contract and environment for the cloud agent that you used locally.
+Choose the issue backed by your reviewed **DT later-slice decision**, unless the summary identifies a real blocker. Use **Remove a track from the playlist** only if you selected that fallback. Prepare the same test contract and environment for the cloud agent that you used locally.
 
 ### Step 1: Confirm the agent's inputs
 
@@ -2244,7 +2509,7 @@ Success Criteria:
 
 ### Step 5 (facilitator demo): Delegate with a label and gh-aw
 
-The solution workflow `solutions\afternoon-2\.github\workflows\security-review-delegation.md` automates Step 3, while a human still decides:
+The solution workflow `solutions/afternoon-2/.github/workflows/security-review-delegation.md` automates Step 3, while a human still decides:
 
 - **Trigger:** a person adds the `security-review` label to an issue.
 - **Agent job:** it only reads the issue and checks that it is a scoped security review request. It cannot write to GitHub.
@@ -2253,14 +2518,28 @@ The solution workflow `solutions\afternoon-2\.github\workflows\security-review-d
 
 Run from the repository root on a new branch; the APM rule now protects the default branch:
 
-```powershell
+```bash
 git switch -c security-review-delegation
-Copy-Item solutions\afternoon-2\.github\workflows\security-review-delegation.md .github\workflows\security-review-delegation.md
+cp solutions/afternoon-2/.github/workflows/security-review-delegation.md .github/workflows/security-review-delegation.md
 gh aw compile
 gh label create security-review --description "Delegate a security review to Copilot cloud agent"
 gh secret set GH_AW_AGENT_TOKEN
-git add .github\workflows\security-review-delegation.md .github\workflows\security-review-delegation.lock.yml
-git commit -m "Add label-gated security review delegation"
+```
+
+Use the HVE commit prompt to review and commit the workflow source and compiled
+lock only. Never include the PAT or tracking state in the selected paths:
+
+```text
+/hve-core:git-commit.prompt
+Commit the reviewed label-gated security workflow at
+.github/workflows/security-review-delegation.md and its compiled .lock.yml only.
+Ask me to select whole paths and confirm the exact staged set; exclude credentials,
+.copilot-tracking/ and unrelated changes.
+```
+
+After the local commit succeeds, publish the branch separately:
+
+```bash
 git push -u origin HEAD
 ```
 
@@ -2378,10 +2657,21 @@ See [Risks and mitigations for Copilot cloud agent](https://docs.github.com/en/c
 
 ## Commit checkpoint
 
-No local commit is required for this level unless you changed local files. Run:
+No local commit is required for this level unless you changed local files. Check
+the working tree first; delegated PR commits are not a reason to create an empty
+local commit:
 
-```powershell
+```bash
 git status
+```
+
+For reviewed local changes only, select the HVE commit prompt and provide the task:
+
+```text
+/hve-core:git-commit.prompt
+Commit the reviewed local Level 6 changes only, if any remain.
+Exclude .copilot-tracking/ and unrelated files. Ask me to select whole paths and
+confirm their exact staged set; do not create an empty commit for delegated PR work.
 ```
 
 Success Criteria:
@@ -2413,8 +2703,8 @@ In the proctor repository, open **Settings → Advanced Security**. Under **Secr
 
 Generate a fake key from the repository root. It is not a real credential:
 
-```powershell
-"MCWS_" + -join ((48..57) + (65..90) | Get-Random -Count 32 | ForEach-Object { [char]$_ })
+```bash
+node -e "console.log('MCWS_' + require('crypto').randomBytes(16).toString('hex').toUpperCase())"
 ```
 
 Under **Secret Protection**, to the right of **Custom patterns**, click **New pattern**, then enter:
@@ -2428,11 +2718,24 @@ Click **Save and dry run**, then **Publish pattern**, then **Enable** push prote
 
 Run from the proctor repository root. Paste your generated key in place of `PASTE-KEY-HERE`:
 
-```powershell
+```bash
 git switch -c demo/push-protection
-Set-Content -Path demo.env -Value "MUSIC_CATALOG_KEY=PASTE-KEY-HERE"
-git add demo.env
-git commit -m "Demo: push protection"
+printf '%s\n' 'MUSIC_CATALOG_KEY=PASTE-KEY-HERE' > demo.env
+```
+
+In the prepared HVE-enabled proctor profile, invoke the commit capability for
+this synthetic fixture only. Keep the selected-path and staged-set confirmations:
+
+```text
+/hve-core:git-commit.prompt
+Commit only demo.env containing the generated fake workshop custom-pattern key.
+It is a synthetic fixture, never a real credential. Ask me to select the whole
+path and confirm its exact staged set; exclude tracking state and unrelated files.
+```
+
+After successful local commit, attempt the protected push. Do not bypass a rejection:
+
+```bash
 git push -u origin demo/push-protection
 ```
 
@@ -2480,7 +2783,7 @@ If you ran the extended tracks, you also worked in three roles: as a Product Man
 | PM agents (extended) | BRD Builder, PRD Builder, Functional Planner and Backlog Manager turned decisions into issues. | Planning is read-only; only a confirmed `/hve-core:backlog-execute` writes to GitHub. |
 | RPI Agent | Sequenced research, plan, implement, review. | Humans gate each phase; tests and commits verified progress. |
 | APM | Installed HVE-Core into the repo with a SHA pin. | `apm.lock.yaml` and policy audit made it reproducible. |
-| Plugin marketplace (demo) | Showed a company-curated catalog. | Discovery and client installation are distinct from APM source trust. |
+| Plugin marketplace | Registered your curated catalog in CLI/VS Code and installed HVE before the APM transition. | Catalog/plugin versions and source SHA differ; discovery is distinct from APM trust. App setup stayed a tutor demo. |
 | gh-aw | Reconciled opted-in issues with committed plans and linked delivery evidence. | Read-only agent job; capped safe outputs; human delegation. |
 | CI and ruleset | Made `dotnet test` and `npm test` a required check on the default branch. | The same contract for humans and agents; bypasses are audited. |
 | Security Reviewer (extended) | Ran a report-only security review in Copilot cloud agent. | A human labels or assigns, and a qualified person validates every finding. |
@@ -2527,7 +2830,7 @@ Use this section as a short facilitated discussion, or read it on your own. Each
 | You inherited the Copilot features, models and MCP access that your organization allows | Enterprise and organization **Copilot policies** decide which features, models, preview features and MCP servers are available. MCP access can be limited to servers from an [MCP registry](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-mcp-usage/configure-mcp-server-access) |
 | `.github\copilot-instructions.md` and `.github\agents` in one repository | Organization custom instructions, and [organization or enterprise custom agents](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-custom-agents) in a `.github` or `.github-private` repository |
 | `apm.yml` and `apm-policy.yml` in one repository | An organization or enterprise APM policy that repositories extend. APM policy inheritance is designed to tighten only: a repository can add restrictions but not relax its parent. Check the current [APM documentation](https://microsoft.github.io/apm/), because the policy schema is evolving |
-| Facilitator-led marketplace demonstration | An organization-curated marketplace repository for discovery; marketplace listing remains distinct from APM source trust |
+| Your template copy's curated marketplace, registered in CLI and VS Code | An organization-curated marketplace repository for discovery; marketplace listing remains distinct from APM source trust |
 | One repository ruleset | Organization rulesets that apply the same required checks and reviews to many repositories |
 
 ### Measure the impact

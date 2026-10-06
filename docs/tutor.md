@@ -1,6 +1,6 @@
 # Tutor guide — Agentic SDLC with GitHub Copilot
 
-This guide is for tutors and facilitators. It holds **all timing** for both afternoons (4 hours each), the pre-flight checklist, known risks and messaging guardrails. The attendee guides contain no time codes, so keep timing changes in this file only.
+This guide is for tutors and facilitators. It holds **all timing** for both afternoons (240 minutes for Afternoon 1; an estimated 255 for Afternoon 2), the pre-flight checklist, known risks and messaging guardrails. The attendee guides contain no time codes, so keep timing changes in this file and their duration metadata synchronized.
 
 - Attendee content: [GitHub Copilot Zero to Hero](afternoon-1/workshop.md) and [AI SDLC with GitHub and GitHub Copilot](afternoon-2/workshop.md)
 - Attendee checklist: [prerequisites and pre-D-Day checks](prerequisites.md), or the per-option checklists for [Codespaces](before-d-day-codespace.md), [local dev container](before-d-day-devcontainer.md) and [local tools](before-d-day-local.md)
@@ -50,7 +50,7 @@ Use this variant when most attendees already use agent mode daily. Send upstream
 
 In the recap, walk the autonomy ladder explicitly and point out that the upstream lab reaches Copilot cloud agent (Level 6) before Copilot CLI (Level 8). Ask the room which controls from the Deeper primitives page they would need before letting the cloud agent work on their own repositories.
 
-## Afternoon 2 — AI SDLC with GitHub and GitHub Copilot (240 min)
+## Afternoon 2 — AI SDLC with GitHub and GitHub Copilot (255 min, estimated)
 
 | Start | Block | Minutes | Checkpoint | If late |
 | --- | --- | --- | --- | --- |
@@ -60,12 +60,16 @@ In the recap, walk the autonomy ladder explicitly and point out that the upstrea
 | 0:40 | Level 2 Curate what you commit | 10 | Reviewed delivery brief saved, curated files committed, `.copilot-tracking` ignored | Inspect the staged file tree; commit only reviewed planning documents |
 | 0:50 | Level 3 RPI, with context engineering and the duplicate-add decision | 65 | Playlist feature merged, tests green, decision debriefed | Share your finished branch; keep the 5-minute decision debrief |
 | 1:55 | Break | 10 | Implementation committed, tests pass | |
-| 2:05 | Level 4 Trusted repository agents with APM | 30 | Personal CLI plugin disabled; repository agents, lockfile and audit published; marketplace orientation shown | Begin installation early; use recorded audits without claiming blocked installs passed |
-| 2:35 | Level 5a Verification as contract | 20 | CI and Copilot setup published; `test` and strict `apm-audit` checks required | Show prepared check evidence; publish initial setup before enabling the strict audit rule |
-| 2:55 | Level 5b Backlog and delegation | 30 | Managed issue has committed planning evidence; RPI cloud task visible on the issue/Project; separate accessibility demo | Show a prepared reconciliation and reviewed setup PR; do not bypass the strict audit gate |
-| 3:25 | Level 6 Independently review and accept | 20 | Copilot review posted on the RPI PR; human decision and issue/Project outcome recorded | Use a prepared PR/review; keep this block on revision-bound acceptance evidence |
-| 3:45 | Recap and architect capstone | 15 | | Keep the recap to 5 minutes; if licensed, show the facilitator-only push-protection demo, then run the capstone as a discussion |
-| 4:00 | End | | | |
+| 2:05 | Level 4 Curated marketplace and trusted repository agents | 45 | Own catalog registered; curated HVE verified, then personal CLI plugin disabled; repository agents, lockfile and audit published | Begin installation early; use recorded evidence without claiming blocked installs passed |
+| 2:50 | Level 5a Verification as contract | 20 | CI and Copilot setup published; `test` and strict `apm-audit` checks required | Show prepared check evidence; publish initial setup before enabling the strict audit rule |
+| 3:10 | Level 5b Backlog and delegation | 30 | Managed issue has committed planning evidence; RPI cloud task visible on the issue/Project; separate accessibility demo | Show a prepared reconciliation and reviewed setup PR; do not bypass the strict audit gate |
+| 3:40 | Level 6 Independently review and accept | 20 | Copilot review posted on the RPI PR; human decision and issue/Project outcome recorded | Use a prepared PR/review; keep this block on revision-bound acceptance evidence |
+| 4:00 | Recap and architect capstone | 15 | | Keep the recap to 5 minutes; if licensed, show the facilitator-only push-protection demo, then run the capstone as a discussion |
+| 4:15 | End | | | |
+
+The added marketplace practice extends Level 4 by fifteen minutes rather than
+cutting APM. These timings are estimates; live client installation and delivery
+timing have not been replayed.
 
 Level 3 and the break together form a 75-minute block. Stop the room at the plan gate for the duplicate-feedback decision, then run a 5-minute debrief after Review: ask attendees with contrasting choices to explain the trade-off. Do not prescribe two options before the planner explores them. In Level 5a, publish the initial CI and Copilot setup before enabling the strict APM audit rule. In Level 5b, complete the reviewed workflow/planning setup and select an issue only after its planning evidence is committed. While the cloud task runs, follow issue/Project progress and show the separate accessibility demo. Agent latency is variable; keep a completed PR ready for Level 6. The Extra Credits page is optional.
 
@@ -76,35 +80,52 @@ Use the question **"What must travel with the repository before a teammate or cl
 | Minutes | Activity |
 | --- | --- |
 | 0-3 | Personal context versus repository-owned capabilities |
-| 3-6 | Brief plugin/marketplace orientation and shared-agent comparison |
-| 6-9 | Private company marketplace demonstration |
-| 9-16 | APM manifest, install, actual agent files, resolved commit |
-| 16-18 | Disable the personal HVE-Core CLI plugin; reopen the repository agent picker |
-| 18-23 | Policy status, audit, deny-and-restore |
-| 23-27 | Audit workflow, staged-diff review, commit and push |
-| 27-30 | Verify default-branch files and audit; connect to cloud delegation |
+| 3-6 | Inspect template-shipped catalog and four remote entries |
+| 6-18 | Register attendee owner/repo in CLI/VS Code; inspect existing HVE source, consented qualified removal, curated install and agent verification |
+| 18-21 | Compare catalog/plugin versions and source SHA; brief app registration demo |
+| 21-29 | APM manifest, install, actual agent files, resolved commit |
+| 29-32 | Disable exact curated personal HVE CLI plugin; handle separate VS Code instance and verify repository agents |
+| 32-37 | Policy status, audit, deny-and-restore |
+| 37-42 | Audit workflow, staged-diff review, commit and push |
+| 42-45 | Verify default-branch files and audit; connect to cloud delegation |
 
 The organization-sharing comparison must use the documented **`.github-private`** name, not the `.copilot-private` shorthand used in the early discussion. Explain enterprise-wide governance as an Enterprise Owner route. Do not label every organization-level custom agent Enterprise-only or claim that standalone prompts/skills automatically distribute through this repository.
 
-For portability, distinguish `apm compile` (instructions/context files) from `apm install` (agents, skills, and other supported primitives). Native whole-plugin loading is version-dependent; it is an explanation, not a second live installation in this exercise.
+For portability, distinguish `apm compile` (instructions/context files) from `apm install` (agents, skills, and other supported primitives). The curated personal install is separate from APM's pinned repository dependency; do not update the APM SHA to match the marketplace.
 
-#### Private plugin marketplace: 2-3 minute demo
+#### Curated marketplace and app demo
 
-Use [the supplied catalog capture](afternoon-2/assets/l4-private-marketplace.png) or your authorized view of [CoffeesoftDotDev/Plugin-Marketplace](https://github.com/CoffeesoftDotDev/Plugin-Marketplace). Attendees do not need membership.
+Use each learner's `.github/plugin/marketplace.json`: HVE-Core 3.2.2, Java Development,
+Java Modernization Studio and WorkIQ. Register the **attendee copy**, not the
+original workshop repository. Read its remote `repo`, optional `path`, and `sha`;
+do not copy upstream relative source strings into the company repository.
 
-1. Point out read access and the `coffeesoft` catalog with one `mslearn` entry.
-2. Explain registration versus discovery. In a prepared proctor profile only:
+Only HVE is a required install. Java source payloads are missing at the selected
+revision; WorkIQ needs service access and has read/write capabilities. Keep all
+three as browse examples; no tenant setup or runtime promises.
 
-   ```powershell
-   copilot plugin marketplace add CoffeesoftDotDev/Plugin-Marketplace
-   copilot plugin marketplace browse coffeesoft
-   ```
+Watch `copilot plugin list --json` before and after the transition. Accept only the
+known Level 1 identity or the sole curated identity; stop for duplicates/unknown
+sources. The learner consents before uninstalling `hve-core@hve-core`, confirms
+absence, then installs `hve-core@music-catalog-marketplace`. Failures/managed
+restrictions are incomplete readiness, never an invitation to force a replacement.
 
-3. Point to the README's installation command without asking the room to run it. Show package metadata and the marketplace entry if you have live access.
-4. Explain the publishing path: PR, manifest validation, and code-owner approval. Credentials do not belong in `mcp.json`.
-5. Bridge back to APM: catalog discovery is not an approved-source rule. Separately, enterprise-managed `strictKnownMarketplaces` and `enabledPlugins` govern client plugin access.
+For the GitHub Copilot app, demonstrate registering this same attendee-owned catalog
+and browsing/installing HVE in an authorized tutor profile. This is an app-only demo,
+not a claim that Java Studio's canvas renders in VS Code. Preflight actual app UI;
+if unavailable, say it was not demonstrated. The retained
+[private catalog capture](afternoon-2/assets/l4-private-marketplace.png) is an optional
+historical comparison, not evidence attendees registered that private repository.
 
-Do not add another personal HVE-Core copy after attendees have disabled it. Keep the existing [duplicate-agent screenshot](afternoon-2/assets/l4-duplicate-agent-entries.png) as a troubleshooting visual for VS Code/managed plugins.
+Explain the publishing path: reviewed source pin and matching version metadata,
+catalog version bump, PR validation, client catalog refresh, then plugin update.
+Catalog discovery is not an APM approved-source rule or enforced company governance.
+Enterprise-managed `strictKnownMarketplaces`/`enabledPlugins` are separate controls.
+
+Do not reinstall personal HVE after the final APM disable. Keep the
+[duplicate-agent screenshot](afternoon-2/assets/l4-duplicate-agent-entries.png) for
+separate VS Code/managed instances. The solution settings file is illustrative;
+copying its enable overlay would block the later local disable.
 
 ### Level 5a proctor flow
 
@@ -141,7 +162,7 @@ For Level 2, allocate 10–15 minutes to the learner-led nine-method sampler and
 
 Use the existing 10-minute curation allocation to save the shared brief with Documentation before the optional PM track, then review and commit the planning files afterwards. Do not add a second writing exercise. In the PM track, retain the supplied business facts and three-question limits, but let the builders choose their questions, templates, traceability, and quality checks. Point out a useful question, an evidence gap, and a native quality-review or handoff decision; these show more HVE value than matching a reference document.
 
-### Extended tracks (outside the 240 minutes)
+### Extended tracks (outside the 255-minute core agenda)
 
 The core agenda above does not include the role-based extended tracks. Choose how to use them before the day:
 
@@ -151,7 +172,10 @@ The core agenda above does not include the role-based extended tracks. Choose ho
 | Tech Lead: ADR Creator, Code Review agent, `/git-commit` | End of Level 3 | 10 to 15 | Tech Lead, Engineer | Early finishers |
 | Security Architect: report-only security review delegated to Copilot cloud agent | End of Level 5 | about 20, plus agent run time | Security Architect | Facilitator demo, or hands-on for a security-focused room |
 
-To keep the afternoon at 240 minutes when you run a track hands-on, take the time from elsewhere: shorten the DT Coach prompts in Level 2 (keep the 10-minute curation block), demo Level 4 from recordings, or move Level 5 accessibility and Extra Credits to a demo. For a PM-only audience, start with the introduction and Levels 1 to 2 with the Product Manager track, then Level 5, and demo the rest.
+Hands-on extended tracks require extra time or a separately agreed agenda change;
+do not silently remove the required marketplace or APM practice. For a PM-only
+audience, agree a separate track using the introduction, Levels 1-2 and the Product
+Manager extension, then Level 5, with the remaining content demonstrated explicitly.
 
 Rules for the tracks:
 - Meeting Analyst needs a Microsoft 365 Copilot licence and WorkIQ, and cannot read local transcripts. Always demo it yourself, or skip it.
@@ -172,7 +196,11 @@ Rules for the tracks:
 2. Compare the upstream repositories with the pinned commits listed in [CONTRIBUTING.md](../CONTRIBUTING.md#upstream-pins), and adjust the timings above if levels changed.
 3. Record these fallback artifacts: passing and failing policy audits, a planning-evidence backlog update, an open-PR update, a verified completed fix, the private accessibility demo output, a cloud-agent PR with completed Copilot review, and a push rejected by the workshop custom pattern.
 4. Check that the HVE-Core commit pinned in `solutions/afternoon-2/apm.yml` still resolves. If you bump it, update the workshop text as well.
-5. Prepare the private `coffeesoft` marketplace visuals and browser-supported accessibility report in your proctor environment. Attendees do not install either demo's plugin or tools. Confirm disabling the personal HVE-Core CLI plugin leaves the repository agents visible.
+5. Preflight the four-entry template catalog and source-qualified HVE transition
+   in disposable CLI/VS Code profiles. Verify the reviewed HVE version/agents and
+   final personal disable leave repository agents visible. Prepare the app setup
+   demo and private accessibility report; the private `coffeesoft` visual is optional
+   historical context, not required attendee access.
 6. Capture the screenshots listed in each `assets/README.md`.
 7. Check the latest [workshop tester](../tests/workshop/afternoon-2/README.md) run. It replays the whole lab on every change to `main`, and an open `[Workshop tester]` issue lists the steps that currently fail.
 

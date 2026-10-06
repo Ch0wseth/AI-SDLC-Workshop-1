@@ -29,6 +29,8 @@ for (let i = 0; i < lines.length; i++) {
 
 const byFirstLine = (prefix) => blocks.find((b) => b.body.startsWith(prefix));
 const byLead = (lead) => blocks.find((b) => b.lead === lead);
+const byCommitTask = (task) => blocks.find((b) =>
+  b.body.startsWith('/hve-core:git-commit.prompt\n') && b.body.includes(task));
 
 for (const block of blocks.filter((b) => b.body.startsWith('/hve-core:'))) {
   const invocation = block.body.match(/^(\/hve-core:[\w.-]+)(?:[ \t]+|\n)([\s\S]+)$/);
@@ -43,6 +45,8 @@ const wanted = {
   'dt-method-next': byFirstLine('/hve-core:dt-method-next.prompt'),
   'dt-summary': byFirstLine('Summarize the final decisions'),
   'dt-record': byFirstLine('Write a curated Design Thinking decision record'),
+  'dt-later-choice': byFirstLine('Help me choose one idea from our DT conversation'),
+  'dt-later-record': byFirstLine('Write a curated later-slice decision'),
   'brd-start': byFirstLine('Create a business requirements document for the Music Catalog playlist slice.'),
   'adr-author': byFirstLine('/hve-core:adr-author'),
   'rpi-research': byFirstLine('/hve-core:rpi-research'),
@@ -56,6 +60,16 @@ const wanted = {
   'issue-area': byLead('Area:'),
   'issue-out-of-scope': byLead('Out of scope:'),
   'agent-instructions': byFirstLine('Use the RPI workflow.'),
+  'commit-l2': byCommitTask('Commit the reviewed Level 2 planning deliverables'),
+  'commit-l3': byCommitTask('Commit the approved playlist implementation'),
+  'commit-tech-lead': byCommitTask('Commit the reviewed Tech Lead changes'),
+  'commit-l4': byCommitTask('Commit the governed repository setup'),
+  'commit-ci': byCommitTask('Commit the reviewed CI workflow'),
+  'commit-setup': byCommitTask('Commit the reviewed Copilot setup'),
+  'commit-backlog': byCommitTask('Commit the reviewed Stage 5b setup'),
+  'commit-security': byCommitTask('Commit the reviewed label-gated security workflow'),
+  'commit-l6': byCommitTask('Commit the reviewed local Level 6 changes'),
+  'commit-demo': byCommitTask('Commit only demo.env'),
 };
 
 const missing = [];
@@ -97,6 +111,7 @@ writeFileSync(join(outDir, 'replay-policy.txt'), [
   'If a required answer is absent, record the gap and stop that action; do not bypass evidence or approval gates.',
   'DT examples are sampled or planned, not evidence that full methods are complete. Keep DT coaching writes under .copilot-tracking/ only.',
   'The separate Documentation authoring turn may curate the published delivery brief in docs/project-planning/playlist-design-decisions.md. This is not human approval or proof of completed DT methods.',
+  'The later-slice DT choice and docs/project-planning/dt-later-slice.md require a real learner decision. Do not fabricate a choice or approval; the replay skips these interactive turns.',
   'BRD drafting may write its documented file in docs/project-planning/. Do not sign off, approve waivers, or execute a backlog handoff.',
   `Curated reference file: ${join(outDir, 'curated-solutions.txt')}`,
 ].join('\n') + '\n');
