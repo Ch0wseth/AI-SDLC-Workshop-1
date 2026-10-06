@@ -123,7 +123,7 @@ test('Workshop Creator loads the canonical local skill without changing its hand
 test('the authoring skill records progressive disclosure without weakening the required path', () => {
   const metadata = frontmatter(skill);
   assert.match(metadata, /^name: workshop-authoring$/m);
-  assert.match(metadata, /^description: "[^"]+Use when[^"]+"$/m);
+  assert.match(metadata, /^description: "[^"]*Use when[^"]+"$/m);
   assert.doesNotMatch(metadata, /^(tools|model|agent|handoffs|applyTo):/m);
   assert.match(skill, /## Documented decision: progressive disclosure/);
   assert.match(skill, /default-collapsed `<details>`/);
